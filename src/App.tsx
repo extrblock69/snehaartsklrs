@@ -7,6 +7,7 @@ import Gallery from './components/Gallery';
 import StudentShowcase from './components/StudentShowcase';
 import Lessons from './components/Lessons';
 import Testimonials from './components/Testimonials';
+import Contact from './components/Contact';
 import Footer from './components/Footer';
 
 export default function App() {
@@ -40,6 +41,9 @@ export default function App() {
 
             {/* 6. Growth Testimonial morphing image sliders */}
             <Testimonials />
+
+            {/* 7. Dedicated Contact & Inquiry Form */}
+            <Contact />
           </main>
 
           {/* Concluding Footer */}

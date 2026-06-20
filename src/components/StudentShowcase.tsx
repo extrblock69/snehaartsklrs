@@ -82,7 +82,7 @@ export default function StudentShowcase() {
 
   const handleBookRedirect = () => {
     setActiveProject(null);
-    const element = document.getElementById('site-footer');
+    const element = document.getElementById('contact');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }

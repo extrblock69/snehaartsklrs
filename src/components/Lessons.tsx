@@ -258,7 +258,7 @@ export default function Lessons() {
                       </button>
                       <button
                         onClick={() => {
-                          const element = document.getElementById('site-footer');
+                          const element = document.getElementById('contact');
                           if (element) {
                             element.scrollIntoView({ behavior: 'smooth' });
                           }
@@ -372,9 +372,9 @@ export default function Lessons() {
                   
                   <button
                     onClick={() => {
-                      const footer = document.getElementById('site-footer');
-                      if (footer) {
-                        footer.scrollIntoView({ behavior: 'smooth' });
+                      const contactSec = document.getElementById('contact');
+                      if (contactSec) {
+                        contactSec.scrollIntoView({ behavior: 'smooth' });
                       }
                     }}
                     className="px-6 py-3 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-stone-100 text-white dark:text-stone-950 font-mono text-xs tracking-widest uppercase rounded-lg cursor-pointer font-bold transition-all duration-300 shadow-sm"
