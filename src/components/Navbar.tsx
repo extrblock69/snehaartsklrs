@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Paintbrush, User, Image, Sparkles, Pencil, GraduationCap, Heart, Mail, Clock } from 'lucide-react';
+import { User, Image, Sparkles, Pencil, GraduationCap, Heart, Mail, Clock } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import { KalakarSnehaLogo } from './KalakarSnehaAssets';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -67,19 +68,10 @@ export default function Navbar() {
         {/* Logo */}
         <button
           onClick={() => scrollToSection('home')}
-          className="flex items-center gap-2 group cursor-pointer focus:outline-none"
+          className="flex items-center gap-1.5 group cursor-pointer focus:outline-none"
+          id="navbar-logo"
         >
-          <div className="w-10 h-10 rounded-full bg-stone-950 dark:bg-white flex items-center justify-center text-wood dark:text-wood border border-stone-200/50 dark:border-stone-800 group-hover:scale-105 transition-transform shadow-inner">
-            <Paintbrush className="w-5 h-5 stroke-[1.8]" />
-          </div>
-          <div className="text-left">
-            <span className="font-brand block text-2xl font-medium italic tracking-wide text-stone-900 dark:text-stone-100 leading-none">
-              Sneha
-            </span>
-            <span className="font-mono text-[9px] tracking-widest text-stone-500 dark:text-stone-400 block uppercase mt-0.5">
-              Fine Art & Drawing
-            </span>
-          </div>
+          <KalakarSnehaLogo className="h-10 sm:h-12 w-auto group-hover:scale-[1.03] transition-all duration-300" />
         </button>
 
         {/* Desktop Links */}

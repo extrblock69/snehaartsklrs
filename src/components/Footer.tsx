@@ -1,4 +1,5 @@
-import { Paintbrush, Mail, Phone, MapPin, ArrowUpCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, ArrowUpCircle } from 'lucide-react';
+import { KalakarSnehaLogo } from './KalakarSnehaAssets';
 
 export default function Footer() {
   const scrollBackToTop = () => {
@@ -18,17 +19,7 @@ export default function Footer() {
         {/* Bio block col 1 (5 cols) */}
         <div className="md:col-span-5 space-y-4">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-full bg-wood flex items-center justify-center text-white">
-              <Paintbrush className="w-4.5 h-4.5 stroke-[2]" />
-            </div>
-            <div>
-              <span className="font-brand block text-xl font-medium italic tracking-wide text-white leading-none">
-                Sneha Fine Art
-              </span>
-              <span className="font-mono text-[8px] tracking-widest text-stone-400 block uppercase mt-0.5">
-                Classical Drawing Pedagogy
-              </span>
-            </div>
+            <KalakarSnehaLogo className="h-10 w-auto text-white dark:text-white" />
           </div>
 
           <p className="text-stone-400 dark:text-stone-400 font-light text-xs leading-relaxed max-w-sm">

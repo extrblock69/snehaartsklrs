@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, MouseEvent, TouchEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Paintbrush, Eraser, Trash2, Download, Send, CheckCircle, Sparkles } from 'lucide-react';
+import { KalakarSnehaPhoto } from './KalakarSnehaAssets';
 
 interface ToolType {
   id: string;
@@ -431,12 +432,7 @@ export default function Sketchpad() {
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-full overflow-hidden border border-stone-350 dark:border-stone-700 bg-stone-150 flex-shrink-0 mt-0.5">
-                      <img
-                        src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150"
-                        alt="Sneha Avatar"
-                        referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover"
-                      />
+                      <KalakarSnehaPhoto className="w-full h-full object-cover" />
                     </div>
                     
                     <div className="space-y-2 flex-grow">

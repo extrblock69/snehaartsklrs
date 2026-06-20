@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Eye, Award, Hammer, Compass } from 'lucide-react';
+import { KalakarSnehaPhoto } from './KalakarSnehaAssets';
 
 export default function About() {
   const pillars = [
@@ -55,12 +56,7 @@ export default function About() {
             {/* Profile Signature & Credentials block */}
             <div className="flex items-center gap-4 pt-4">
               <div className="w-12 h-12 rounded-full overflow-hidden border border-stone-300 dark:border-stone-700 bg-stone-250">
-                <img
-                  src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=200"
-                  alt="Sneha Portrait thumbnail"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
+                <KalakarSnehaPhoto className="w-full h-full object-cover" />
               </div>
               <div>
                 <h4 className="font-serif text-stone-850 dark:text-stone-100 font-semibold leading-none">
