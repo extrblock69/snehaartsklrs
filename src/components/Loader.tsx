@@ -101,9 +101,9 @@ export default function Loader({ onComplete }: LoaderProps) {
                 x="50"
                 y="54"
                 textAnchor="middle"
-                className="font-serif text-3xl font-light tracking-widest fill-stone-800 dark:fill-stone-200"
+                className="font-serif text-xl font-light tracking-[0.25em] fill-stone-800 dark:fill-stone-200 uppercase"
               >
-                E R
+                SNEHA
               </text>
             </svg>
 

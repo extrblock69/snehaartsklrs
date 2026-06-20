@@ -37,19 +37,28 @@ export default function About() {
           {/* Left Column: Philosophical bio and highlights */}
           <div className="lg:col-span-6 space-y-6 text-left">
             <span className="font-mono text-xs text-wood dark:text-wood font-semibold tracking-widest uppercase block">
-              ACADEMIC PHILOSOPHY
+              ARTIST & EDUCATOR PRECIS
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-light text-stone-900 dark:text-stone-100 tracking-tight leading-tight">
-              Drawing is the honesty of fine art. It cannot be negotiated.
+              Sneha Bansal
             </h2>
-            
-            <p className="text-stone-600 dark:text-stone-300 font-light leading-relaxed text-base">
-              My instruction does not promise quick shortcuts, filters, or tracing shortcuts. 
-              Instead, it is an immersive study of classic light physics, proportional triangulation, 
-              and charcoal value gradations that gives you the self-sufficiency to draw <strong>anything</strong> in front of you.
+            <p className="font-mono text-[11px] tracking-wider text-wood uppercase font-medium -mt-3">
+              Artist &bull; Art Educator &bull; Creative Mentor
             </p>
+            
+            <div className="space-y-4 text-stone-600 dark:text-stone-300 font-light leading-relaxed text-sm">
+              <p>
+                Sneha Bansal is a passionate artist and art educator with experience teaching and mentoring 100+ students through online and offline art programs. She has worked with students from different regions of India and internationally, helping them develop strong artistic foundations and creative confidence.
+              </p>
+              <p>
+                She has contributed to art education initiatives associated with reputed institutions such as Oxford and Sanskar schools and has been involved in various large-scale creative projects. Her work and contributions have also been featured in newspapers, recognizing her dedication to art education and community impact.
+              </p>
+              <p>
+                Through structured training programs, workshops, and personalized mentoring, Sneha focuses on making art education accessible, engaging, and skill-oriented. Her teaching approach combines creativity, discipline, and practical learning to help students progress from basic drawing skills to advanced artwork and portrait creation.
+              </p>
+            </div>
 
-            <blockquote className="border-l-4 border-wood pl-5 my-6 italic text-stone-700 dark:text-stone-300 font-serif text-lg leading-relaxed">
+            <blockquote className="border-l-4 border-wood pl-5 my-6 italic text-stone-700 dark:text-stone-300 font-serif text-base leading-relaxed">
               "We do not learn to draw to replicate a photo. We learn to draw so we can translate how light rolls over a surface, and make a flat piece of paper breathe."
             </blockquote>
 
@@ -60,10 +69,10 @@ export default function About() {
               </div>
               <div>
                 <h4 className="font-serif text-stone-850 dark:text-stone-100 font-semibold leading-none">
-                  Sneha
+                  Sneha Bansal
                 </h4>
-                <p className="text-xs font-mono text-stone-500 dark:text-stone-400 tracking-wider mt-1 uppercase">
-                  Fine Art Mentor, Kailaras, Morena, Madhya Pradesh, India
+                <p className="text-[10px] font-mono text-stone-500 dark:text-stone-400 tracking-wider mt-1.5 uppercase">
+                  Academic Director, Kailaras, Morena, Madhya Pradesh, India
                 </p>
               </div>
             </div>
