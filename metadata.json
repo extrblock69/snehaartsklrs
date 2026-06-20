@@ -1,0 +1,6 @@
+{
+  "name": "Drawing Teacher Portfolio",
+  "description": "A polished, interactive portfolio for fine art instructor Sneha from Kailaras, Morena, Madhya Pradesh, India, featuring a student gallery, lesson scheduling, and a live practice sketchpad.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-brand: "Cormorant Garamond", Georgia, serif;
+  --color-cream: #FAF5EC;
+  --color-wood: #937562;
+  --color-wood-dark: #7A5E4E;
+  --color-wood-light: #F3EAD3;
+
+  /* Custom stone scale derived from the warm organic paper and charcoal/espresso sketch in the photo */
+  --color-stone-50: #FAF5EC;
+  --color-stone-100: #F3EAD3;
+  --color-stone-150: #EADFBF;
+  --color-stone-200: #DFD2B2;
+  --color-stone-250: #D0C2A0;
+  --color-stone-300: #C4B392;
+  --color-stone-400: #A89574;
+  --color-stone-450: #8C7859;
+  --color-stone-500: #7A674B;
+  --color-stone-550: #62513B;
+  --color-stone-600: #4F402E;
+  --color-stone-650: #3E3123;
+  --color-stone-700: #33271C;
+  --color-stone-800: #2C2118;
+  --color-stone-850: #241A13;
+  --color-stone-900: #21140E;
+  --color-stone-930: #1B0F0B;
+  --color-stone-950: #140A07;
+}
+
+/* Base styling */
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+}
+
+/* Custom premium thin scrollbar designed specifically for the drawing portfolio */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-stone-50);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: var(--color-stone-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-stone-300);
+  border: 2px solid var(--color-stone-50);
+  border-radius: 9999px;
+  transition: background 0.3s ease;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--color-stone-700);
+  border: 2px solid var(--color-stone-900);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-stone-400);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-stone-600);
+}
+
+/* Sleek Pencil Line Animation for custom page loader */
+@keyframes draw-shading {
+  0% {
+    stroke-dashoffset: 1000;
+    opacity: 0.1;
+  }
+  50% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -1000;
+    opacity: 0.1;
+  }
+}
+
+.pencil-draw-path {
+  stroke-dasharray: 1000;
+  animation: draw-shading 6s ease-in-out infinite;
+}
+
+/* Custom sketchpad utilities */
+.brush-outline {
+  cursor: crosshair;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
