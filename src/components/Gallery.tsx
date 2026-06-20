@@ -306,12 +306,12 @@ export default function Gallery() {
                     <button
                       onClick={() => {
                         setActiveArtwork(null);
-                        const el = document.getElementById('book');
+                        const el = document.getElementById('site-footer');
                         if (el) el.scrollIntoView({ behavior: 'smooth' });
                       }}
                       className="w-full py-3 bg-stone-900 hover:bg-stone-800 dark:bg-stone-100 dark:hover:bg-stone-200 text-stone-50 dark:text-stone-950 font-mono text-xs tracking-widest uppercase text-center rounded transition-all cursor-pointer"
                     >
-                      Learn This Technique
+                      Inquire About Classes
                     </button>
                   </div>
                 </div>

@@ -1,28 +1,43 @@
 import { motion } from 'motion/react';
-import { Eye, Award, Hammer, Compass } from 'lucide-react';
+import { Palette, Globe, GraduationCap, Newspaper, Sparkles, BookOpen, Heart } from 'lucide-react';
 import { KalakarSnehaPhoto } from './KalakarSnehaAssets';
 
 export default function About() {
-  const pillars = [
+  const highlights = [
     {
-      icon: Eye,
-      title: 'Active Seeing',
-      desc: 'Most people draw what they "know" rather than what they actually "see". My foundational classes rebuild your observation skills, training you to spot accurate proportional alignments, subtle values, and negative space geometry.'
+      icon: Palette,
+      title: 'Trained & Mentored 100+ Students',
+      desc: 'Nurtured creative skills in drawing, sketching, shading, and lifelike portrait creation.'
     },
     {
-      icon: Compass,
-      title: 'Structural Architecture',
-      desc: 'Before shading, there must be absolute skeletal integrity. We learn how to establish secure structural layouts using triangulation, plumb lines, perspective vanishing points, and block-in boundaries for perfect composition.'
+      icon: Globe,
+      title: 'Global Outreach & Classes',
+      desc: 'Conducted live, immersive online classes for enthusiastic students across India and international regions.'
     },
     {
-      icon: Hammer,
-      title: 'Medium Mastery',
-      desc: 'Discover how to manipulate the absolute tooth of your paper. Gain tactile knowledge over vine and compressed charcoal, graphite hard-soft grade scales (9H to 9B), sepia washes, tortillons, and kneaded rubbers to sculpt high-end textures.'
+      icon: GraduationCap,
+      title: 'Academic & School Associations',
+      desc: 'Associated with and contributed to art-related pedagogies in reputed institutions like Oxford and Sanskar.'
     },
     {
-      icon: Award,
-      title: 'The Academic Legacy',
-      desc: 'Inspired by classical and academic drawing principles. True high craft isn\'t about tracing photo references, but capturing the atmospheric mood, form hierarchy, and emotional weight of a live model or setup.'
+      icon: Newspaper,
+      title: 'Press & Media Features',
+      desc: 'Featured in newspapers recognizing dedication to art education, creative initiatives, and community impact.'
+    },
+    {
+      icon: Sparkles,
+      title: 'Large-scale Art Projects',
+      desc: 'Participated in and contributed to prestigious creative events, large canvases, and community projects.'
+    },
+    {
+      icon: BookOpen,
+      title: 'Structured Art Programs',
+      desc: 'Developed tailored, step-by-step training curriculum for both absolute beginners and advanced creators.'
+    },
+    {
+      icon: Heart,
+      title: 'Growing Creative Community',
+      desc: 'Built a supportive network of young artists through active mentorship, reviews, and continuous guidance.'
     }
   ];
 
@@ -79,30 +94,43 @@ export default function About() {
           </div>
 
           {/* Right Column: Key pillars grid */}
-          <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {pillars.map((pillar, idx) => {
-              const IconComp = pillar.icon;
-              return (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: '-100px' }}
-                  transition={{ duration: 0.6, delay: idx * 0.1 }}
-                  className="bg-stone-50 dark:bg-stone-950 p-6 rounded-md border border-stone-200/50 dark:border-stone-800/50 hover:shadow-md hover:border-stone-300 dark:hover:border-stone-850 transition-all text-left"
-                >
-                  <div className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-wood mb-4 shadow-sm">
-                    <IconComp className="w-5 h-5 stroke-[1.5]" />
-                  </div>
-                  <h3 className="font-serif text-lg font-medium text-stone-900 dark:text-stone-100 mb-2">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-stone-500 dark:text-stone-400 text-xs font-normal leading-relaxed">
-                    {pillar.desc}
-                  </p>
-                </motion.div>
-              );
-            })}
+          <div className="lg:col-span-6 space-y-6">
+            <div className="flex items-center justify-between border-b border-stone-200/50 dark:border-stone-800/50 pb-2">
+              <span className="font-mono text-xs text-wood dark:text-wood font-semibold tracking-widest uppercase block">
+                Highlights & Achievements
+              </span>
+              <span className="font-mono text-[9px] text-stone-400 dark:text-stone-500 uppercase tracking-wider">
+                IMPACT STUDY
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {highlights.map((item, idx) => {
+                const IconComp = item.icon;
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-100px' }}
+                    transition={{ duration: 0.6, delay: idx * 0.08 }}
+                    className={`bg-stone-50 dark:bg-stone-950 p-6 rounded-md border border-stone-200/50 dark:border-stone-800/50 hover:shadow-md hover:border-stone-300 dark:hover:border-stone-850 transition-all text-left ${
+                      idx === highlights.length - 1 ? 'sm:col-span-2' : ''
+                    }`}
+                  >
+                    <div className="w-10 h-10 rounded-full bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 flex items-center justify-center text-wood mb-4 shadow-sm">
+                      <IconComp className="w-5 h-5 stroke-[1.5]" />
+                    </div>
+                    <h3 className="font-serif text-base font-semibold text-stone-900 dark:text-stone-100 mb-2">
+                      {item.title}
+                    </h3>
+                    <p className="text-stone-500 dark:text-stone-400 text-xs font-normal leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
 
         </div>

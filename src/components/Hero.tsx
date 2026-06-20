@@ -77,10 +77,10 @@ export default function Hero() {
             className="flex flex-wrap items-center gap-4 pt-4"
           >
             <button
-              onClick={() => handleScrollToSection('book')}
+              onClick={() => handleScrollToSection('site-footer')}
               className="px-6 py-3.5 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-stone-100 text-white dark:text-stone-950 text-xs font-semibold tracking-widest uppercase rounded-lg border border-stone-950 dark:border-stone-50 cursor-pointer shadow-sm transition-all duration-300 hover:translate-y-[-1px]"
             >
-              Enroll Now
+              Contact Sneha
             </button>
             <button
               onClick={() => handleScrollToSection('gallery')}

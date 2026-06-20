@@ -15,7 +15,7 @@ export default function Navbar() {
       setScrolled(window.scrollY > 40);
 
       // Simple active link tracker
-      const sections = ['home', 'about', 'gallery', 'student-showcase', 'sketchpad', 'lessons', 'testimonials', 'book'];
+      const sections = ['home', 'about', 'gallery', 'student-showcase', 'lessons', 'testimonials'];
       const scrollPos = window.scrollY + 120;
 
       for (const section of sections) {
@@ -50,7 +50,6 @@ export default function Navbar() {
     { label: 'About', id: 'about' },
     { label: 'Gallery', id: 'gallery' },
     { label: 'Student Showcase', id: 'student-showcase' },
-    { label: 'Practice Sketchpad', id: 'sketchpad' },
     { label: 'Lessons', id: 'lessons' },
     { label: 'Student Growth', id: 'testimonials' },
   ];
@@ -94,15 +93,9 @@ export default function Navbar() {
 
           <div className="h-6 w-[1.5px] bg-stone-200 dark:bg-stone-800" />
 
-          {/* Theme switch and booking CTA button */}
+          {/* Theme switch */}
           <div className="flex items-center gap-5">
             <ThemeToggle />
-            <button
-              onClick={() => scrollToSection('book')}
-              className="px-4.5 py-2.5 bg-stone-950 hover:bg-stone-850 dark:bg-stone-105 dark:bg-stone-50 dark:hover:bg-white text-white dark:text-stone-950 text-xs font-semibold tracking-widest uppercase rounded-lg transition-all duration-300 shadow-sm cursor-pointer"
-            >
-              Book Class
-            </button>
           </div>
         </div>
 
@@ -171,8 +164,8 @@ export default function Navbar() {
             {/* Empty Spacer Line for Aesthetic Brevity */}
             <div className="h-[1px] bg-stone-200/50 dark:bg-stone-800/50 my-2" />
 
-            {/* Drawer Action buttons with elegant minimal style and beautiful rounded corners */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-1">
+             {/* Drawer Action buttons with elegant minimal style and beautiful rounded corners */}
+            <div className="flex flex-col gap-3 pt-1">
               {/* Contact Button */}
               <button
                 onClick={() => {
@@ -182,20 +175,9 @@ export default function Navbar() {
                     el.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="py-3 px-6 border border-stone-900 dark:border-stone-100 hover:bg-stone-950 dark:hover:bg-stone-50 hover:text-white dark:hover:text-stone-950 text-stone-900 dark:text-stone-100 text-xs font-semibold tracking-wider rounded-xl transition-all duration-300 uppercase cursor-pointer text-center h-11 flex items-center justify-center"
+                className="w-full py-3 px-6 bg-stone-950 hover:bg-stone-900 border border-stone-950 dark:bg-stone-50 dark:hover:bg-white text-white dark:text-stone-950 text-xs font-semibold tracking-wider rounded-xl transition-all duration-300 uppercase cursor-pointer text-center h-11 flex items-center justify-center shadow-sm"
               >
                 <span>Contact Teacher</span>
-              </button>
-
-              {/* Book button */}
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  scrollToSection('book');
-                }}
-                className="py-3 px-6 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-white text-white dark:text-stone-950 text-xs font-semibold tracking-wider rounded-xl transition-all duration-300 uppercase cursor-pointer text-center h-11 flex items-center justify-center shadow-sm"
-              >
-                <span>Book Class</span>
               </button>
             </div>
           </motion.div>

@@ -5,10 +5,8 @@ import Hero from './components/Hero';
 import About from './components/About';
 import Gallery from './components/Gallery';
 import StudentShowcase from './components/StudentShowcase';
-import Sketchpad from './components/Sketchpad';
 import Lessons from './components/Lessons';
 import Testimonials from './components/Testimonials';
-import Booking from './components/Booking';
 import Footer from './components/Footer';
 
 export default function App() {
@@ -37,17 +35,11 @@ export default function App() {
             {/* 3.5. Featured Student Showcase */}
             <StudentShowcase />
 
-            {/* 4. Interactive practice Drawing Canvas */}
-            <Sketchpad />
-
             {/* 5. Course Syllabus details & Quiz assessor */}
             <Lessons />
 
             {/* 6. Growth Testimonial morphing image sliders */}
             <Testimonials />
-
-            {/* 7. Class Schedulers reservation form */}
-            <Booking />
           </main>
 
           {/* Concluding Footer */}

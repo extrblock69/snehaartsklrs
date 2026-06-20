@@ -258,14 +258,14 @@ export default function Lessons() {
                       </button>
                       <button
                         onClick={() => {
-                          const element = document.getElementById('book');
+                          const element = document.getElementById('site-footer');
                           if (element) {
                             element.scrollIntoView({ behavior: 'smooth' });
                           }
                         }}
                         className="flex-grow py-3 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-stone-100 text-white dark:text-stone-950 text-xs font-semibold font-mono tracking-wider uppercase rounded-lg cursor-pointer text-center duration-300 transition-colors shadow-sm"
                       >
-                        Enroll Now
+                        Inquire Now
                       </button>
                     </div>
                   </motion.div>
@@ -372,15 +372,14 @@ export default function Lessons() {
                   
                   <button
                     onClick={() => {
-                      const bookForm = document.getElementById('book');
-                      if (bookForm) {
-                        // Prefill some fields if possible, zoom down
-                        bookForm.scrollIntoView({ behavior: 'smooth' });
+                      const footer = document.getElementById('site-footer');
+                      if (footer) {
+                        footer.scrollIntoView({ behavior: 'smooth' });
                       }
                     }}
                     className="px-6 py-3 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-stone-100 text-white dark:text-stone-950 font-mono text-xs tracking-widest uppercase rounded-lg cursor-pointer font-bold transition-all duration-300 shadow-sm"
                   >
-                    Select This Class
+                    Inquire About Class
                   </button>
                 </div>
               </motion.div>
