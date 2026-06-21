@@ -2,6 +2,7 @@ import { useState, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Quote, Star, ArrowLeftRight, Award, Plus } from 'lucide-react';
 import { Testimonial } from '../types';
+import { useContent } from '../context/ContentContext';
 
 const TESTIMONIALS_DATA: Testimonial[] = [
   {
@@ -34,12 +35,16 @@ const TESTIMONIALS_DATA: Testimonial[] = [
 ];
 
 export default function Testimonials() {
-  const [activeId, setActiveId] = useState<string>('test-1');
+  const { content } = useContent();
+  const testimonialsList = content.testimonials && content.testimonials.length > 0 ? content.testimonials : TESTIMONIALS_DATA;
+  const [activeId, setActiveId] = useState<string>('');
   const [sliderPos, setSliderPos] = useState<number>(45); // percent 0 - 100
 
   const getActiveTestimonial = () => {
-    return TESTIMONIALS_DATA.find((t) => t.id === activeId) || TESTIMONIALS_DATA[0];
+    return testimonialsList.find((t) => t.id === activeId) || testimonialsList[0];
   };
+
+  const activeTestimonialId = getActiveTestimonial()?.id || '';
 
   const handleSliderChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSliderPos(parseInt(e.target.value));
@@ -75,7 +80,7 @@ export default function Testimonials() {
             
             {/* Student selection Tab Buttons */}
             <div className="flex border-b border-stone-250 dark:border-stone-850 pb-2 gap-4">
-              {TESTIMONIALS_DATA.map((t) => (
+              {testimonialsList.map((t) => (
                 <button
                   key={t.id}
                   onClick={() => {
@@ -83,13 +88,13 @@ export default function Testimonials() {
                     setSliderPos(45); // reset comparison slider
                   }}
                   className={`text-sm font-medium pb-2 relative cursor-pointer focus:outline-none transition-colors ${
-                    activeId === t.id
+                    activeTestimonialId === t.id
                       ? 'text-stone-900 dark:text-stone-100 font-bold'
                       : 'text-stone-400 dark:text-stone-500 hover:text-stone-700'
                   }`}
                 >
                   {t.studentName}
-                  {activeId === t.id && (
+                  {activeTestimonialId === t.id && (
                     <motion.div
                       layoutId="activeTestUnderline"
                       className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-stone-950 dark:bg-stone-50"
@@ -102,7 +107,7 @@ export default function Testimonials() {
             {/* Testimonial Quote details */}
             <AnimatePresence mode="wait">
               <motion.div
-                key={activeId}
+                key={activeTestimonialId}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, Compass, Eye, Map, Award, HelpCircle, RefreshCw, Star } from 'lucide-react';
 import { Lesson } from '../types';
+import { useContent } from '../context/ContentContext';
 
 const LESSONS_DATA: Lesson[] = [
   {
@@ -52,7 +53,9 @@ const LESSONS_DATA: Lesson[] = [
 ];
 
 export default function Lessons() {
-  const [selectedLessonId, setSelectedLessonId] = useState<string>('lesson-1');
+  const { content } = useContent();
+  const lessonsList = content.lessons && content.lessons.length > 0 ? content.lessons : LESSONS_DATA;
+  const [selectedLessonId, setSelectedLessonId] = useState<string>(lessonsList[0]?.id || 'lesson-1');
   
   // Assessor State
   const [quizStep, setQuizStep] = useState<number>(0); // 0 = not started, 1, 2, 3 = steps, 4 = results
@@ -119,7 +122,7 @@ export default function Lessons() {
   };
 
   const getRecommendedLesson = () => {
-    return LESSONS_DATA.find((l) => l.id === selectedLessonId) || LESSONS_DATA[0];
+    return lessonsList.find((l) => l.id === selectedLessonId) || lessonsList[0];
   };
 
   return (
@@ -144,11 +147,11 @@ export default function Lessons() {
           </p>
         </div>
 
-        {/* Layout: Assessor widget side-by-side with Course selection cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
+        {/* Layout: Centered Interactive Level Assessor */}
+        <div className="max-w-2xl mx-auto">
           
-          {/* Left Column: Interactive Level Assessor (5 cols) */}
-          <div className="lg:col-span-5 bg-stone-100 dark:bg-stone-900 border border-stone-200/50 dark:border-stone-800 p-6 rounded-lg flex flex-col justify-between text-left relative overflow-hidden">
+          {/* Centered Interactive Level Assessor Card */}
+          <div className="bg-stone-100 dark:bg-stone-900 border border-stone-200/50 dark:border-stone-800 p-8 rounded-lg flex flex-col justify-between text-left relative overflow-hidden shadow-sm">
             
             {/* Background absolute decor */}
             <div className="absolute right-0 top-0 opacity-[0.03] text-stone-500 transform translate-x-12 translate-y-[-10px] pointer-events-none">
@@ -209,7 +212,7 @@ export default function Lessons() {
 
                     {/* Question options */}
                     <div className="space-y-3 pt-2">
-                      {quizQuestions[quizStep - 1].options.map((opt, i) => (
+                       {quizQuestions[quizStep - 1].options.map((opt, i) => (
                         <button
                           key={i}
                           onClick={() => handleSelectQuizOption(opt.value)}
@@ -277,114 +280,6 @@ export default function Lessons() {
             <div className="mt-8 pt-4 border-t border-stone-250 dark:border-stone-800 font-serif italic text-[11px] text-stone-500 dark:text-stone-450 leading-relaxed">
               "We must understand our visual limits before we attempt to expand our drawing speed."
             </div>
-          </div>
-
-          {/* Right Column: Dynamic Course Details container & Tab List (7 cols) */}
-          <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
-            
-            {/* Horizontal Tabs selector for manual override */}
-            <div className="grid grid-cols-3 gap-3">
-              {LESSONS_DATA.map((lesson) => (
-                <button
-                  key={lesson.id}
-                  onClick={() => {
-                    setSelectedLessonId(lesson.id);
-                    if (quizStep === 4) setQuizStep(0); // clear recommended screen if they override
-                  }}
-                  className={`py-3.5 rounded-lg border text-center transition-all cursor-pointer ${
-                    selectedLessonId === lesson.id
-                      ? 'bg-stone-950 text-white border-stone-950 dark:bg-stone-50 dark:text-stone-950 dark:border-stone-50 shadow-sm font-semibold'
-                      : 'bg-stone-100/50 text-stone-550 border-stone-200 hover:bg-stone-200/50 dark:bg-stone-930 dark:text-stone-400 dark:border-stone-850 dark:hover:bg-stone-900'
-                  }`}
-                >
-                  <span className="block text-xs font-mono tracking-widest uppercase font-semibold">
-                    {lesson.level}
-                  </span>
-                  <span className="block text-[10px] opacity-75 font-serif mt-1 truncate">
-                    {lesson.title.split(' ')[0]} Studies
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            {/* Display detail content block */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedLessonId}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.4 }}
-                className="bg-stone-50 dark:bg-stone-950 p-6 md:p-8 rounded-lg border border-stone-200/80 dark:border-stone-850 flex-grow text-left space-y-6 flex flex-col justify-between"
-              >
-                <div className="space-y-6">
-                  {/* Top line specs */}
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <span className="font-mono text-[10px] tracking-widest bg-stone-200/60 dark:bg-stone-900 px-2.5 py-1 text-stone-800 dark:text-stone-200 rounded-full font-bold uppercase">
-                        {getRecommendedLesson().duration}
-                      </span>
-                      <h3 className="font-serif text-2xl font-light text-stone-900 dark:text-stone-50 pt-1">
-                        {getRecommendedLesson().title}
-                      </h3>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-serif text-3xl font-light text-stone-900 dark:text-stone-50">
-                        ${getRecommendedLesson().price}
-                      </span>
-                      <span className="block font-mono text-[9px] text-stone-400 uppercase tracking-wider">
-                        Tuition Cost / Course
-                      </span>
-                    </div>
-                  </div>
-
-                  <hr className="border-stone-200 dark:border-stone-850" />
-
-                  <p className="text-stone-655 dark:text-stone-300 text-sm leading-relaxed font-light">
-                    {getRecommendedLesson().description}
-                  </p>
-
-                  {/* Core curriculum checklist */}
-                  <div className="space-y-3">
-                    <span className="font-mono text-[10px] tracking-widest text-stone-400 block uppercase font-bold">
-                      SYLLABUS SPECIFICATIONS INCLUDED:
-                    </span>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-y-2.5 gap-x-6">
-                      {getRecommendedLesson().curriculum.map((item, idx) => (
-                        <li
-                          key={idx}
-                           className="flex items-start gap-2.5 text-xs text-stone-600 dark:text-stone-400"
-                        >
-                          <span className="w-4 h-4 rounded-full bg-wood/10 border border-wood/20 text-wood flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <Check className="w-2.5 h-2.5" />
-                          </span>
-                          <span className="leading-tight">{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="pt-6 border-t border-stone-200 dark:border-stone-850 flex flex-wrap items-center justify-between gap-4">
-                  <span className="text-[11px] font-mono text-stone-450 dark:text-stone-500 flex items-center gap-1.5 uppercase leading-none">
-                    <Award className="w-3.5 h-3.5" /> Includes certificate of Academic Fine Art
-                  </span>
-                  
-                  <button
-                    onClick={() => {
-                      const contactSec = document.getElementById('contact');
-                      if (contactSec) {
-                        contactSec.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
-                    className="px-6 py-3 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-stone-100 text-white dark:text-stone-950 font-mono text-xs tracking-widest uppercase rounded-lg cursor-pointer font-bold transition-all duration-300 shadow-sm"
-                  >
-                    Inquire About Class
-                  </button>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
           </div>
 
         </div>

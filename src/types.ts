@@ -55,3 +55,50 @@ export interface StudentProject {
   teacherMentorshipNotes: string;
 }
 
+export interface SiteContent {
+  hero: {
+    badgeText: string;
+    headingTextMain: string;
+    headingTextHighlight: string;
+    headingTextSuffix: string;
+    subheadingText: string;
+    ctaPrimaryText: string;
+    ctaSecondaryText: string;
+    teacherPhotoUrl?: string;
+    underlayPhotoUrl?: string;
+    sigQuote?: string;
+    sigSub?: string;
+  };
+  about: {
+    badgeText: string;
+    title: string;
+    paragraphs: string[];
+    experienceYears: string;
+    studentsMentored: string;
+    quote?: string;
+    avatarUrl?: string;
+    authorName?: string;
+    authorRole?: string;
+  };
+  contact?: {
+    badgeText: string;
+    title: string;
+    description: string;
+    phone: string;
+    email: string;
+    address: string;
+    infoCardText: string;
+    infoCardQuote: string;
+    infoCardQuoteAuthor: string;
+    metricLeftVal: string;
+    metricLeftLabel: string;
+    metricRightVal: string;
+    metricRightLabel: string;
+  };
+  gallery: Artwork[];
+  studentShowcase: StudentProject[];
+  lessons: Lesson[];
+  testimonials: Testimonial[];
+}
+
+

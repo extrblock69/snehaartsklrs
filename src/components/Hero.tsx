@@ -1,8 +1,12 @@
 import { motion } from 'motion/react';
 import { ArrowDown, Award, Users } from 'lucide-react';
 import { KalakarSnehaPhoto } from './KalakarSnehaAssets';
+import { useContent } from '../context/ContentContext';
 
 export default function Hero() {
+  const { content } = useContent();
+  const { hero, about } = content;
+
   const handleScrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -41,7 +45,7 @@ export default function Hero() {
             className="inline-flex items-center gap-2 px-3 py-1 bg-stone-200/60 dark:bg-stone-900/60 text-stone-800 dark:text-stone-200 border border-stone-300/40 dark:border-stone-800/40 rounded-full font-mono text-[11px] tracking-widest uppercase"
           >
             <Award className="w-3.5 h-3.5 text-stone-700 dark:text-stone-300" />
-            <span>FINE ART ACADEMY CERTIFIED TUTOR</span>
+            <span>{hero.badgeText}</span>
           </motion.div>
 
           {/* Main heading displaying expressive fine-art lettering */}
@@ -51,12 +55,13 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.1 }}
             className="font-serif text-4xl sm:text-5xl md:text-6xl font-light text-stone-900 dark:text-stone-50 leading-[1.1] tracking-tight"
           >
-            Unlock the <span className="italic relative font-normal text-stone-850 dark:text-stone-50">
-              soul of your pencil
+            {hero.headingTextMain}
+            <span className="italic relative font-normal text-stone-850 dark:text-stone-50">
+              {hero.headingTextHighlight}
               {/* Artistic smudge stroke under words */}
               <span className="absolute bottom-1.5 left-0 right-0 h-[6px] bg-wood/25 dark:bg-wood/20 rounded-full -z-10" />
             </span>
-            {' '}and learn to see truly.
+            {hero.headingTextSuffix}
           </motion.h1>
 
           <motion.p
@@ -65,8 +70,7 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-stone-600 dark:text-stone-300 text-base md:text-lg font-light leading-relaxed max-w-xl"
           >
-            Sneha teaches classical drawing techniques, from direct charcoal portraiture
-            to complex architectural line perspective, guiding students from tentative markings to confident, beautiful fine artistry.
+            {hero.subheadingText}
           </motion.p>
 
           {/* Action buttons */}
@@ -78,15 +82,15 @@ export default function Hero() {
           >
             <button
               onClick={() => handleScrollToSection('contact')}
-              className="px-6 py-3.5 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-stone-100 text-white dark:text-stone-950 text-xs font-semibold tracking-widest uppercase rounded-lg border border-stone-950 dark:border-stone-50 cursor-pointer shadow-sm transition-all duration-300 hover:translate-y-[-1px]"
+              className="px-6 py-3.5 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-white text-white dark:text-stone-950 text-xs font-semibold tracking-widest uppercase rounded-lg border border-stone-950 dark:border-stone-50 cursor-pointer shadow-sm transition-all duration-300 hover:translate-y-[-1px]"
             >
-              Contact Sneha
+              {hero.ctaPrimaryText}
             </button>
             <button
               onClick={() => handleScrollToSection('gallery')}
               className="px-6 py-3.5 border border-stone-300 hover:border-stone-400 dark:border-stone-800 dark:hover:border-stone-700 text-stone-850 dark:text-stone-200 hover:bg-stone-100/40 dark:hover:bg-stone-900/30 text-xs font-semibold tracking-widest uppercase rounded-lg cursor-pointer transition-all duration-300"
             >
-              View Portfolio
+              {hero.ctaSecondaryText}
             </button>
           </motion.div>
 
@@ -100,7 +104,7 @@ export default function Hero() {
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-stone-900 dark:text-stone-100 font-serif text-2xl font-semibold">
                 <Award className="w-5 h-5 stroke-[1.5] text-wood" />
-                <span>5</span>
+                <span>{about.experienceYears}</span>
               </div>
               <p className="text-[11px] font-mono tracking-wider text-stone-500 dark:text-stone-400 uppercase">
                 Years Academics
@@ -110,7 +114,7 @@ export default function Hero() {
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-stone-900 dark:text-stone-100 font-serif text-2xl font-semibold">
                 <Users className="w-5 h-5 stroke-[1.5] text-wood" />
-                <span>100+</span>
+                <span>{about.studentsMentored}</span>
               </div>
               <p className="text-[11px] font-mono tracking-wider text-stone-500 dark:text-stone-400 uppercase">
                 Active Pupils
@@ -132,12 +136,12 @@ export default function Hero() {
             <div className="absolute inset-0 bg-stone-50 dark:bg-stone-950 pointer-events-none -z-10" />
 
             <div className="relative w-full h-[82%] overflow-hidden rounded-md bg-stone-200 dark:bg-stone-800">
-              <KalakarSnehaPhoto className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <KalakarSnehaPhoto src={hero.teacherPhotoUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(0,0,0,0.1),transparent)] pointer-events-none" />
 
               {/* Float drawing paper tag */}
               <div className="absolute bottom-4 left-4 bg-stone-900/85 backdrop-blur-sm text-stone-50 px-3 py-1 rounded text-[10px] font-mono tracking-widest uppercase">
-                Sneha, Studio Profile
+                {about.authorName || "Sneha"}, Studio Profile
               </div>
             </div>
 
@@ -145,39 +149,41 @@ export default function Hero() {
             <div className="pt-4 px-1 pb-1 flex justify-between items-end">
               <div>
                 <p className="font-serif italic text-base text-stone-850 dark:text-stone-100 font-medium">
-                  "See, Shaded, Sculpted"
+                  "{hero.sigQuote || "See, Shaded, Sculpted"}"
                 </p>
                 <p className="text-[10px] font-mono text-stone-500 dark:text-stone-400 tracking-wider">
-                  Traditional Medium, Studio 12
+                  {hero.sigSub || "Traditional Medium, Studio 12"}
                 </p>
               </div>
 
               {/* Artistic pencil sketch signature look-alike */}
               <div className="font-serif italic text-xs text-stone-400 dark:text-stone-500 pr-1">
-                Sneha
+                {about.authorName ? about.authorName.split(' ')[0] : "Sneha"}
               </div>
             </div>
           </motion.div>
 
           {/* Underlay canvas sketch overlay floating decorative card */}
-          <motion.div
-            initial={{ opacity: 0, x: 40, rotate: -6 }}
-            animate={{ opacity: 0.85, x: 20, rotate: -4 }}
-            transition={{ duration: 1, delay: 0.4 }}
-            className="absolute -bottom-8 -right-4 w-44 aspect-[4/5] bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-2 rounded-md shadow-lg pointer-events-none z-[-5] hidden sm:block"
-          >
-            <div className="w-full h-[80%] overflow-hidden rounded bg-stone-200 dark:bg-stone-800">
-              <img
-                src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400"
-                alt="Portrait charcoal sketch"
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="pt-2 text-[9px] font-mono text-stone-400 uppercase tracking-widest text-center">
-              Student Study #108
-            </div>
-          </motion.div>
+          {hero.underlayPhotoUrl && (
+            <motion.div
+              initial={{ opacity: 0, x: 40, rotate: -6 }}
+              animate={{ opacity: 0.85, x: 20, rotate: -4 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              className="absolute -bottom-8 -right-4 w-44 aspect-[4/5] bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-2 rounded-md shadow-lg pointer-events-none z-[-5] hidden sm:block"
+            >
+              <div className="w-full h-[80%] overflow-hidden rounded bg-stone-200 dark:bg-stone-800">
+                <img
+                  src={hero.underlayPhotoUrl}
+                  alt="Portrait charcoal sketch"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="pt-2 text-[9px] font-mono text-stone-400 uppercase tracking-widest text-center">
+                Student Study #108
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 

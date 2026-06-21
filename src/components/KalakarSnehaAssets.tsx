@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface AssetProps {
   className?: string;
@@ -115,13 +115,18 @@ export const KalakarSnehaLogo: React.FC<AssetProps> = ({ className = 'h-12', sty
  * It defaults to '/assets/sneha_photo.png' but gracefully falls back to a gorgeous interactive
  * CSS and SVG composition if the asset isn't present.
  */
-export const KalakarSnehaPhoto: React.FC<AssetProps> = ({ className = 'w-full h-full', style }) => {
+export const KalakarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ className = 'w-full h-full', style, src }) => {
   const [loadFailed, setLoadFailed] = useState(false);
+  const imageSrc = src || "/assets/sneha_photo.png";
+
+  useEffect(() => {
+    setLoadFailed(false);
+  }, [src]);
 
   if (!loadFailed) {
     return (
       <img
-        src="/assets/sneha_photo.png"
+        src={imageSrc}
         alt="Artist Sneha"
         onError={() => setLoadFailed(true)}
         referrerPolicy="no-referrer"

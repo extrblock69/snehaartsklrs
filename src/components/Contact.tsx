@@ -1,8 +1,26 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Phone, MapPin, Send, CheckCircle2, User, HelpCircle, Palette, Sparkles } from 'lucide-react';
+import { useContent } from '../context/ContentContext';
 
 export default function Contact() {
+  const { content } = useContent();
+  const contact = content.contact || {
+    badgeText: "START YOUR EDUCATION",
+    title: "Connect with Sneha Bansal",
+    description: "Have questions about group programs, specialized portfolio reviews, or personalized coaching? Fill out the portfolio inquiry form below and elevate your sketching foundations.",
+    phone: "+91 7562 224809",
+    email: "sneha@fineart-morena.com",
+    address: "Studio 12, Main Road, Kailaras, Morena, Madhya Pradesh, 476224, India",
+    infoCardText: "Based out of Kailaras, Morena, Sneha offers structural art training worldwide. Whether you prefer traditional paper workshops or live interactive screens, get structured answers.",
+    infoCardQuote: "Art is not just a collection of drawings. It is a systematic, lovely discipline of learning to see depth, space, and accurate value hierarchies.",
+    infoCardQuoteAuthor: "Sneha Bansal",
+    metricLeftVal: "24 Hour",
+    metricLeftLabel: "Typical Reply Time",
+    metricRightVal: "Global",
+    metricRightLabel: "India & International"
+  };
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -57,6 +75,8 @@ export default function Contact() {
     setStatus('idle');
   };
 
+  const formattedPhoneUrl = contact.phone.replace(/\s+/g, '');
+
   return (
     <section id="contact" className="py-24 bg-stone-50 dark:bg-stone-950 border-t border-stone-200/40 dark:border-stone-900/60 transition-colors duration-300 relative overflow-hidden">
       {/* Decorative background grid and blurs */}
@@ -65,15 +85,14 @@ export default function Contact() {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="font-mono text-xs text-wood dark:text-wood font-semibold tracking-widest uppercase block mb-3">
-            START YOUR EDUCATION
+            {contact.badgeText}
           </span>
           <h2 className="font-serif text-3xl sm:text-4xl font-light text-stone-900 dark:text-stone-100 tracking-tight leading-tight">
-            Connect with Sneha Bansal
+            {contact.title}
           </h2>
           <div className="h-[1px] w-12 bg-wood mx-auto my-4" />
           <p className="text-stone-550 dark:text-stone-300 font-light text-sm leading-relaxed">
-            Have questions about group programs, specialized portfolio reviews, or personalized coaching? 
-            Fill out the portfolio inquiry form below and elevate your sketching foundations.
+            {contact.description}
           </p>
         </div>
 
@@ -89,8 +108,7 @@ export default function Contact() {
               </h3>
               
               <p className="text-stone-600 dark:text-stone-300 font-light text-xs leading-relaxed mb-8">
-                Based out of Kailaras, Morena, Sneha offers structural art training worldwide. 
-                Whether you prefer traditional paper workshops or live interactive screens, get structured answers.
+                {contact.infoCardText}
               </p>
 
               <div className="space-y-6 text-xs">
@@ -100,8 +118,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <span className="font-mono text-[9px] text-stone-400 dark:text-stone-500 block uppercase tracking-wider mb-0.5">PHONE INQUIRY</span>
-                    <a href="tel:+917562224809" className="text-stone-800 dark:text-stone-200 hover:text-wood font-medium font-mono text-xs transition-colors">
-                      +91 7562 224809
+                    <a href={`tel:${formattedPhoneUrl}`} className="text-stone-800 dark:text-stone-200 hover:text-wood font-medium font-mono text-xs transition-colors">
+                      {contact.phone}
                     </a>
                   </div>
                 </div>
@@ -112,8 +130,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <span className="font-mono text-[9px] text-stone-400 dark:text-stone-500 block uppercase tracking-wider mb-0.5">DIRECT EMAIL</span>
-                    <a href="mailto:sneha@fineart-morena.com" className="text-stone-800 dark:text-stone-200 hover:text-wood font-medium font-mono text-xs transition-colors">
-                      sneha@fineart-morena.com
+                    <a href={`mailto:${contact.email}`} className="text-stone-800 dark:text-stone-200 hover:text-wood font-medium font-mono text-xs transition-colors">
+                      {contact.email}
                     </a>
                   </div>
                 </div>
@@ -124,8 +142,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <span className="font-mono text-[9px] text-stone-400 dark:text-stone-500 block uppercase tracking-wider mb-0.5">THE WORKSPACE</span>
-                    <span className="text-stone-700 dark:text-stone-300 font-light leading-relaxed block">
-                      Studio 12, Main Road, Kailaras, Morena,<br />Madhya Pradesh, 476224, India
+                    <span className="text-stone-700 dark:text-stone-300 font-light leading-relaxed block whitespace-pre-line">
+                      {contact.address}
                     </span>
                   </div>
                 </div>
@@ -134,10 +152,10 @@ export default function Contact() {
               {/* Aesthetic quote in card */}
               <div className="border-t border-stone-200 dark:border-stone-800 mt-8 pt-6">
                 <blockquote className="italic font-serif text-stone-500 dark:text-stone-400 text-xs leading-relaxed">
-                  "Art is not just a collection of drawings. It is a systematic, lovely discipline of learning to see depth, space, and accurate value hierarchies."
+                  "{contact.infoCardQuote}"
                 </blockquote>
                 <span className="block font-mono text-[9px] text-wood font-semibold mt-2 tracking-widest uppercase">
-                  &mdash; Sneha Bansal
+                  &mdash; {contact.infoCardQuoteAuthor}
                 </span>
               </div>
             </div>
@@ -145,12 +163,12 @@ export default function Contact() {
             {/* Quick trust metrics */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-stone-100/50 dark:bg-stone-900/40 p-4 rounded-xl border border-stone-200/30 dark:border-stone-800/40 text-center">
-                <span className="block text-2xl font-serif text-wood font-light leading-none mb-1">24 Hour</span>
-                <span className="block font-mono text-[9px] text-stone-400 uppercase tracking-widest">Typical Reply Time</span>
+                <span className="block text-2xl font-serif text-wood font-light leading-none mb-1">{contact.metricLeftVal}</span>
+                <span className="block font-mono text-[9px] text-stone-400 uppercase tracking-widest">{contact.metricLeftLabel}</span>
               </div>
               <div className="bg-stone-100/50 dark:bg-stone-900/40 p-4 rounded-xl border border-stone-200/30 dark:border-stone-800/40 text-center">
-                <span className="block text-2xl font-serif text-wood font-light leading-none mb-1">Global</span>
-                <span className="block font-mono text-[9px] text-stone-400 uppercase tracking-widest">India & International</span>
+                <span className="block text-2xl font-serif text-wood font-light leading-none mb-1">{contact.metricRightVal}</span>
+                <span className="block font-mono text-[9px] text-stone-400 uppercase tracking-widest">{contact.metricRightLabel}</span>
               </div>
             </div>
           </div>

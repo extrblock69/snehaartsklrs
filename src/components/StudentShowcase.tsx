@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Maximize2, BookOpen, Award, Clock, ArrowRight, X, Layers, User, ShieldAlert } from 'lucide-react';
 import { StudentProject, LessonLevel } from '../types';
+import { useContent } from '../context/ContentContext';
 
 const SHOWCASE_DATA: StudentProject[] = [
   {
@@ -73,10 +74,11 @@ const SHOWCASE_DATA: StudentProject[] = [
 ];
 
 export default function StudentShowcase() {
+  const { content } = useContent();
   const [selectedLevel, setSelectedLevel] = useState<LessonLevel | 'All'>('All');
   const [activeProject, setActiveProject] = useState<StudentProject | null>(null);
 
-  const filteredProjects = SHOWCASE_DATA.filter(
+  const filteredProjects = (content.studentShowcase || []).filter(
     (proj) => selectedLevel === 'All' || proj.level === selectedLevel
   );
 

@@ -2,69 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Maximize2, X, Info, Download } from 'lucide-react';
 import { Artwork, ArtCategory } from '../types';
-
-const GALLERY_DATA: Artwork[] = [
-  {
-    id: 'art-1',
-    title: "Philosopher's Wisdom",
-    category: 'charcoal',
-    medium: 'Compressed charcoal, raw vine willow, and white chalk on heavy Canson paper',
-    dimensions: '18" x 24"',
-    year: '2024',
-    imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800',
-    description: 'A study in high chiaroscuro and skin textures. Drawn from a live model session in Siena, Italy. This drawing demonstrates how hard edge-lines can be dissolved entirely into shadow gradients to establish monumental physical volume.'
-  },
-  {
-    id: 'art-2',
-    title: 'Cathedral of San Frediano',
-    category: 'ink',
-    medium: 'Iron gall ink, bamboo stylus, and dry-brush sepia washes on vintage paper',
-    dimensions: '12" x 16"',
-    year: '2023',
-    imageUrl: 'https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?auto=format&fit=crop&q=80&w=800',
-    description: 'An architectural perspective study illustrating 3-point vanishing alignments. This piece showcases controlled hatching density to suggest ancient sun-baked stone and deep, dusty archway negative spaces.'
-  },
-  {
-    id: 'art-3',
-    title: 'The Florentine Hand Study',
-    category: 'charcoal',
-    medium: 'Willow charcoal rods and graphite 4B accents on cream drawing rag',
-    dimensions: '16" x 20"',
-    year: '2024',
-    imageUrl: 'https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=800',
-    description: 'Anatomical study highlighting active hand tendons and structural joint foreshortening. A major focus here is the delicate gradation of light bouncing off the palm versus the dark backdrop shadows.'
-  },
-  {
-    id: 'art-4',
-    title: 'Study of Roman Torso',
-    category: 'graphite',
-    medium: 'Graphite scale pencils (H, F, HB, 2B, 6B) on hot-pressed Bristol paper',
-    dimensions: '14" x 18"',
-    year: '2025',
-    imageUrl: 'https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=800',
-    description: 'This museum classical plaster cast study teaches students how to render complex spherical surfaces and clean cast-shadow bounds without relying on smudging tools. Made entirely with precise cross-hatching.'
-  },
-  {
-    id: 'art-5',
-    title: 'Grizzled Forest Pines',
-    category: 'pastel',
-    medium: 'Soft dry earth pastels and charcoal willow lines on Canson Mi-Teintes sand board',
-    dimensions: '11" x 14"',
-    year: '2025',
-    imageUrl: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&q=80&w=800',
-    description: 'Landscape texture exercise exploring contrast between rough pine bark and distant, blurry horizon atmospheres. Soft pastel layers were massed in first and then defined with raw charcoal willow strokes.'
-  },
-  {
-    id: 'art-6',
-    title: 'The Eye of Leonardo',
-    category: 'graphite',
-    medium: 'Graphite 6B and 8B woodless pencils on off-white drawing cotton',
-    dimensions: '10" x 10"',
-    year: '2024',
-    imageUrl: 'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&q=80&w=800',
-    description: 'An analysis of wet eyeball specular reflections and eyelid structural wrapping. This piece is a student-favorite, demonstrating the intense realism that can be accomplished with simple graphite gradients.'
-  }
-];
+import { useContent } from '../context/ContentContext';
 
 const CATEGORIES: { label: string; value: ArtCategory }[] = [
   { label: 'All Drawings', value: 'all' },
@@ -75,12 +13,14 @@ const CATEGORIES: { label: string; value: ArtCategory }[] = [
 ];
 
 export default function Gallery() {
+  const { content } = useContent();
   const [selectedCategory, setSelectedCategory] = useState<ArtCategory>('all');
   const [activeArtwork, setActiveArtwork] = useState<Artwork | null>(null);
 
-  const filteredArtworks = GALLERY_DATA.filter(
+  const filteredArtworks = (content.gallery || []).filter(
     (art) => selectedCategory === 'all' || art.category === selectedCategory
   );
+
 
   return (
     <section

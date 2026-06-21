@@ -1,0 +1,218 @@
+{
+  "hero": {
+    "badgeText": "FINE ART ACADEMY CERTIFIED TUTOR",
+    "headingTextMain": "Unlock the ",
+    "headingTextHighlight": "soul of your pencil",
+    "headingTextSuffix": " and learn to see truly.",
+    "subheadingText": "Sneha teaches classical drawing techniques, from direct charcoal portraiture to complex architectural line perspective, guiding students from tentative markings to confident, beautiful fine artistry.",
+    "ctaPrimaryText": "Contact Sneha",
+    "ctaSecondaryText": "View Portfolio",
+    "teacherPhotoUrl": "/assets/sneha_photo.png",
+    "underlayPhotoUrl": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400",
+    "sigQuote": "See, Shaded, Sculpted",
+    "sigSub": "Traditional Medium, Studio 12"
+  },
+  "about": {
+    "badgeText": "THE FOUNDRY OF TECHNIQUE",
+    "title": "About Sneha Bansal",
+    "paragraphs": [
+      "Hello! I am Sneha, a traditional artist and visual discipline mentor based in India. Art is not a collection of happy accidents or unexplainable magic. It is a language of visual relationships, structural perspective, and careful tonal gradation.",
+      "My teaching philosophy centers on systematic academic instruction. Whether you are an absolute beginner struggling to draw eyes that line up, or an experienced hobbyist wanting to elevate your portraits, I dismantle the visual world into clear, repeatable mathematical steps.",
+      "By guiding you through sight-size triangulation, edge hierarchy refinement, and charcoal value mapping, we will rewrite the software of how you see. Let's train your eye to see truly and your pencil to express with absolute precision."
+    ],
+    "experienceYears": "8+",
+    "studentsMentored": "450+",
+    "quote": "We do not learn to draw to replicate a photo. We learn to draw so we can translate how light rolls over a surface, and make a flat piece of paper breathe.",
+    "avatarUrl": "/assets/sneha_photo.png",
+    "authorName": "Sneha Bansal",
+    "authorRole": "Academic Director, Kailaras, Morena, Madhya Pradesh, India"
+  },
+  "contact": {
+    "badgeText": "START YOUR EDUCATION",
+    "title": "Connect with Sneha Bansal",
+    "description": "Have questions about group programs, specialized portfolio reviews, or personalized coaching? Fill out the portfolio inquiry form below and elevate your sketching foundations.",
+    "phone": "+91 7562 224809",
+    "email": "sneha@fineart-morena.com",
+    "address": "Studio 12, Main Road, Kailaras, Morena, Madhya Pradesh, 476224, India",
+    "infoCardText": "Based out of Kailaras, Morena, Sneha offers structural art training worldwide. Whether you prefer traditional paper workshops or live interactive screens, get structured answers.",
+    "infoCardQuote": "Art is not just a collection of drawings. It is a systematic, lovely discipline of learning to see depth, space, and accurate value hierarchies.",
+    "infoCardQuoteAuthor": "Sneha Bansal",
+    "metricLeftVal": "24 Hour",
+    "metricLeftLabel": "Typical Reply Time",
+    "metricRightVal": "Global",
+    "metricRightLabel": "India & International"
+  },
+  "gallery": [
+    {
+      "id": "art-1",
+      "title": "Philosopher's Wisdom",
+      "category": "charcoal",
+      "medium": "Compressed charcoal, raw vine willow, and white chalk on heavy Canson paper",
+      "dimensions": "18\" x 24\"",
+      "year": "2024",
+      "imageUrl": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800",
+      "description": "A study in high chiaroscuro and skin textures. Drawn from a live model session in Siena, Italy. This drawing demonstrates how hard edge-lines can be dissolved entirely into shadow gradients to establish monumental physical volume."
+    },
+    {
+      "id": "art-2",
+      "title": "Cathedral of San Frediano",
+      "category": "ink",
+      "medium": "Iron gall ink, bamboo stylus, and dry-brush sepia washes on vintage paper",
+      "dimensions": "12\" x 16\"",
+      "year": "2023",
+      "imageUrl": "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?auto=format&fit=crop&q=80&w=800",
+      "description": "An architectural perspective study illustrating 3-point vanishing alignments. This piece showcases controlled hatching density to suggest ancient sun-baked stone and deep, dusty archway negative spaces."
+    },
+    {
+      "id": "art-3",
+      "title": "The Florentine Hand Study",
+      "category": "charcoal",
+      "medium": "Willow charcoal rods and graphite 4B accents on cream drawing rag",
+      "dimensions": "16\" x 20\"",
+      "year": "2024",
+      "imageUrl": "https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=800",
+      "description": "Anatomical study highlighting active hand tendons and structural joint foreshortening. A major focus here is the delicate gradation of light bouncing off the palm versus the dark backdrop shadows."
+    },
+    {
+      "id": "art-4",
+      "title": "Study of Roman Torso",
+      "category": "graphite",
+      "medium": "Graphite scale pencils (H, F, HB, 2B, 6B) on hot-pressed Bristol paper",
+      "dimensions": "14\" x 18\"",
+      "year": "2025",
+      "imageUrl": "https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=800",
+      "description": "This museum classical plaster cast study teaches students how to render complex spherical surfaces and clean cast-shadow bounds without relying on smudging tools. Made entirely with precise cross-hatching."
+    },
+    {
+      "id": "art-5",
+      "title": "Grizzled Forest Pines",
+      "category": "pastel",
+      "medium": "Soft dry earth pastels and charcoal willow lines on Canson Mi-Teintes sand board",
+      "dimensions": "11\" x 14\"",
+      "year": "2025",
+      "imageUrl": "https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&q=80&w=800",
+      "description": "Landscape texture exercise exploring contrast between rough pine bark and distant, blurry horizon atmospheres. Soft pastel layers were massed in first and then defined with raw charcoal willow strokes."
+    },
+    {
+      "id": "art-6",
+      "title": "The Eye of Leonardo",
+      "category": "graphite",
+      "medium": "Traditional carbon charcoal and standard mechanical pencils on cotton rag",
+      "dimensions": "10\" x 10\"",
+      "year": "2024",
+      "imageUrl": "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&q=80&w=800",
+      "description": "An high-fidelity microscopic study replica of the human eye. Explores the circular muscular structure of the iris and the mirror-like specular highlights that make eyes look liquid and three-dimensional."
+    }
+  ],
+  "studentShowcase": [
+    {
+      "id": "proj-1",
+      "title": "Bargue Profile of Dante",
+      "studentName": "Clarissa Montgomery",
+      "durationInAcademy": "6 Weeks of Training",
+      "level": "Beginner",
+      "medium": "Academic Graphite (HB, 2B, 4B) on Strathmore heavy paper",
+      "imageUrl": "https://images.unsplash.com/photo-1580136579312-94651dfd596d?auto=format&fit=crop&q=80&w=800",
+      "description": "A dedicated study in line-weight control and outline exactness, practicing Charles Bargue's Sight-Size classical methodology of geometric simplification.",
+      "teacherMentorshipNotes": "Clarissa started with zero formal drawing experience. By teaching her to squint and simplify complex contours into straight, angled vectors first, she overcame the fear of free-hand portraiture. Her precision in the forehead slope and nose contour is exceptional."
+    },
+    {
+      "id": "proj-2",
+      "title": "Michelangelo's David Eye Plaster",
+      "studentName": "Julian Vance",
+      "durationInAcademy": "12 Weeks of Training",
+      "level": "Intermediate",
+      "medium": "Compressed Charcoal, Willow Sticks, and Kneaded Eraser on Canson Rag",
+      "imageUrl": "https://images.unsplash.com/photo-1579783921570-07520420d44a?auto=format&fit=crop&q=80&w=800",
+      "description": "Detailed classical cast study analyzing the dramatic three-dimensional light wrapping around the eye socket, eyelid fold, and brow structure.",
+      "teacherMentorshipNotes": "An incredible study in light mechanics. Julian's rendering of the iris hollow and the cast-shadow from the brow projection is perfectly aligned with real light rays. The intermediate stage focuses heavily on translating spheres and cylinders."
+    },
+    {
+      "id": "proj-3",
+      "title": "Anatomical Grip & Foreshortened Wrist",
+      "studentName": "Evelyn Zhao",
+      "durationInAcademy": "5 Months of Training",
+      "level": "Advanced",
+      "medium": "Stumped Charcoal, Carbon Dust, and Raw Graphite 6B highlights on Tinted Ingres Paper",
+      "imageUrl": "https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=800",
+      "description": "An advanced inquiry of active hand bone landmarks, tendon strains, and complex overlapping fingers receding in deeply foreshortened space.",
+      "teacherMentorshipNotes": "Hands are notoriously difficult because our minds tend to draw symbols instead of actual shapes. Evelyn analyzed the skeletal structure underneath first. Note how her highlights follow the tendon lines, giving the drawing vibrant muscular realism."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "lesson-1",
+      "title": "Foundations of Sight",
+      "level": "Beginner",
+      "duration": "12-Week Private Mentorship",
+      "price": 480,
+      "description": "Rebuild your visual system. Learn to bypass mental assumptions and sketch precisely what is in front of you, with secure contours and basic structural value blocks.",
+      "curriculum": [
+        "Proportional Triangulation & Plumb alignments",
+        "Contour drawing & Hand-eye synchronization limits",
+        "Understanding negative space boundaries",
+        "The 9-step gray scale and charcoal value blocks",
+        "Foundational 1-point and 2-point perspective laws"
+      ]
+    },
+    {
+      "id": "lesson-2",
+      "title": "Classical Portraiture Mastery",
+      "level": "Intermediate",
+      "duration": "16-Week Immersive Critique",
+      "price": 720,
+      "description": "Anatomical analysis of the human facial architecture. Learn how to map muscular forms, direct strong lighting (chiaroscuro), and shade core values smoothly.",
+      "curriculum": [
+        "The Loomis method & structural head planes",
+        "Eye, nose, lip, and ear anatomical sub-structures",
+        "Establishing core and cast shadow borders",
+        "Edge hierarchy (Hard, Firm, Soft, and Lost boundaries)",
+        "Subtle value gradient transitions using 6B and woodless graphite"
+      ]
+    },
+    {
+      "id": "lesson-3",
+      "title": "Architectural & Masterwork Perspective",
+      "level": "Advanced",
+      "duration": "10-Week Master Masterclass",
+      "price": 590,
+      "description": "Explore grand perspectives and natural landscapes. Work with classical iron gall sepia ink and bamboo reeds, learning how to combine architectural precision with organic texture.",
+      "curriculum": [
+        "Advanced 3-point and atmospheric perspective",
+        "Complex building architectural hatching systems",
+        "Draped linen study and complex texture rendering",
+        "Landscape massing using soft charcoal and ink washes",
+        "Analyzing and copying classical master drawings (Da Vinci, Michelangelo)"
+      ]
+    }
+  ],
+  "testimonials": [
+    {
+      "id": "test-1",
+      "studentName": "Marcus Finch",
+      "courseTaken": "Classical Portraiture Mastery",
+      "reviewText": "Before working with Sneha, my drawings felt like flat cartoon outlines. She completely rewired how I analyze lighting. By understanding where the terminator shadows meet bouncing ambient light, I can finally draw realistic, three-dimensional faces that look alive. Her program is legendary!",
+      "rating": 5,
+      "beforeImage": "https://images.unsplash.com/photo-1582201942988-13e60e4556ee?auto=format&fit=crop&q=80&w=500",
+      "afterImage": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=500"
+    },
+    {
+      "id": "test-2",
+      "studentName": "Sophia Chen",
+      "courseTaken": "Architectural & Masterwork",
+      "reviewText": "I used to struggle intensely with structural perspective. Alignment lines never seemed to match. Sneha taught me classical academic triangulation tricks and 2-point horizon guides. My sketchbooks are now filled with beautiful, structured heritage landmark drawings. Absolutely flawless tutoring.",
+      "rating": 5,
+      "beforeImage": "https://images.unsplash.com/photo-1576016770956-debb63d900ef?auto=format&fit=crop&q=80&w=500",
+      "afterImage": "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?auto=format&fit=crop&q=80&w=500"
+    },
+    {
+      "id": "test-3",
+      "studentName": "Aiden Gallagher",
+      "courseTaken": "Foundations of Sight",
+      "reviewText": "I thought realism required an innate genetic talent. Sneha showed me that drawing is simply 95% active, focused seeing. Learning to isolate shapes using negative space and values removed my creative blocks entirely. Highly encourage this for anyone starting out with pencil drawing.",
+      "rating": 5,
+      "beforeImage": "https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=500",
+      "afterImage": "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&q=80&w=500"
+    }
+  ]
+}
