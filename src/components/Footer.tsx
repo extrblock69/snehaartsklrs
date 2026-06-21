@@ -69,9 +69,6 @@ export default function Footer() {
               <a href="#sketchpad" className="hover:text-white transition-colors">PRACTICE CANVASES</a>
             </li>
             <li>
-              <a href="#lessons" className="hover:text-white transition-colors">CURRICULAS</a>
-            </li>
-            <li>
               <a href="#admin" className="hover:text-amber-500 hover:underline transition-colors tracking-wider font-bold">ADMIN PORTAL</a>
             </li>
           </ul>

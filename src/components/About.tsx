@@ -80,7 +80,7 @@ export default function About() {
             {/* Profile Signature & Credentials block */}
             <div className="flex items-center gap-4 pt-4">
               <div className="w-12 h-12 rounded-full overflow-hidden border border-stone-300 dark:border-stone-700 bg-stone-250 flex-shrink-0">
-                <KalakarSnehaPhoto src={about.avatarUrl || hero.teacherPhotoUrl} className="w-full h-full object-cover" />
+                <KalakarSnehaPhoto src={about.avatarUrl || content.hero.teacherPhotoUrl} className="w-full h-full object-cover" />
               </div>
               <div>
                 <h4 className="font-serif text-stone-850 dark:text-stone-100 font-semibold leading-none">
@@ -133,31 +133,6 @@ export default function About() {
             </div>
           </div>
 
-        </div>
-
-        {/* Decorative Tools Row */}
-        <div className="mt-20 pt-10 border-t border-stone-200/50 dark:border-stone-800/50 text-center">
-          <p className="font-mono text-[10px] tracking-widest text-wood font-semibold uppercase mb-6">
-            PRIMARY INSTRUCTIONAL MEDIUMS & TOOLS
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 text-stone-600 dark:text-stone-400 font-serif italic text-sm md:text-base">
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-wood" />
-              Raw Vine Charcoal (Coarse and Soft)
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-wood" />
-              Academic Graphite (4H to 8B)
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-wood" />
-              Sepia Ink & Bamboo Reed Pens
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-wood" />
-              Canson 300g Hot-Pressed Art Cotton
-            </span>
-          </div>
         </div>
 
       </div>

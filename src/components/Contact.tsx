@@ -264,27 +264,6 @@ export default function Contact() {
                       </div>
                     </div>
 
-                    {/* Medium Of Interest */}
-                    <div className="space-y-1.5">
-                      <label className="block text-[11px] font-mono text-stone-550 dark:text-stone-400 uppercase tracking-wider font-semibold">
-                        Syllabus or Artwork Focus of Interest
-                      </label>
-                      <div className="relative">
-                        <Palette className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400/80 pointer-events-none" />
-                        <select
-                          value={formData.mediumOfInterest}
-                          onChange={(e) => setFormData({ ...formData, mediumOfInterest: e.target.value })}
-                          className="w-full bg-stone-50 dark:bg-stone-950/60 border border-stone-250 dark:border-stone-800 rounded-lg py-2.5 pl-10 pr-4 text-xs font-sans text-stone-800 dark:text-stone-100 focus:outline-none focus:border-wood focus:ring-1 focus:ring-wood/50 transition-all appearance-none cursor-pointer"
-                        >
-                          {mediums.map((med, i) => (
-                            <option key={i} value={med} className="dark:bg-stone-900 bg-white">
-                              {med}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
                     {/* Message textarea */}
                     <div className="space-y-1.5">
                       <label className="block text-[11px] font-mono text-stone-550 dark:text-stone-400 uppercase tracking-wider font-semibold">

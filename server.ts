@@ -12,6 +12,12 @@ const PORT = 3000;
 // Middleware
 app.use(express.json({ limit: "50mb" }));
 
+const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+app.use("/uploads", express.static(UPLOADS_DIR));
+
 const CONTENT_FILE_PATH = path.join(process.cwd(), "src", "data", "site_content.json");
 
 // Helper: load content
@@ -84,6 +90,57 @@ app.post("/api/content", requireAdmin, (req, res) => {
     res.json({ message: "Content updated successfully!", content: newContent });
   } else {
     res.status(500).json({ error: "Could not persist content on server" });
+  }
+});
+
+// API: Upload Media Image File (Protected)
+app.post("/api/upload", requireAdmin, (req, res) => {
+  const { filename, base64Data } = req.body;
+  
+  if (!base64Data || typeof base64Data !== "string") {
+    return res.status(400).json({ error: "Missing or invalid base64Data content payload" });
+  }
+
+  try {
+    let mimeType = "image/png";
+    let pureBase64 = base64Data;
+    let extension = "png";
+
+    if (base64Data.startsWith("data:")) {
+      const match = base64Data.match(/^data:([^;]+);base64,(.+)$/);
+      if (match) {
+        mimeType = match[1];
+        pureBase64 = match[2];
+        const extMatch = mimeType.split("/");
+        if (extMatch && extMatch[1]) {
+          extension = extMatch[1];
+        }
+      }
+    }
+
+    // Sanitize file extensions
+    if (extension === "jpeg") extension = "jpg";
+    if (extension === "svg+xml") extension = "svg";
+    if (extension === "gif") extension = "gif";
+    if (extension === "webp") extension = "webp";
+
+    const buffer = Buffer.from(pureBase64, "base64");
+    
+    // Create clean unique target filename to prevent overwriting assets
+    const cleanBaseName = filename 
+      ? path.basename(filename, path.extname(filename)).replace(/[^a-zA-Z0-9_-]/g, "_")
+      : "upload";
+    
+    const uniqueFilename = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}_${cleanBaseName}.${extension}`;
+    const filePath = path.join(UPLOADS_DIR, uniqueFilename);
+
+    fs.writeFileSync(filePath, buffer);
+
+    const publicUrl = `/uploads/${uniqueFilename}`;
+    res.json({ success: true, url: publicUrl });
+  } catch (err: any) {
+    console.error("Image disk saving operation failed:", err);
+    res.status(500).json({ error: "Failed to persist uploaded asset on server subspace", details: err.message });
   }
 });
 

@@ -2,9 +2,102 @@ import React, { useState } from 'react';
 import { useContent } from '../context/ContentContext';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
-  HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye
+  HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload
 } from 'lucide-react';
 import { Artwork, Lesson, Testimonial, StudentProject, ArtCategory, LessonLevel } from '../types';
+
+interface FileUploaderProps {
+  value: string;
+  onChange: (url: string) => void;
+  adminToken: string | null;
+  label?: string;
+  placeholder?: string;
+}
+
+function FileUploader({ value, onChange, adminToken, label, placeholder }: FileUploaderProps) {
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      setError('File is too large. Max size is 15MB.');
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Data = reader.result as string;
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {})
+          },
+          body: JSON.stringify({
+            filename: file.name,
+            base64Data
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+          onChange(data.url);
+        } else {
+          setError(data.error || 'Failed to upload image.');
+        }
+      } catch (err) {
+        console.error('Upload request failed:', err);
+        setError('Server network error uploading file.');
+      } finally {
+        setUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="space-y-1.5 text-left w-full">
+      {label && <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase block">{label}</label>}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          className="flex-1 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+          placeholder={placeholder || "https://... or choose file on right"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+        <label className="relative shrink-0 flex items-center justify-center px-4 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-350 hover:text-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg cursor-pointer text-xs transition duration-150 select-none">
+          {uploading ? (
+            <span className="flex items-center gap-1.5 font-bold font-mono text-[10px] uppercase tracking-wide">
+              <span className="w-3.5 h-3.5 border-2 border-stone-500 border-t-transparent rounded-full animate-spin" />
+              Saving...
+            </span>
+          ) : (
+            <span className="flex items-center gap-1.5 font-bold font-mono text-[10px] uppercase tracking-wide">
+              <Upload className="w-3.5 h-3.5" />
+              Upload
+            </span>
+          )}
+          <input
+            type="file"
+            className="hidden"
+            accept="image/*"
+            disabled={uploading}
+            onChange={handleFileChange}
+          />
+        </label>
+      </div>
+      {error && <span className="text-[10px] text-red-500 font-mono block mt-1">{error}</span>}
+    </div>
+  );
+}
 
 export default function AdminPanel() {
   const { content, login, logout, isAdmin, updateContent, adminToken } = useContent();
@@ -608,26 +701,20 @@ export default function AdminPanel() {
                 <div className="border-t border-stone-100 dark:border-stone-800 pt-5 mt-4">
                   <h4 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase mb-4">Hero Media & Art Signature Settings</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Teacher Main Photo (URL)</label>
-                      <input
-                        type="text"
-                        placeholder="/assets/sneha_photo.png"
-                        className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
-                        value={heroForm.teacherPhotoUrl}
-                        onChange={(e) => setHeroForm({ ...heroForm, teacherPhotoUrl: e.target.value })}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Secondary Underlay Sketch (URL)</label>
-                      <input
-                        type="text"
-                        placeholder="https://images.unsplash.com/..."
-                        className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
-                        value={heroForm.underlayPhotoUrl}
-                        onChange={(e) => setHeroForm({ ...heroForm, underlayPhotoUrl: e.target.value })}
-                      />
-                    </div>
+                    <FileUploader
+                      label="Teacher Main Photo"
+                      placeholder="/assets/sneha_photo.png"
+                      value={heroForm.teacherPhotoUrl}
+                      adminToken={adminToken}
+                      onChange={(url) => setHeroForm({ ...heroForm, teacherPhotoUrl: url })}
+                    />
+                    <FileUploader
+                      label="Secondary Underlay Sketch"
+                      placeholder="https://images.unsplash.com/..."
+                      value={heroForm.underlayPhotoUrl}
+                      adminToken={adminToken}
+                      onChange={(url) => setHeroForm({ ...heroForm, underlayPhotoUrl: url })}
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
@@ -749,16 +836,13 @@ export default function AdminPanel() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Signature Circle Avatar Photo (URL)</label>
-                      <input
-                        type="text"
-                        placeholder="/assets/sneha_photo.png"
-                        className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
-                        value={aboutForm.avatarUrl}
-                        onChange={(e) => setAboutForm({ ...aboutForm, avatarUrl: e.target.value })}
-                      />
-                    </div>
+                    <FileUploader
+                      label="Signature Circle Avatar Photo"
+                      placeholder="/assets/sneha_photo.png"
+                      value={aboutForm.avatarUrl}
+                      adminToken={adminToken}
+                      onChange={(url) => setAboutForm({ ...aboutForm, avatarUrl: url })}
+                    />
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Author Name</label>
                       <input
@@ -985,14 +1069,12 @@ export default function AdminPanel() {
                           ) : (
                             <Image className="w-8 h-8 text-stone-300" />
                           )}
-                          <div className="w-full mt-3 space-y-1">
-                            <span className="block text-[9px] font-mono text-stone-400 text-left uppercase">COPY & PASTE PHOTO URL</span>
-                            <input
-                              type="text"
-                              className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-250 dark:border-stone-800 rounded px-2 py-1 text-[10px] font-mono"
-                              placeholder="https://images.unsplash.com/..."
+                          <div className="w-full mt-3">
+                            <FileUploader
                               value={art.imageUrl}
-                              onChange={(e) => handleUpdateGalleryItem(art.id, 'imageUrl', e.target.value)}
+                              adminToken={adminToken}
+                              onChange={(url) => handleUpdateGalleryItem(art.id, 'imageUrl', url)}
+                              placeholder="https://images.unsplash.com/..."
                             />
                           </div>
                         </div>
@@ -1120,13 +1202,12 @@ export default function AdminPanel() {
                           ) : (
                             <Image className="w-8 h-8 text-stone-300" />
                           )}
-                          <div className="w-full mt-3 space-y-1">
-                            <span className="block text-[9px] font-mono text-stone-400 text-left uppercase">PASTE ART IMAGE URL</span>
-                            <input
-                              type="text"
-                              className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-250 dark:border-stone-800 rounded px-2 py-1 text-[10px] font-mono"
+                          <div className="w-full mt-3">
+                            <FileUploader
                               value={proj.imageUrl}
-                              onChange={(e) => handleUpdateShowcaseItem(proj.id, 'imageUrl', e.target.value)}
+                              adminToken={adminToken}
+                              onChange={(url) => handleUpdateShowcaseItem(proj.id, 'imageUrl', url)}
+                              placeholder="/assets/student_study.jpg"
                             />
                           </div>
                         </div>
