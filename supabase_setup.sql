@@ -171,3 +171,34 @@ WITH CHECK (bucket_id = 'portfolio');
 -- ====================================================================
 -- FINISH: Setup script execution successful!
 -- ====================================================================
+-- 1. Ensure the bucket is created and marked public
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('portfolio', 'portfolio', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- 2. Drop any existing conflicting policies to start clean
+DROP POLICY IF EXISTS "Public Read Access for Images" ON storage.objects;
+DROP POLICY IF EXISTS "Allow administrative file uploads" ON storage.objects;
+DROP POLICY IF EXISTS "Allow administrative file changes" ON storage.objects;
+DROP POLICY IF EXISTS "Allow administrative file deletes" ON storage.objects;
+
+-- 3. Policy A: Allow anyone to view and fetch uploaded images publicly
+CREATE POLICY "Public Read Access for Images"
+ON storage.objects FOR SELECT TO public, anon
+USING (bucket_id = 'portfolio');
+
+-- 4. Policy B: Allow uploads and edits into the bucket 
+CREATE POLICY "Allow administrative file uploads"
+ON storage.objects FOR INSERT TO public, anon
+WITH CHECK (bucket_id = 'portfolio');
+
+-- 5. Policy C: Allow editing files
+CREATE POLICY "Allow administrative file changes"
+ON storage.objects FOR UPDATE TO public, anon
+USING (bucket_id = 'portfolio')
+WITH CHECK (bucket_id = 'portfolio');
+
+-- 6. Policy D: Allow deleting files
+CREATE POLICY "Allow administrative file deletes"
+ON storage.objects FOR DELETE TO public, anon
+USING (bucket_id = 'portfolio');
