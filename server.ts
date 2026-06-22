@@ -251,6 +251,10 @@ async function setupVite() {
   });
 }
 
-setupVite().catch((err) => {
-  console.error("Vite server configuration initialization failed", err);
-});
+if (!process.env.VERCEL) {
+  setupVite().catch((err) => {
+    console.error("Vite server configuration initialization failed", err);
+  });
+}
+
+export default app;

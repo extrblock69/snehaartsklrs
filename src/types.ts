@@ -99,6 +99,7 @@ export interface SiteContent {
   studentShowcase: StudentProject[];
   lessons: Lesson[];
   testimonials: Testimonial[];
+  uploadedImages?: string[];
 }
 
 

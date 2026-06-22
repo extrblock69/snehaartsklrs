@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useContent } from '../context/ContentContext';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
-  HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload
+  HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload,
+  RefreshCw
 } from 'lucide-react';
 import { Artwork, Lesson, Testimonial, StudentProject, ArtCategory, LessonLevel } from '../types';
 
@@ -12,9 +13,10 @@ interface FileUploaderProps {
   adminToken: string | null;
   label?: string;
   placeholder?: string;
+  onUploaded?: (url: string) => void;
 }
 
-function FileUploader({ value, onChange, adminToken, label, placeholder }: FileUploaderProps) {
+function FileUploader({ value, onChange, adminToken, label, placeholder, onUploaded }: FileUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
@@ -49,6 +51,9 @@ function FileUploader({ value, onChange, adminToken, label, placeholder }: FileU
         const data = await response.json();
         if (response.ok && data.success) {
           onChange(data.url);
+          if (onUploaded) {
+            onUploaded(data.url);
+          }
         } else {
           setError(data.error || 'Failed to upload image.');
         }
@@ -103,9 +108,14 @@ export default function AdminPanel() {
   const { content, login, logout, isAdmin, updateContent, adminToken } = useContent();
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab ] = useState<'hero' | 'about' | 'contact' | 'gallery' | 'showcase' | 'lessons' | 'testimonials' | 'security'>('hero');
+  const [activeTab, setActiveTab ] = useState<'hero' | 'about' | 'contact' | 'gallery' | 'showcase' | 'lessons' | 'testimonials' | 'security' | 'media'>('hero');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState<string[]>(content.uploadedImages || []);
+  const [mediaUploadUrl, setMediaUploadUrl] = useState('');
+  const [selectedReplacerUrl, setSelectedReplacerUrl] = useState('');
+  const [replacerTarget, setReplacerTarget] = useState('hero-teacher');
+  const [replaceNotice, setReplaceNotice] = useState<{ type: 'success' | 'error' | '', message: string }>({ type: '', message: '' });
 
   // Password alteration states
   const [newPassphrase, setNewPassphrase] = useState('');
@@ -216,6 +226,7 @@ export default function AdminPanel() {
       setShowcaseList([...content.studentShowcase]);
       setLessonsList([...content.lessons]);
       setTestimonialsList([...content.testimonials]);
+      setUploadedImages(content.uploadedImages || []);
     }
   };
 
@@ -265,6 +276,7 @@ export default function AdminPanel() {
       studentShowcase: showcaseList,
       lessons: lessonsList,
       testimonials: testimonialsList,
+      uploadedImages: uploadedImages,
     };
 
     const success = await updateContent(updatedPayload);
@@ -275,6 +287,70 @@ export default function AdminPanel() {
     } else {
       alert('Error: Could not save settings to the server database. Ensure details are correct.');
     }
+  };
+
+  const handleNewUploadRecord = (url: string) => {
+    setUploadedImages((prev) => {
+      if (prev.includes(url)) return prev;
+      return [...prev, url];
+    });
+  };
+
+  const handleRemoveLibraryImage = (url: string) => {
+    setUploadedImages((prev) => prev.filter((img) => img !== url));
+    if (selectedReplacerUrl === url) {
+      setSelectedReplacerUrl('');
+    }
+  };
+
+  const handleApplyReplacement = () => {
+    setReplaceNotice({ type: '', message: '' });
+    if (!selectedReplacerUrl) {
+      setReplaceNotice({ type: 'error', message: 'Please select an image from the library grid or provide a valid raw URL first.' });
+      return;
+    }
+
+    if (!replacerTarget) {
+      setReplaceNotice({ type: 'error', message: 'Please select a target portfolio section layout option to replace.' });
+      return;
+    }
+
+    let updatedSectionName = '';
+
+    if (replacerTarget === 'hero-teacher') {
+      setHeroForm((prev) => ({ ...prev, teacherPhotoUrl: selectedReplacerUrl }));
+      updatedSectionName = 'Intro: Teacher Main Portrait';
+    } else if (replacerTarget === 'hero-underlay') {
+      setHeroForm((prev) => ({ ...prev, underlayPhotoUrl: selectedReplacerUrl }));
+      updatedSectionName = 'Intro: Secondary Underlay Sketch';
+    } else if (replacerTarget === 'about-avatar') {
+      setAboutForm((prev) => ({ ...prev, avatarUrl: selectedReplacerUrl }));
+      updatedSectionName = 'Biography: Creator Circle Avatar';
+    } else if (replacerTarget.startsWith('gallery-')) {
+      const artId = replacerTarget.replace('gallery-', '');
+      handleUpdateGalleryItem(artId, 'imageUrl', selectedReplacerUrl);
+      updatedSectionName = 'Gallery Artwork';
+    } else if (replacerTarget.startsWith('showcase-')) {
+      const projId = replacerTarget.replace('showcase-', '');
+      handleUpdateShowcaseItem(projId, 'imageUrl', selectedReplacerUrl);
+      updatedSectionName = 'Student Study';
+    } else if (replacerTarget.startsWith('testimonial-before-')) {
+      const testId = replacerTarget.replace('testimonial-before-', '');
+      handleUpdateTestimonialItem(testId, 'beforeImage', selectedReplacerUrl);
+      updatedSectionName = 'Testimonial (Before Image)';
+    } else if (replacerTarget.startsWith('testimonial-after-')) {
+      const testId = replacerTarget.replace('testimonial-after-', '');
+      handleUpdateTestimonialItem(testId, 'afterImage', selectedReplacerUrl);
+      updatedSectionName = 'Testimonial (After Image)';
+    } else {
+      setReplaceNotice({ type: 'error', message: 'Unknown replacement target identified.' });
+      return;
+    }
+
+    setReplaceNotice({
+      type: 'success',
+      message: `Successfully swapped ${updatedSectionName} with the selected image in memory! Remember to click "SAVE CHANGES" at the top or bottom of the Command Hub to persist your design live.`
+    });
   };
 
   // --- ABOUT SECTION Helpers ---
@@ -566,6 +642,7 @@ export default function AdminPanel() {
             { id: 'showcase', label: '🎓 Student Showroom' },
             { id: 'lessons', label: '📚 Study Programs' },
             { id: 'testimonials', label: '⭐ Testimonials Review' },
+            { id: 'media', label: '📷 Media & Image Hub' },
             { id: 'security', label: '🛡️ Security Settings' },
           ].map((tab) => (
             <button
@@ -606,6 +683,7 @@ export default function AdminPanel() {
               {activeTab === 'showcase' && 'Student Success Showroom'}
               {activeTab === 'lessons' && 'Academic Study Programs & Curriculum'}
               {activeTab === 'testimonials' && 'Before & After Drawing Slider Testimonials'}
+              {activeTab === 'media' && 'Media Library & Section Image Replacer'}
               {activeTab === 'security' && 'Security Credits & Admin Passphrase'}
             </h2>
             <p className="text-xs text-stone-400 mt-1">
@@ -616,6 +694,7 @@ export default function AdminPanel() {
               {activeTab === 'showcase' && 'Display exemplary artworks made by students under Sneha\'s precise supervision.'}
               {activeTab === 'lessons' && 'Define the actual syllabus, hourly mentoring prices, key subtopics, and difficulty levels.'}
               {activeTab === 'testimonials' && 'Log actual before-and-after progress slider images showing academic student improvement.'}
+              {activeTab === 'media' && 'Manage uploaded local image files stored in the application\'s state and dynamically swap them in any portfolio section.'}
               {activeTab === 'security' && 'Change the credential passphrase needed to access the Sneha Art Academy dashboard.'}
             </p>
           </div>
@@ -707,6 +786,7 @@ export default function AdminPanel() {
                       value={heroForm.teacherPhotoUrl}
                       adminToken={adminToken}
                       onChange={(url) => setHeroForm({ ...heroForm, teacherPhotoUrl: url })}
+                      onUploaded={handleNewUploadRecord}
                     />
                     <FileUploader
                       label="Secondary Underlay Sketch"
@@ -714,6 +794,7 @@ export default function AdminPanel() {
                       value={heroForm.underlayPhotoUrl}
                       adminToken={adminToken}
                       onChange={(url) => setHeroForm({ ...heroForm, underlayPhotoUrl: url })}
+                      onUploaded={handleNewUploadRecord}
                     />
                   </div>
 
@@ -842,6 +923,7 @@ export default function AdminPanel() {
                       value={aboutForm.avatarUrl}
                       adminToken={adminToken}
                       onChange={(url) => setAboutForm({ ...aboutForm, avatarUrl: url })}
+                      onUploaded={handleNewUploadRecord}
                     />
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Author Name</label>
@@ -1075,6 +1157,7 @@ export default function AdminPanel() {
                               adminToken={adminToken}
                               onChange={(url) => handleUpdateGalleryItem(art.id, 'imageUrl', url)}
                               placeholder="https://images.unsplash.com/..."
+                              onUploaded={handleNewUploadRecord}
                             />
                           </div>
                         </div>
@@ -1208,6 +1291,7 @@ export default function AdminPanel() {
                               adminToken={adminToken}
                               onChange={(url) => handleUpdateShowcaseItem(proj.id, 'imageUrl', url)}
                               placeholder="/assets/student_study.jpg"
+                              onUploaded={handleNewUploadRecord}
                             />
                           </div>
                         </div>
@@ -1503,23 +1587,24 @@ export default function AdminPanel() {
                         {/* Shifting Images links */}
                         <div className="space-y-3">
                           <div className="space-y-1">
-                            <span className="text-[10px] font-mono text-stone-400 block uppercase font-bold text-red-500">Practice Beginning drawing (Before Photo URL)</span>
-                            <input
-                              type="text"
-                              className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-[10px] font-mono"
-                              placeholder="https://..."
+                            <span className="text-[10px] font-mono text-stone-400 block uppercase font-bold text-amber-700 dark:text-amber-500">Practice Beginning drawing (Before Photo URL)</span>
+                            <FileUploader
                               value={test.beforeImage}
-                              onChange={(e) => handleUpdateTestimonialItem(test.id, 'beforeImage', e.target.value)}
+                              adminToken={adminToken}
+                              onChange={(url) => handleUpdateTestimonialItem(test.id, 'beforeImage', url)}
+                              placeholder="https://images.unsplash.com/..."
+                              onUploaded={handleNewUploadRecord}
                             />
                           </div>
 
                           <div className="space-y-1">
-                            <span className="text-[10px] font-mono text-stone-400 block uppercase font-bold text-emerald-500">Graduation drawing (After Photo URL)</span>
-                            <input
-                              type="text"
-                              className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-[10px] font-mono"
+                            <span className="text-[10px] font-mono text-stone-400 block uppercase font-bold text-emerald-600 dark:text-emerald-400">Graduation drawing (After Photo URL)</span>
+                            <FileUploader
                               value={test.afterImage}
-                              onChange={(e) => handleUpdateTestimonialItem(test.id, 'afterImage', e.target.value)}
+                              adminToken={adminToken}
+                              onChange={(url) => handleUpdateTestimonialItem(test.id, 'afterImage', url)}
+                              placeholder="https://images.unsplash.com/..."
+                              onUploaded={handleNewUploadRecord}
                             />
                           </div>
 
@@ -1547,6 +1632,296 @@ export default function AdminPanel() {
 
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+            
+            {/* MEDIA MODULE */}
+            {activeTab === 'media' && (
+              <div className="space-y-8">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+                  
+                  {/* Left Column Controls */}
+                  <div className="xl:col-span-5 space-y-6">
+                    {/* Upload box */}
+                    <div className="bg-stone-50 dark:bg-stone-950 p-5 rounded-xl border border-stone-200 dark:border-stone-800 space-y-4 text-left">
+                      <div className="flex items-center gap-2">
+                        <Upload className="w-4 h-4 text-wood" />
+                        <h3 className="text-xs font-mono font-bold tracking-wider text-stone-800 dark:text-stone-200 uppercase">
+                          Upload Local Image
+                        </h3>
+                      </div>
+                      <p className="text-[11px] text-stone-500 leading-relaxed">
+                        Select a file from your computer to upload. The image will be processed, hosted, and saved into your state-stashed media catalog.
+                      </p>
+                      
+                      <div className="mt-2 text-left">
+                        <FileUploader
+                          value={mediaUploadUrl}
+                          adminToken={adminToken}
+                          onChange={(url) => {
+                            setMediaUploadUrl(url);
+                          }}
+                          onUploaded={(url) => {
+                            handleNewUploadRecord(url);
+                            setMediaUploadUrl('');
+                          }}
+                          placeholder="Drag local file or click to browse..."
+                        />
+                      </div>
+                      <p className="text-[10px] text-stone-400 font-sans italic leading-tight">
+                        * Supported types: PNG, JPEG, WEBP, GIF. Max Size: 15MB.
+                      </p>
+                    </div>
+
+                    {/* Replacer box */}
+                    <div className="bg-stone-50 dark:bg-stone-950 p-5 rounded-xl border border-stone-200 dark:border-stone-800 space-y-4 text-left">
+                      <div className="flex items-center gap-2">
+                        <RefreshCw className="w-4 h-4 text-wood" />
+                        <h3 className="text-xs font-mono font-bold tracking-wider text-stone-800 dark:text-stone-200 uppercase">
+                          Section Image Replacer
+                        </h3>
+                      </div>
+                      <p className="text-[11px] text-stone-500 leading-relaxed">
+                        Choose any image from your Library or paste a raw address below, select a target page section layout, and swap it out instantly.
+                      </p>
+
+                      <div className="space-y-4 pt-2">
+                        {/* Selected Image URL Text block */}
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-mono tracking-wider text-stone-500 uppercase block font-bold">
+                            Selected Replacement Image URL
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Select an image from the library grid or paste a custom URL..."
+                            className="w-full bg-white dark:bg-stone-950 border border-stone-250 dark:border-stone-800 rounded-lg p-2.5 text-xs font-mono"
+                            value={selectedReplacerUrl}
+                            onChange={(e) => setSelectedReplacerUrl(e.target.value)}
+                          />
+                        </div>
+
+                        {/* Target layout selection dropdown */}
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-mono tracking-wider text-stone-500 uppercase block font-bold">
+                            Target Portfolio Image Coordinates
+                          </label>
+                          <select
+                            className="w-full bg-white dark:bg-stone-950 border border-stone-250 dark:border-stone-800 rounded-lg p-2.5 text-xs font-semibold text-stone-800 dark:text-stone-200"
+                            value={replacerTarget}
+                            onChange={(e) => setReplacerTarget(e.target.value)}
+                          >
+                            <optgroup label="Main Header & Biography Icons">
+                              <option value="hero-teacher">Intro: Teacher Main Portrait photo</option>
+                              <option value="hero-underlay">Intro: Secondary Underlay Sketch back</option>
+                              <option value="about-avatar">Biography: Creator Circle Avatar icon</option>
+                            </optgroup>
+
+                            {galleryList.length > 0 && (
+                              <optgroup label="Fine Art Portfolio Artworks">
+                                {galleryList.map((art) => (
+                                  <option key={`opt-gal-${art.id}`} value={`gallery-${art.id}`}>
+                                    Gallery Artwork: "{art.title}" ({art.category})
+                                  </option>
+                                ))}
+                              </optgroup>
+                            )}
+
+                            {showcaseList.length > 0 && (
+                              <optgroup label="Student Success Showroom Study program">
+                                {showcaseList.map((proj) => (
+                                  <option key={`opt-show-${proj.id}`} value={`showcase-${proj.id}`}>
+                                    Student Study: "{proj.title}" by {proj.studentName}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            )}
+
+                            {testimonialsList.length > 0 && (
+                              <optgroup label="Drawing Experience Sliders">
+                                {testimonialsList.map((test) => (
+                                  <React.Fragment key={`opt-test-frag-${test.id}`}>
+                                    <option value={`testimonial-before-${test.id}`}>
+                                      Testimonial Before: "{test.studentName}"
+                                    </option>
+                                    <option value={`testimonial-after-${test.id}`}>
+                                      Testimonial After: "{test.studentName}"
+                                    </option>
+                                  </React.Fragment>
+                                ))}
+                              </optgroup>
+                            )}
+                          </select>
+                        </div>
+
+                        {replaceNotice.message && (
+                          <div className={`p-3 rounded-lg text-xs font-medium ${
+                            replaceNotice.type === 'success' 
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' 
+                              : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
+                          }`}>
+                            {replaceNotice.message}
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={handleApplyReplacement}
+                          className="w-full bg-wood hover:bg-wood-dark text-white font-mono uppercase text-xs tracking-wider py-3 px-4 rounded-lg font-bold shadow transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                        >
+                          <Check className="w-4 h-4" />
+                          <span>Apply Image Replacement</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column Grid View */}
+                  <div className="xl:col-span-7 space-y-6">
+                    {/* Media Library list */}
+                    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 space-y-4 text-left">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Image className="w-4 h-4 text-wood" />
+                          <h3 className="text-xs font-mono font-bold tracking-wider text-stone-800 dark:text-stone-200 uppercase">
+                            State-Stashed Media Library Catalogue ({uploadedImages.length})
+                          </h3>
+                        </div>
+                        {uploadedImages.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if(confirm("Confirm: Clear all stashed images? This resets memory bindings.")) {
+                                setUploadedImages([]);
+                                setSelectedReplacerUrl('');
+                              }
+                            }}
+                            className="text-[10px] text-red-500 hover:text-red-650 font-mono tracking-wide flex items-center gap-1 cursor-pointer"
+                          >
+                            <Trash2 className="w-3" />
+                            Clear All
+                          </button>
+                        )}
+                      </div>
+
+                      {uploadedImages.length === 0 ? (
+                        <div className="border border-dashed border-stone-250 dark:border-stone-800 rounded-xl p-10 text-center text-stone-400 text-xs py-16 space-y-2">
+                          <Image className="w-8 h-8 text-stone-300 mx-auto animate-pulse" />
+                          <p className="font-mono text-[10px] uppercase font-bold tracking-wider text-stone-500">
+                            State Library Empty
+                          </p>
+                          <p className="max-w-md mx-auto text-[11px] text-stone-400 tracking-wide font-sans leading-relaxed">
+                            No custom local files uploaded to the application's configuration state yet. Use the upload tool to initialize custom assets.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3.5 max-h-[500px] overflow-y-auto pr-1">
+                          {uploadedImages.map((imgUrl, i) => {
+                            const isSelected = selectedReplacerUrl === imgUrl;
+                            return (
+                              <div
+                                key={`lib-img-${i}`}
+                                onClick={() => setSelectedReplacerUrl(imgUrl)}
+                                className={`group relative aspect-square bg-stone-50 dark:bg-stone-950 border rounded-lg overflow-hidden cursor-pointer transition-all ${
+                                  isSelected 
+                                    ? 'border-wood ring-2 ring-wood/20 shadow-md transform scale-[0.98]' 
+                                    : 'border-stone-200 dark:border-stone-800 hover:border-stone-400'
+                                }`}
+                              >
+                                <img
+                                  src={imgUrl}
+                                  alt={`Media item ${i}`}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                                
+                                {/* Overlay hover controls */}
+                                <div className="absolute inset-0 bg-stone-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
+                                  <div className="flex justify-end">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRemoveLibraryImage(imgUrl);
+                                      }}
+                                      className="p-1 bg-red-600 hover:bg-red-700 text-white rounded shadow cursor-pointer transition-colors"
+                                      title="Remove from Media state index"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                  <div className="space-y-1">
+                                    <p className="text-[9px] font-mono text-stone-300 bg-black/40 px-1 py-0.5 rounded truncate">
+                                      {imgUrl.slice(imgUrl.lastIndexOf('/') + 1)}
+                                    </p>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigator.clipboard.writeText(imgUrl);
+                                        alert("URL Copied to clipboard!");
+                                      }}
+                                      className="w-full py-1 text-[9px] font-mono uppercase bg-wood hover:bg-wood-dark text-white rounded transition-colors"
+                                    >
+                                      Copy URL link
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {isSelected && (
+                                  <div className="absolute top-2 left-2 bg-wood text-white text-[9px] font-mono uppercase px-1.5 py-0.5 rounded shadow">
+                                    Active Target
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Pre-existing default core catalog options */}
+                    <div className="bg-stone-50 dark:bg-stone-950 p-5 rounded-xl border border-stone-200 dark:border-stone-800 text-left space-y-3.5">
+                      <div className="flex items-center gap-2">
+                        <Image className="w-4 h-4 text-stone-400" />
+                        <h4 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">
+                          Standard Native Imagery Presets
+                        </h4>
+                      </div>
+                      <p className="text-[11px] text-stone-500 leading-relaxed">
+                        Need to revert back or reference a predefined graphic? Click any preset thumbnail to select it as the swap target replacement candidate:
+                      </p>
+                      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                        {[
+                          { name: 'Teacher', url: '/assets/sneha_photo.png' },
+                          { name: 'Syllabus', url: '/assets/academic_study.jpg' },
+                          { name: 'Graphite', url: '/images/charcoal_soft.jpg' },
+                          { name: 'Reed Pen', url: '/images/sepia_ink.jpg' }
+                        ].map((preset, i) => (
+                          <div
+                            key={`preset-cat-${i}`}
+                            onClick={() => setSelectedReplacerUrl(preset.url)}
+                            className={`aspect-square bg-white dark:bg-stone-900 border rounded-md overflow-hidden cursor-pointer p-0.5 transition-all ${
+                              selectedReplacerUrl === preset.url 
+                                ? 'border-wood ring-1 ring-wood/30' 
+                                : 'border-stone-200 dark:border-stone-800 hover:border-stone-300'
+                            }`}
+                            title={`Select ${preset.name} Preset`}
+                          >
+                            <div className="w-full h-full relative group">
+                              <img src={preset.url} alt={preset.name} className="w-full h-full object-cover rounded-sm" />
+                              <div className="absolute inset-x-0 bottom-0 bg-black/60 text-white text-[8px] font-mono text-center py-0.5 truncate group-hover:bg-wood/80">
+                                {preset.name}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             )}
