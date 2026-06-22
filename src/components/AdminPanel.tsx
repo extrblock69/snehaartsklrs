@@ -222,6 +222,77 @@ export default function AdminPanel() {
     }
   }, [content]);
 
+  // Supabase diagnostics status state
+  const [supabaseStatusDoc, setSupabaseStatusDoc] = useState<{
+    configured: boolean;
+    initialized: boolean;
+    databaseOk: boolean;
+    storageOk: boolean;
+    dbError: string | null;
+    storageError: string | null;
+    bucketUsed: string;
+    envCheck?: {
+      hasUrl: boolean;
+      urlLength: number;
+      hasAnonKey: boolean;
+      hasServiceKey: boolean;
+    }
+  } | null>(null);
+  const [loadingSupabaseStatus, setLoadingSupabaseStatus] = useState(false);
+
+  // Supabase Interactive self-test verification diagnostics
+  const [supabaseTestStatus, setSupabaseTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [supabaseTestMessage, setSupabaseTestMessage] = useState<string | null>(null);
+  const [supabaseTestDetails, setSupabaseTestDetails] = useState<string | null>(null);
+
+  const runSupabaseVerificationTest = async () => {
+    setSupabaseTestStatus('testing');
+    setSupabaseTestMessage('Executing live write/read/delete self-test loops on cloud storage...');
+    setSupabaseTestDetails(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/supabase-test-write`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setSupabaseTestStatus('success');
+        setSupabaseTestMessage(data.message || 'Verification complete!');
+        setSupabaseTestDetails(`Bucket Destination: "${data.bucket}"\nSelf-test Filename: "${data.filename}"\nResolved Public CDN Link: ${data.resolvedUrl}\nStorage Cleanup Deletion: ${data.cleanup}`);
+        // Refresh passive diagnostics status too!
+        fetchSupabaseStatus();
+      } else {
+        setSupabaseTestStatus('error');
+        setSupabaseTestMessage(data.error || 'Live connection verification test failed.');
+        setSupabaseTestDetails(data.details ? JSON.stringify(data.details, null, 2) : `Phase failure detail: ${data.phase || 'unknown_error'}`);
+      }
+    } catch (err: any) {
+      setSupabaseTestStatus('error');
+      setSupabaseTestMessage(err.message || 'An operational or network exception occurred.');
+      setSupabaseTestDetails(String(err));
+    }
+  };
+
+  const fetchSupabaseStatus = async () => {
+    setLoadingSupabaseStatus(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/supabase-status`);
+      if (response.ok) {
+        const data = await response.json();
+        setSupabaseStatusDoc(data);
+      }
+    } catch (err) {
+      console.error("Could not fetch Supabase status:", err);
+    } finally {
+      setLoadingSupabaseStatus(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin && (activeTab === 'security' || activeTab === 'media' || activeTab === 'hero')) {
+      fetchSupabaseStatus();
+    }
+  }, [isAdmin, activeTab]);
+
   // Handle Login
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -2026,6 +2097,198 @@ export default function AdminPanel() {
                     )}
                   </button>
                 </form>
+
+                {/* SUPABASE CONNECTION REAL-TIME STATUS & DIAGNOSTICS */}
+                <div className="pt-6 border-t border-stone-200 dark:border-stone-800 space-y-4">
+                  <div>
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                      <Settings className="w-4 h-4 text-wood animate-spin-slow" />
+                      Supabase Cloud Sync Status
+                    </h3>
+                    <p className="text-[11px] text-stone-500 mt-1">
+                      Check your Render-hosted Express API credentials, read/write permissions, and storage bucket connectivity live.
+                    </p>
+                  </div>
+
+                  {loadingSupabaseStatus ? (
+                    <div className="bg-stone-50 dark:bg-stone-950 border border-stone-100 dark:border-stone-900 rounded-xl p-6 text-center space-y-2">
+                      <div className="w-5 h-5 border-2 border-wood border-t-transparent rounded-full animate-spin mx-auto" />
+                      <p className="text-[11px] font-mono text-stone-400">Querying Render api/supabase-status telemetry...</p>
+                    </div>
+                  ) : supabaseStatusDoc ? (
+                    <div className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl p-4 space-y-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="p-3 bg-white dark:bg-stone-900 rounded-lg border border-stone-100 dark:border-stone-800 space-y-1.5">
+                          <span className="text-[10px] font-mono text-stone-400 block uppercase font-bold">CLIENT LOGIC</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full ${supabaseStatusDoc.initialized ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            <span className="text-xs font-mono font-bold text-stone-800 dark:text-stone-200">
+                              {supabaseStatusDoc.initialized ? 'Initialized ✅' : 'Not Loaded ❌'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="p-3 bg-white dark:bg-stone-900 rounded-lg border border-stone-100 dark:border-stone-800 space-y-1.5">
+                          <span className="text-[10px] font-mono text-stone-400 block uppercase font-bold">ACTIVE STORAGE</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full ${supabaseStatusDoc.storageOk ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            <span className="text-xs font-mono font-bold text-stone-800 dark:text-stone-200">
+                              {supabaseStatusDoc.storageOk ? 'Connected ✅' : 'Storage Failed ⚠️'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 text-xs">
+                        <div className="flex justify-between py-1 border-b border-stone-100 dark:border-stone-900">
+                          <span className="text-stone-500 font-mono text-[11px]">Database (`site_configs`)</span>
+                          <span className={`font-mono font-bold ${supabaseStatusDoc.databaseOk ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-500'}`}>
+                            {supabaseStatusDoc.databaseOk ? 'ACTIVE & HEALTHY' : 'UNREACHABLE'}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between py-1 border-b border-stone-100 dark:border-stone-900">
+                          <span className="text-stone-500 font-mono text-[11px]">Storage Bucket (`{supabaseStatusDoc.bucketUsed}`)</span>
+                          <span className={`font-mono font-bold ${supabaseStatusDoc.storageOk ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+                            {supabaseStatusDoc.storageOk ? 'READ-WRITE OK' : 'ACCESS DENIED / EMPTY'}
+                          </span>
+                        </div>
+
+                        <div className="flex justify-between py-1 border-b border-stone-100 dark:border-stone-900">
+                          <span className="text-stone-500 font-mono text-[11px]">SUPABASE_URL</span>
+                          <span className="font-mono text-[11px] text-stone-700 dark:text-stone-300">
+                            {supabaseStatusDoc.envCheck?.hasUrl ? `Set (Length: ${supabaseStatusDoc.envCheck.urlLength})` : 'Missing ❌'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Explicit Error debugging to give crystal-clear advice */}
+                      {supabaseStatusDoc.storageError && (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 space-y-1">
+                          <span className="text-[10px] font-mono font-bold uppercase text-red-600 dark:text-red-400 block">
+                            Storage API Warning Trace:
+                          </span>
+                          <code className="text-[10px] font-mono text-stone-700 dark:text-stone-300 block bg-black/5 dark:bg-black/40 p-2 rounded max-h-20 overflow-y-auto break-all whitespace-pre-wrap leading-relaxed">
+                            {supabaseStatusDoc.storageError}
+                          </code>
+                          <p className="text-[10px] text-stone-500 mt-1 leading-normal italic">
+                            💡 Tip: Go to Supabase dashboard &gt; Storage. Ensure a public bucket with the exact name <strong>"{supabaseStatusDoc.bucketUsed}"</strong> is created, and your RLS Policies allow unrestricted "insert/select/update" for Anon users.
+                          </p>
+                        </div>
+                      )}
+
+                      {supabaseStatusDoc.dbError && (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 space-y-1">
+                          <span className="text-[10px] font-mono font-bold uppercase text-red-600 dark:text-red-400 block">
+                            Database Schema Trace:
+                          </span>
+                          <code className="text-[10px] font-mono text-stone-700 dark:text-stone-300 block bg-black/5 dark:bg-black/40 p-2 rounded max-h-20 overflow-y-auto break-all">
+                            {supabaseStatusDoc.dbError}
+                          </code>
+                          <p className="text-[10px] text-stone-500 mt-1 leading-normal italic">
+                            💡 Tip: Run the compiled SQL schema script in `/supabase_setup.sql` inside your Supabase SQL Editor to initiate the site configurations table.
+                          </p>
+                        </div>
+                      )}
+
+                      {!supabaseStatusDoc.configured && (
+                        <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg text-[11px] font-sans text-amber-700 dark:text-amber-400 leading-normal space-y-1">
+                          <strong className="block">⚠️ Supabase Variables Omitted on Render Backend Dashboard!</strong>
+                          <p>
+                            To persist site data permanently, open your <strong>Render Dashboard</strong>, go to your Express service settings, select <strong>Environment</strong>, and add:
+                          </p>
+                          <ul className="list-disc pl-4 mt-1 font-mono text-[10px] text-stone-600 dark:text-stone-400 space-y-0.5">
+                            <li>`SUPABASE_URL` = Your project API URL</li>
+                            <li>`SUPABASE_ANON_KEY` = Your public/anon API key</li>
+                          </ul>
+                          <p className="pt-1">
+                            <em>Note: Adding variables directly on Vercel is insufficient as Vercel runs only the static frontend, whereas your backend Render container coordinates filesystem/cloud transfers.</em>
+                          </p>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={fetchSupabaseStatus}
+                        className="w-full py-2 bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 rounded-lg text-[10px] font-mono uppercase tracking-widest transition-all duration-300 font-bold"
+                      >
+                        REFRESH STATUS
+                      </button>
+
+                      {/* LIVE INTERACTIVE SUPABASE VERIFIER */}
+                      <div className="pt-4 border-t border-stone-200 dark:border-stone-800 mt-2 space-y-3">
+                        <span className="text-[10px] font-mono font-bold tracking-wider text-stone-400 block uppercase">
+                          ⚡ LIVE INTEGRATION TESTER
+                        </span>
+
+                        <p className="text-[11px] text-stone-500 leading-normal">
+                          Perform a live roundtrip test (write dummy data, read CDN, clean up file) to completely verify your Supabase Storage rules.
+                        </p>
+
+                        <button
+                          type="button"
+                          disabled={supabaseTestStatus === 'testing'}
+                          onClick={runSupabaseVerificationTest}
+                          className={`w-full py-2.5 rounded-lg text-[11px] font-mono uppercase tracking-wider font-bold transition-all duration-300 cursor-pointer ${
+                            supabaseTestStatus === 'testing'
+                              ? 'bg-stone-300 dark:bg-stone-800 text-stone-500 animate-pulse'
+                              : supabaseTestStatus === 'success'
+                              ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                              : supabaseTestStatus === 'error'
+                              ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                              : 'bg-wood hover:bg-wood/90 text-white'
+                          }`}
+                        >
+                          {supabaseTestStatus === 'testing' ? (
+                            <span className="flex items-center justify-center gap-1.5">
+                              <div className="w-3 h-3 border-2 border-stone-500 border-t-transparent rounded-full animate-spin" />
+                              VERIFYING WRITES...
+                            </span>
+                          ) : supabaseTestStatus === 'success' ? (
+                            '✅ TEST PASSED - RETEST'
+                          ) : supabaseTestStatus === 'error' ? (
+                            '❌ TEST FAILED - RETEST'
+                          ) : (
+                            'RUN LIVE INTEGRATION TEST'
+                          )}
+                        </button>
+
+                        {supabaseTestMessage && (
+                          <div className={`p-3 rounded-lg border text-xs leading-normal ${
+                            supabaseTestStatus === 'success'
+                              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+                              : supabaseTestStatus === 'error'
+                              ? 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300'
+                              : 'bg-stone-100 dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400'
+                          }`}>
+                            <strong className="block font-bold text-[11px] mb-1">
+                              {supabaseTestStatus === 'success' ? 'Connection Succeeded!' : supabaseTestStatus === 'error' ? 'Connection Failed!' : 'Verification Loop Status:'}
+                            </strong>
+                            <p className="font-sans">{supabaseTestMessage}</p>
+
+                            {supabaseTestDetails && (
+                              <pre className="mt-2 p-2 bg-black/10 dark:bg-black/40 rounded text-[9px] font-mono overflow-x-auto whitespace-pre-wrap break-all leading-tight text-stone-700 dark:text-stone-300">
+                                {supabaseTestDetails}
+                              </pre>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                    </div>
+                  ) : (
+                    <div className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl p-4 text-center">
+                      <p className="text-xs text-stone-400">Diagnostics unavailable. Verify if server is currently starting up.</p>
+                      <button
+                        type="button"
+                        onClick={fetchSupabaseStatus}
+                        className="mt-2 px-3 py-1.5 bg-stone-200 hover:bg-stone-300 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 rounded-lg text-[10px] font-mono uppercase tracking-wider font-bold"
+                      >
+                        RETRY CONNECTION
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

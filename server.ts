@@ -4,6 +4,7 @@ import fs from "fs";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
+import { allowLocalFallback } from "./fallback";
 
 dotenv.config();
 
@@ -94,14 +95,14 @@ function getDataFilePath(filename: string, defaultSubpath: string): string {
 const CONTENT_FILE_PATH = getDataFilePath("site_content.json", "src/data/site_content.json");
 
 // Define Supabase Connection parameters support
-const SUPABASE_URL = process.env.SUPABASE_URL || "";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/^["']|["']$/g, "").trim();
+const SUPABASE_ANON_KEY = (process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "").replace(/^["']|["']$/g, "").trim();
 let supabaseClient: any = null;
 
 if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   try {
     supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log("Supabase Client initialized successfully!");
+    console.log(`Supabase Client initialized successfully with URL: ${SUPABASE_URL}`);
   } catch (error) {
     console.error("Failed to initialize Supabase client:", error);
   }
@@ -246,6 +247,136 @@ app.get("/api/content", async (req, res) => {
   }
 });
 
+// API: Get Supabase Connection Status and Diagnostics
+app.get("/api/supabase-status", async (req, res) => {
+  const isInitialized = !!supabaseClient;
+  let databaseCheck = false;
+  let storageCheck = false;
+  let dbError: string | null = null;
+  let storageError: string | null = null;
+
+  if (isInitialized) {
+    try {
+      const { error } = await supabaseClient
+        .from("site_configs")
+        .select("key")
+        .limit(1);
+      
+      if (error) {
+        dbError = error.message;
+      } else {
+        databaseCheck = true;
+      }
+    } catch (err: any) {
+      dbError = err.message || String(err);
+    }
+
+    try {
+      const rawBucket = process.env.SUPABASE_STORAGE_BUCKET || "portfolio";
+      const bucketName = rawBucket.replace(/^["']|["']$/g, "").trim();
+      const { error } = await supabaseClient
+        .storage
+        .from(bucketName)
+        .list("", { limit: 1 });
+      
+      if (error) {
+        storageError = error.message;
+      } else {
+        storageCheck = true;
+      }
+    } catch (err: any) {
+      storageError = err.message || String(err);
+    }
+  }
+
+  res.json({
+    configured: !!(process.env.SUPABASE_URL && (process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY)),
+    initialized: isInitialized,
+    databaseOk: databaseCheck,
+    storageOk: storageCheck,
+    dbError,
+    storageError,
+    bucketUsed: (process.env.SUPABASE_STORAGE_BUCKET || "portfolio").replace(/^["']|["']$/g, "").trim(),
+    envCheck: {
+      hasUrl: !!process.env.SUPABASE_URL,
+      urlLength: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.trim().length : 0,
+      hasAnonKey: !!process.env.SUPABASE_ANON_KEY,
+      hasServiceKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+    }
+  });
+});
+
+// API: Perform interactive write and delete test on Supabase storage
+app.post("/api/supabase-test-write", async (req, res) => {
+  if (!supabaseClient) {
+    return res.status(400).json({
+      success: false,
+      error: "Supabase client is not initialized. Please verify your SUPABASE_URL and SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY variables on your server env."
+    });
+  }
+
+  const rawBucket = process.env.SUPABASE_STORAGE_BUCKET || "portfolio";
+  const bucketName = rawBucket.replace(/^["']|["']$/g, "").trim();
+  const testFilename = `connection_test_${Date.now()}.txt`;
+  const testData = new TextEncoder().encode("Supabase storage read/write link verified successfully! You are ready to upload images.");
+
+  try {
+    // 1. Attempt upload
+    const { data: uploadData, error: uploadError } = await supabaseClient
+      .storage
+      .from(bucketName)
+      .upload(testFilename, testData, {
+        contentType: "text/plain",
+        cacheControl: "0",
+        upsert: true
+      });
+
+    if (uploadError) {
+      return res.status(500).json({
+        success: false,
+        phase: "upload",
+        error: uploadError.message,
+        details: uploadError
+      });
+    }
+
+    // 2. Attempt URL resolution
+    const { data: urlData } = supabaseClient
+      .storage
+      .from(bucketName)
+      .getPublicUrl(testFilename);
+
+    const publicUrl = urlData?.publicUrl || "";
+
+    // 3. Attempt clean-up deletion
+    const { error: deleteError } = await supabaseClient
+      .storage
+      .from(bucketName)
+      .remove([testFilename]);
+
+    let deletionStatus = "Cleaned up test file successfully";
+    if (deleteError) {
+      deletionStatus = `Failed to clean up test file: ${deleteError.message}`;
+    }
+
+    res.json({
+      success: true,
+      phase: "complete",
+      message: `Successfully completed Supabase Cloud Storage verification!`,
+      bucket: bucketName,
+      filename: testFilename,
+      resolvedUrl: publicUrl,
+      cleanup: deletionStatus
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      phase: "exception",
+      error: err.message || String(err)
+    });
+  }
+});
+
 // API: Update Site Content (Protected)
 app.post("/api/content", requireAdmin, async (req, res) => {
   const newContent = req.body;
@@ -304,7 +435,8 @@ app.post("/api/upload", requireAdmin, async (req, res) => {
     // Prefer Supabase Storage Upload if Supabase credentials are input
     if (supabaseClient) {
       try {
-        const bucketName = process.env.SUPABASE_STORAGE_BUCKET || "portfolio";
+        const rawBucket = process.env.SUPABASE_STORAGE_BUCKET || "portfolio";
+        const bucketName = rawBucket.replace(/^["']|["']$/g, "").trim();
         console.log(`Attempting cloud upload to Supabase Storage Bucket [${bucketName}] with filename [${uniqueFilename}]. Content-Type: ${mimeType}`);
 
         // Convert Node Buffer to a standard Uint8Array to prevent JS runtime/SDK platform mismatch warnings
@@ -321,6 +453,12 @@ app.post("/api/upload", requireAdmin, async (req, res) => {
 
         if (uploadError) {
           console.error("❌ Supabase Storage upload failed with API Error:", uploadError.message, uploadError);
+          if (!allowLocalFallback) {
+            return res.status(500).json({
+              error: "Supabase cloud storage upload failed and local fallback is strictly disabled in fallback.ts.",
+              details: uploadError.message
+            });
+          }
           console.warn("Falling back to local Render disk storage for this upload.");
         } else if (uploadData) {
           const { data: urlData } = supabaseClient
@@ -335,11 +473,24 @@ app.post("/api/upload", requireAdmin, async (req, res) => {
         }
       } catch (storageErr: any) {
         console.error("❌ Exception during Supabase Storage Upload operation:", storageErr.message || storageErr);
+        if (!allowLocalFallback) {
+          return res.status(500).json({
+            error: "Supabase cloud storage upload threw an exception and local fallback is strictly disabled in fallback.ts.",
+            details: storageErr.message || String(storageErr)
+          });
+        }
         console.warn("Falling back to local Render disk storage for this upload.");
+      }
+    } else {
+      // Supabase not configured
+      if (!allowLocalFallback) {
+        return res.status(500).json({
+          error: "Supabase is not configured and local fallback is strictly disabled in fallback.ts."
+        });
       }
     }
 
-    // Default Fallback: Write directly to dynamic hosting uploads directory
+    // Default Fallback: Write directly to dynamic hosting uploads directory (only if allowLocalFallback is true)
     const filePath = path.join(UPLOADS_DIR, uniqueFilename);
     fs.writeFileSync(filePath, buffer);
 
