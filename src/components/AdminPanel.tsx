@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { Artwork, Lesson, Testimonial, StudentProject, ArtCategory, LessonLevel } from '../types';
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+
 interface FileUploaderProps {
   value: string;
   onChange: (url: string) => void;
@@ -36,7 +38,7 @@ function FileUploader({ value, onChange, adminToken, label, placeholder, onUploa
     reader.onloadend = async () => {
       const base64Data = reader.result as string;
       try {
-        const response = await fetch('/api/upload', {
+        const response = await fetch(`${API_BASE_URL}/api/upload`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -240,7 +242,7 @@ export default function AdminPanel() {
     
     setIsChangingPassphrase(true);
     try {
-      const response = await fetch('/api/admin/change-password', {
+      const response = await fetch(`${API_BASE_URL}/api/admin/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

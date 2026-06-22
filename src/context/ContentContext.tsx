@@ -14,6 +14,8 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [content, setContent] = useState<SiteContent>(defaultContent as SiteContent);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -24,7 +26,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const fetchContent = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("/api/content");
+      const res = await fetch(`${API_BASE_URL}/api/content`);
       if (res.ok) {
         const data = await res.json();
         setContent(data);
@@ -43,7 +45,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Login handler
   const login = async (password: string): Promise<boolean> => {
     try {
-      const res = await fetch("/api/login", {
+      const res = await fetch(`${API_BASE_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: "admin", password }),
@@ -65,7 +67,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Logout handler
   const logout = () => {
     if (adminToken) {
-      fetch("/api/logout", {
+      fetch(`${API_BASE_URL}/api/logout`, {
         method: "POST",
         headers: { Authorization: `Bearer ${adminToken}` },
       }).catch(() => {});
@@ -83,7 +85,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setContent(newContent);
 
     try {
-      const res = await fetch("/api/content", {
+      const res = await fetch(`${API_BASE_URL}/api/content`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

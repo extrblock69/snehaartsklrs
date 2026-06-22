@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import * as dotenv from "dotenv";
 import { fileURLToPath } from "url";
+import cors from "cors";
 
 dotenv.config();
 
@@ -10,7 +11,45 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+
+// Set up CORS with selective origin validation based on environmental specifications
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:5173"
+];
+
+if (process.env.FRONTEND_URL) {
+  // Support comma-separated list of values
+  const origins = process.env.FRONTEND_URL.split(",").map(o => o.trim());
+  allowedOrigins.push(...origins);
+}
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // If no origin specified (e.g. server-to-server, curls), proceed.
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const isMatch = allowedOrigins.includes(origin) ||
+      allowedOrigins.some(ao => origin.startsWith(ao)) ||
+      origin.includes("run.app") ||
+      origin.includes("localhost") ||
+      origin.includes("vercel.app");
+
+    if (isMatch) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS: origin '${origin}' is restricted.`));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 // Middleware
 app.use(express.json({ limit: "50mb" }));
@@ -31,25 +70,31 @@ try {
 
 app.use("/uploads", express.static(UPLOADS_DIR));
 
-const CONTENT_FILE_PATH = isVercel
-  ? path.join("/tmp", "site_content.json")
-  : path.join(__dirname, "src", "data", "site_content.json");
-
-if (isVercel && !fs.existsSync(CONTENT_FILE_PATH)) {
-  try {
-    const originalPath = path.join(__dirname, "src", "data", "site_content.json");
-    if (fs.existsSync(originalPath)) {
-      const parentDir = path.dirname(CONTENT_FILE_PATH);
-      if (!fs.existsSync(parentDir)) {
-        fs.mkdirSync(parentDir, { recursive: true });
+// Robust path helper to support Serverless, local dev, or standard persistent containers (like Render)
+function getDataFilePath(filename: string, defaultSubpath: string): string {
+  if (isVercel) {
+    const tmpPath = path.join("/tmp", filename);
+    if (!fs.existsSync(tmpPath)) {
+      try {
+        const repoPath = path.join(process.cwd(), defaultSubpath);
+        if (fs.existsSync(repoPath)) {
+          const parentDir = path.dirname(tmpPath);
+          if (!fs.existsSync(parentDir)) {
+            fs.mkdirSync(parentDir, { recursive: true });
+          }
+          fs.copyFileSync(repoPath, tmpPath);
+          console.log(`Copied ${filename} from repo to writable location /tmp`);
+        }
+      } catch (e) {
+        console.error(`Failed to copy ${filename} to /tmp:`, e);
       }
-      fs.copyFileSync(originalPath, CONTENT_FILE_PATH);
-      console.log("Succesfully prepared site_content.json in writable location /tmp");
     }
-  } catch (error) {
-    console.error("Failed to copy site_content.json to /tmp", error);
+    return tmpPath;
   }
+  return path.join(process.cwd(), defaultSubpath);
 }
+
+const CONTENT_FILE_PATH = getDataFilePath("site_content.json", "src/data/site_content.json");
 
 // Helper: load content
 function getSiteContent() {
@@ -167,7 +212,12 @@ app.post("/api/upload", requireAdmin, (req, res) => {
 
     fs.writeFileSync(filePath, buffer);
 
-    const publicUrl = `/uploads/${uniqueFilename}`;
+    // If BACKEND_URL is set (e.g. Render backend URL), return absolute URL. Otherwise relative URL.
+    const backendUrl = process.env.BACKEND_URL || "";
+    const publicUrl = backendUrl 
+      ? `${backendUrl.replace(/\/$/, "")}/uploads/${uniqueFilename}`
+      : `/uploads/${uniqueFilename}`;
+
     res.json({ success: true, url: publicUrl });
   } catch (err: any) {
     console.error("Image disk saving operation failed:", err);
@@ -175,25 +225,7 @@ app.post("/api/upload", requireAdmin, (req, res) => {
   }
 });
 
-const ADMIN_CONFIG_PATH = isVercel
-  ? path.join("/tmp", "admin_config.json")
-  : path.join(__dirname, "src", "data", "admin_config.json");
-
-if (isVercel && !fs.existsSync(ADMIN_CONFIG_PATH)) {
-  try {
-    const originalPath = path.join(__dirname, "src", "data", "admin_config.json");
-    if (fs.existsSync(originalPath)) {
-      const parentDir = path.dirname(ADMIN_CONFIG_PATH);
-      if (!fs.existsSync(parentDir)) {
-        fs.mkdirSync(parentDir, { recursive: true });
-      }
-      fs.copyFileSync(originalPath, ADMIN_CONFIG_PATH);
-      console.log("Successfully prepared admin_config.json in writable location /tmp");
-    }
-  } catch (error) {
-    console.error("Failed to copy admin_config.json to /tmp", error);
-  }
-}
+const ADMIN_CONFIG_PATH = getDataFilePath("admin_config.json", "src/data/admin_config.json");
 
 function getAdminCredentials() {
   let customPass = ADMIN_PASS;
