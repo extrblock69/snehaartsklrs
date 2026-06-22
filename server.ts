@@ -302,11 +302,16 @@ app.post("/api/upload", requireAdmin, async (req, res) => {
     const filePath = path.join(UPLOADS_DIR, uniqueFilename);
     fs.writeFileSync(filePath, buffer);
 
-    // If BACKEND_URL is set (e.g. Render backend URL), return absolute URL. Otherwise template relative URL.
-    const backendUrl = process.env.BACKEND_URL || "";
-    const publicUrl = backendUrl 
-      ? `${backendUrl.replace(/\/$/, "")}/uploads/${uniqueFilename}`
-      : `/uploads/${uniqueFilename}`;
+    // Dynamic Absolute URL detector so local fallbacks resolve correctly across separate frontend & backend domains:
+    const backendUrl = process.env.BACKEND_URL;
+    let publicUrl = "";
+    if (backendUrl) {
+      publicUrl = `${backendUrl.replace(/\/$/, "")}/uploads/${uniqueFilename}`;
+    } else {
+      const proto = (req.headers["x-forwarded-proto"] as string || "http").split(",")[0].trim();
+      const host = req.get("host");
+      publicUrl = `${proto}://${host}/uploads/${uniqueFilename}`;
+    }
 
     res.json({ success: true, url: publicUrl });
   } catch (err: any) {
