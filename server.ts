@@ -12,13 +12,41 @@ const PORT = 3000;
 // Middleware
 app.use(express.json({ limit: "50mb" }));
 
-const UPLOADS_DIR = path.join(process.cwd(), "uploads");
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+const isVercel = !!process.env.VERCEL;
+
+const UPLOADS_DIR = isVercel
+  ? path.join("/tmp", "uploads")
+  : path.join(process.cwd(), "uploads");
+
+try {
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+} catch (error) {
+  console.warn("Could not create uploads directory, likely a read-only serverless environment:", error);
 }
+
 app.use("/uploads", express.static(UPLOADS_DIR));
 
-const CONTENT_FILE_PATH = path.join(process.cwd(), "src", "data", "site_content.json");
+const CONTENT_FILE_PATH = isVercel
+  ? path.join("/tmp", "site_content.json")
+  : path.join(process.cwd(), "src", "data", "site_content.json");
+
+if (isVercel && !fs.existsSync(CONTENT_FILE_PATH)) {
+  try {
+    const originalPath = path.join(process.cwd(), "src", "data", "site_content.json");
+    if (fs.existsSync(originalPath)) {
+      const parentDir = path.dirname(CONTENT_FILE_PATH);
+      if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+      }
+      fs.copyFileSync(originalPath, CONTENT_FILE_PATH);
+      console.log("Succesfully prepared site_content.json in writable location /tmp");
+    }
+  } catch (error) {
+    console.error("Failed to copy site_content.json to /tmp", error);
+  }
+}
 
 // Helper: load content
 function getSiteContent() {
@@ -144,7 +172,25 @@ app.post("/api/upload", requireAdmin, (req, res) => {
   }
 });
 
-const ADMIN_CONFIG_PATH = path.join(process.cwd(), "src", "data", "admin_config.json");
+const ADMIN_CONFIG_PATH = isVercel
+  ? path.join("/tmp", "admin_config.json")
+  : path.join(process.cwd(), "src", "data", "admin_config.json");
+
+if (isVercel && !fs.existsSync(ADMIN_CONFIG_PATH)) {
+  try {
+    const originalPath = path.join(process.cwd(), "src", "data", "admin_config.json");
+    if (fs.existsSync(originalPath)) {
+      const parentDir = path.dirname(ADMIN_CONFIG_PATH);
+      if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+      }
+      fs.copyFileSync(originalPath, ADMIN_CONFIG_PATH);
+      console.log("Successfully prepared admin_config.json in writable location /tmp");
+    }
+  } catch (error) {
+    console.error("Failed to copy admin_config.json to /tmp", error);
+  }
+}
 
 function getAdminCredentials() {
   let customPass = ADMIN_PASS;
