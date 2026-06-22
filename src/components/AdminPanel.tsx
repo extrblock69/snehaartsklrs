@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
@@ -171,6 +171,56 @@ export default function AdminPanel() {
   const [showcaseList, setShowcaseList] = useState<StudentProject[]>([...content.studentShowcase]);
   const [lessonsList, setLessonsList] = useState<Lesson[]>([...content.lessons]);
   const [testimonialsList, setTestimonialsList] = useState<Testimonial[]>([...content.testimonials]);
+
+  // Dynamically synchronize local form states with fetched content configurations
+  useEffect(() => {
+    if (content) {
+      setHeroForm({
+        badgeText: content.hero?.badgeText || '',
+        headingTextMain: content.hero?.headingTextMain || '',
+        headingTextHighlight: content.hero?.headingTextHighlight || '',
+        headingTextSuffix: content.hero?.headingTextSuffix || '',
+        subheadingText: content.hero?.subheadingText || '',
+        ctaPrimaryText: content.hero?.ctaPrimaryText || '',
+        ctaSecondaryText: content.hero?.ctaSecondaryText || '',
+        teacherPhotoUrl: content.hero?.teacherPhotoUrl || '',
+        underlayPhotoUrl: content.hero?.underlayPhotoUrl || '',
+        sigQuote: content.hero?.sigQuote || '',
+        sigSub: content.hero?.sigSub || '',
+      });
+      setAboutForm({
+        badgeText: content.about?.badgeText || '',
+        title: content.about?.title || '',
+        paragraphs: content.about?.paragraphs || [],
+        experienceYears: content.about?.experienceYears || '',
+        studentsMentored: content.about?.studentsMentored || '',
+        quote: content.about?.quote || '',
+        avatarUrl: content.about?.avatarUrl || '',
+        authorName: content.about?.authorName || '',
+        authorRole: content.about?.authorRole || '',
+      });
+      setContactForm({
+        badgeText: content.contact?.badgeText || "START YOUR EDUCATION",
+        title: content.contact?.title || "Connect with Sneha Bansal",
+        description: content.contact?.description || "",
+        phone: content.contact?.phone || "",
+        email: content.contact?.email || "",
+        address: content.contact?.address || "",
+        infoCardText: content.contact?.infoCardText || "",
+        infoCardQuote: content.contact?.infoCardQuote || "",
+        infoCardQuoteAuthor: content.contact?.infoCardQuoteAuthor || "",
+        metricLeftVal: content.contact?.metricLeftVal || "",
+        metricLeftLabel: content.contact?.metricLeftLabel || "",
+        metricRightVal: content.contact?.metricRightVal || "",
+        metricRightLabel: content.contact?.metricRightLabel || "",
+      });
+      setGalleryList(content.gallery ? [...content.gallery] : []);
+      setShowcaseList(content.studentShowcase ? [...content.studentShowcase] : []);
+      setLessonsList(content.lessons ? [...content.lessons] : []);
+      setTestimonialsList(content.testimonials ? [...content.testimonials] : []);
+      setUploadedImages(content.uploadedImages || []);
+    }
+  }, [content]);
 
   // Handle Login
   const handleLoginSubmit = async (e: React.FormEvent) => {

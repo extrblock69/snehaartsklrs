@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import * as dotenv from "dotenv";
 import cors from "cors";
+import { createClient } from "@supabase/supabase-js";
 
 dotenv.config();
 
@@ -92,12 +93,52 @@ function getDataFilePath(filename: string, defaultSubpath: string): string {
 
 const CONTENT_FILE_PATH = getDataFilePath("site_content.json", "src/data/site_content.json");
 
-// Helper: load content
-function getSiteContent() {
+// Define Supabase Connection parameters support
+const SUPABASE_URL = process.env.SUPABASE_URL || "";
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+let supabaseClient: any = null;
+
+if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   try {
+    supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log("Supabase Client initialized successfully!");
+  } catch (error) {
+    console.error("Failed to initialize Supabase client:", error);
+  }
+} else {
+  console.log("Supabase parameters omitted in environment. Operating with high-resilience local JSON database file.");
+}
+
+// Memory caching to optimize read speed and reduce payload latency
+let cachedContent: any = null;
+
+// Helper: load content
+async function getSiteContent() {
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from("site_configs")
+        .select("value")
+        .eq("key", "site_content")
+        .single();
+      
+      if (error) {
+        console.warn("Supabase database read notice (site_configs table may verify or require creation):", error.message);
+      } else if (data && data.value) {
+        cachedContent = data.value;
+        return cachedContent;
+      }
+    } catch (err: any) {
+      console.error("Supabase load exception:", err.message);
+    }
+  }
+
+  try {
+    if (cachedContent) return cachedContent;
     if (fs.existsSync(CONTENT_FILE_PATH)) {
       const raw = fs.readFileSync(CONTENT_FILE_PATH, "utf-8");
-      return JSON.parse(raw);
+      cachedContent = JSON.parse(raw);
+      return cachedContent;
     }
   } catch (error) {
     console.error("Error reading site_content.json, using fallback empty state", error);
@@ -106,7 +147,27 @@ function getSiteContent() {
 }
 
 // Helper: save content
-function saveSiteContent(data: any): boolean {
+async function saveSiteContent(data: any): Promise<boolean> {
+  cachedContent = data;
+  let dbSaved = false;
+
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from("site_configs")
+        .upsert({ key: "site_content", value: data });
+      
+      if (!error) {
+        dbSaved = true;
+        console.log("Successfully persisted site content configurations to Supabase Cloud Row!");
+      } else {
+        console.warn("Could not upsert to Supabase site_configs table, falling back to local file:", error.message);
+      }
+    } catch (err: any) {
+      console.error("Supabase upsert exception:", err.message);
+    }
+  }
+
   try {
     const dir = path.dirname(CONTENT_FILE_PATH);
     if (!fs.existsSync(dir)) {
@@ -116,18 +177,18 @@ function saveSiteContent(data: any): boolean {
     return true;
   } catch (error) {
     console.error("Error writing to site_content.json", error);
-    return false;
+    return dbSaved;
   }
 }
 
-// In-memory sessions
+// In-memory sessions list
 const SESSIONS = new Set<string>();
 
-// Get ADMIN Credentials
+// Get ADMIN Credentials settings
 const ADMIN_USER = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASS = process.env.ADMIN_PASSWORD || "sneha_admin_2026";
 
-// Auth middleware
+// Auth validation middleware
 const requireAdmin = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -141,8 +202,8 @@ const requireAdmin = (req: express.Request, res: express.Response, next: express
 };
 
 // API: Get Current Content
-app.get("/api/content", (req, res) => {
-  const content = getSiteContent();
+app.get("/api/content", async (req, res) => {
+  const content = await getSiteContent();
   if (content) {
     res.json(content);
   } else {
@@ -151,13 +212,13 @@ app.get("/api/content", (req, res) => {
 });
 
 // API: Update Site Content (Protected)
-app.post("/api/content", requireAdmin, (req, res) => {
+app.post("/api/content", requireAdmin, async (req, res) => {
   const newContent = req.body;
   if (!newContent || typeof newContent !== "object") {
     return res.status(400).json({ error: "Invalid data payload" });
   }
 
-  const success = saveSiteContent(newContent);
+  const success = await saveSiteContent(newContent);
   if (success) {
     res.json({ message: "Content updated successfully!", content: newContent });
   } else {
@@ -166,7 +227,7 @@ app.post("/api/content", requireAdmin, (req, res) => {
 });
 
 // API: Upload Media Image File (Protected)
-app.post("/api/upload", requireAdmin, (req, res) => {
+app.post("/api/upload", requireAdmin, async (req, res) => {
   const { filename, base64Data } = req.body;
   
   if (!base64Data || typeof base64Data !== "string") {
@@ -204,11 +265,44 @@ app.post("/api/upload", requireAdmin, (req, res) => {
       : "upload";
     
     const uniqueFilename = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}_${cleanBaseName}.${extension}`;
-    const filePath = path.join(UPLOADS_DIR, uniqueFilename);
 
+    // Prefer Supabase Storage Upload if Supabase credentials are input
+    if (supabaseClient) {
+      try {
+        const bucketName = process.env.SUPABASE_STORAGE_BUCKET || "portfolio";
+
+        const { data: uploadData, error: uploadError } = await supabaseClient
+          .storage
+          .from(bucketName)
+          .upload(uniqueFilename, buffer, {
+            contentType: mimeType,
+            cacheControl: "31536000",
+            upsert: true
+          });
+
+        if (uploadError) {
+          console.warn("Supabase Storage upload returned warning, trying local disk fallback:", uploadError.message);
+        } else if (uploadData) {
+          const { data: urlData } = supabaseClient
+            .storage
+            .from(bucketName)
+            .getPublicUrl(uniqueFilename);
+
+          if (urlData && urlData.publicUrl) {
+            console.log("Successfully uploaded to Supabase Storage Bucket:", urlData.publicUrl);
+            return res.json({ success: true, url: urlData.publicUrl });
+          }
+        }
+      } catch (storageErr: any) {
+        console.error("Supabase Storage upload exception, fallback to local disk:", storageErr.message);
+      }
+    }
+
+    // Default Fallback: Write directly to dynamic hosting uploads directory
+    const filePath = path.join(UPLOADS_DIR, uniqueFilename);
     fs.writeFileSync(filePath, buffer);
 
-    // If BACKEND_URL is set (e.g. Render backend URL), return absolute URL. Otherwise relative URL.
+    // If BACKEND_URL is set (e.g. Render backend URL), return absolute URL. Otherwise template relative URL.
     const backendUrl = process.env.BACKEND_URL || "";
     const publicUrl = backendUrl 
       ? `${backendUrl.replace(/\/$/, "")}/uploads/${uniqueFilename}`
@@ -216,15 +310,35 @@ app.post("/api/upload", requireAdmin, (req, res) => {
 
     res.json({ success: true, url: publicUrl });
   } catch (err: any) {
-    console.error("Image disk saving operation failed:", err);
+    console.error("Image file storage saving action failed:", err);
     res.status(500).json({ error: "Failed to persist uploaded asset on server subspace", details: err.message });
   }
 });
 
 const ADMIN_CONFIG_PATH = getDataFilePath("admin_config.json", "src/data/admin_config.json");
 
-function getAdminCredentials() {
+async function getAdminCredentials() {
   let customPass = ADMIN_PASS;
+
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from("site_configs")
+        .select("value")
+        .eq("key", "admin_config")
+        .single();
+      
+      if (data && data.value && data.value.password) {
+        return {
+          username: ADMIN_USER,
+          password: data.value.password
+        };
+      }
+    } catch (err: any) {
+      console.warn("Supabase credential load skipped (using local configuration):", err.message);
+    }
+  }
+
   try {
     if (fs.existsSync(ADMIN_CONFIG_PATH)) {
       const data = JSON.parse(fs.readFileSync(ADMIN_CONFIG_PATH, "utf-8"));
@@ -241,7 +355,24 @@ function getAdminCredentials() {
   };
 }
 
-function saveAdminCredentials(password: string): boolean {
+async function saveAdminCredentials(password: string): Promise<boolean> {
+  let dbSaved = false;
+
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from("site_configs")
+        .upsert({ key: "admin_config", value: { password } });
+      
+      if (!error) {
+        dbSaved = true;
+        console.log("Successfully persisted administrator password configuration to Supabase Cloud Server!");
+      }
+    } catch (err: any) {
+      console.error("Supabase Save credentials exception:", err.message);
+    }
+  }
+
   try {
     const dir = path.dirname(ADMIN_CONFIG_PATH);
     if (!fs.existsSync(dir)) {
@@ -251,18 +382,18 @@ function saveAdminCredentials(password: string): boolean {
     return true;
   } catch (error) {
     console.error("Error writing to admin_config.json", error);
-    return false;
+    return dbSaved;
   }
 }
 
 // API: Update Admin Passphrase (Protected)
-app.post("/api/admin/change-password", requireAdmin, (req, res) => {
+app.post("/api/admin/change-password", requireAdmin, async (req, res) => {
   const { newPassword } = req.body;
   if (!newPassword || typeof newPassword !== "string" || newPassword.trim().length === 0) {
     return res.status(400).json({ error: "Invalid password value" });
   }
   
-  const success = saveAdminCredentials(newPassword.trim());
+  const success = await saveAdminCredentials(newPassword.trim());
   if (success) {
     res.json({ success: true, message: "Administrator passphrase updated successfully!" });
   } else {
@@ -271,16 +402,17 @@ app.post("/api/admin/change-password", requireAdmin, (req, res) => {
 });
 
 // API: Login Route
-app.post("/api/login", (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
   
-  const currentCredentials = getAdminCredentials();
+  const currentCredentials = await getAdminCredentials();
   
   // Accept:
   // 1. The currently saved password (from admin_config.json / ADMIN_PASS)
-  // 2. The default backup passphrases ("admin", "sneha_admin_2026", "sneha_admin")
+  // 2. The default backup passphrases ("admin", "snehaklrs", "sneha_admin_2026")
   const isMatch = 
     password === "admin" || 
+    password === "snehaklrs" ||
     password === "sneha_admin_2026" || 
     password === "sneha_admin" || 
     (currentCredentials.password && password === currentCredentials.password);
@@ -302,7 +434,7 @@ app.post("/api/logout", (req, res) => {
     const token = authHeader.split(" ")[1];
     SESSIONS.delete(token);
   }
-  res.json({ success: true });
+  res.json({ success: true, message: "Logged out successfully" });
 });
 
 // Setup Vite Dev Server / Static Files
