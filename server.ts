@@ -112,8 +112,39 @@ if (SUPABASE_URL && SUPABASE_ANON_KEY) {
 // Memory caching to optimize read speed and reduce payload latency
 let cachedContent: any = null;
 
+// Helper: Normalize absolute image URLs lacking the http/https protocol prefix
+function normalizeClientUrls(obj: any): any {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === "string") {
+    const lower = obj.toLowerCase();
+    const looksLikeDomain = lower.includes("onrender.com") || lower.includes("supabase.co") || lower.includes("supabase.in") || lower.includes("snehaartsklrs");
+    const containsUploads = lower.includes("/uploads/") || lower.includes("/storage/v1/");
+
+    if ((looksLikeDomain || containsUploads) && 
+        !obj.startsWith("http://") && 
+        !obj.startsWith("https://") && 
+        !obj.startsWith("/") &&
+        !obj.startsWith("data:")) {
+      return `https://${obj}`;
+    }
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => normalizeClientUrls(item));
+  }
+  if (typeof obj === "object") {
+    const fresh: any = {};
+    for (const key of Object.keys(obj)) {
+      fresh[key] = normalizeClientUrls(obj[key]);
+    }
+    return fresh;
+  }
+  return obj;
+}
+
 // Helper: load content
 async function getSiteContent() {
+  let content = null;
   if (supabaseClient) {
     try {
       const { data, error } = await supabaseClient
@@ -126,24 +157,28 @@ async function getSiteContent() {
         console.warn("Supabase database read notice (site_configs table may verify or require creation):", error.message);
       } else if (data && data.value) {
         cachedContent = data.value;
-        return cachedContent;
+        content = cachedContent;
       }
     } catch (err: any) {
       console.error("Supabase load exception:", err.message);
     }
   }
 
-  try {
-    if (cachedContent) return cachedContent;
-    if (fs.existsSync(CONTENT_FILE_PATH)) {
-      const raw = fs.readFileSync(CONTENT_FILE_PATH, "utf-8");
-      cachedContent = JSON.parse(raw);
-      return cachedContent;
+  if (!content) {
+    try {
+      if (cachedContent) {
+        content = cachedContent;
+      } else if (fs.existsSync(CONTENT_FILE_PATH)) {
+        const raw = fs.readFileSync(CONTENT_FILE_PATH, "utf-8");
+        cachedContent = JSON.parse(raw);
+        content = cachedContent;
+      }
+    } catch (error) {
+      console.error("Error reading site_content.json, using fallback empty state", error);
     }
-  } catch (error) {
-    console.error("Error reading site_content.json, using fallback empty state", error);
   }
-  return null;
+
+  return normalizeClientUrls(content);
 }
 
 // Helper: save content
@@ -270,18 +305,23 @@ app.post("/api/upload", requireAdmin, async (req, res) => {
     if (supabaseClient) {
       try {
         const bucketName = process.env.SUPABASE_STORAGE_BUCKET || "portfolio";
+        console.log(`Attempting cloud upload to Supabase Storage Bucket [${bucketName}] with filename [${uniqueFilename}]. Content-Type: ${mimeType}`);
+
+        // Convert Node Buffer to a standard Uint8Array to prevent JS runtime/SDK platform mismatch warnings
+        const binaryData = new Uint8Array(buffer);
 
         const { data: uploadData, error: uploadError } = await supabaseClient
           .storage
           .from(bucketName)
-          .upload(uniqueFilename, buffer, {
+          .upload(uniqueFilename, binaryData, {
             contentType: mimeType,
             cacheControl: "31536000",
             upsert: true
           });
 
         if (uploadError) {
-          console.warn("Supabase Storage upload returned warning, trying local disk fallback:", uploadError.message);
+          console.error("❌ Supabase Storage upload failed with API Error:", uploadError.message, uploadError);
+          console.warn("Falling back to local Render disk storage for this upload.");
         } else if (uploadData) {
           const { data: urlData } = supabaseClient
             .storage
@@ -289,12 +329,13 @@ app.post("/api/upload", requireAdmin, async (req, res) => {
             .getPublicUrl(uniqueFilename);
 
           if (urlData && urlData.publicUrl) {
-            console.log("Successfully uploaded to Supabase Storage Bucket:", urlData.publicUrl);
+            console.log("✅ Successfully uploaded and retrieved public URL from Supabase Storage Bucket:", urlData.publicUrl);
             return res.json({ success: true, url: urlData.publicUrl });
           }
         }
       } catch (storageErr: any) {
-        console.error("Supabase Storage upload exception, fallback to local disk:", storageErr.message);
+        console.error("❌ Exception during Supabase Storage Upload operation:", storageErr.message || storageErr);
+        console.warn("Falling back to local Render disk storage for this upload.");
       }
     }
 
@@ -303,9 +344,12 @@ app.post("/api/upload", requireAdmin, async (req, res) => {
     fs.writeFileSync(filePath, buffer);
 
     // Dynamic Absolute URL detector so local fallbacks resolve correctly across separate frontend & backend domains:
-    const backendUrl = process.env.BACKEND_URL;
+    let backendUrl = process.env.BACKEND_URL;
     let publicUrl = "";
     if (backendUrl) {
+      if (!backendUrl.startsWith("http://") && !backendUrl.startsWith("https://")) {
+        backendUrl = `https://${backendUrl}`;
+      }
       publicUrl = `${backendUrl.replace(/\/$/, "")}/uploads/${uniqueFilename}`;
     } else {
       const proto = (req.headers["x-forwarded-proto"] as string || "http").split(",")[0].trim();
