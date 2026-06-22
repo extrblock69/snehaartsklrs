@@ -1,10 +1,13 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
-import { createServer as createViteServer } from "vite";
 import * as dotenv from "dotenv";
+import { fileURLToPath } from "url";
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
@@ -30,11 +33,11 @@ app.use("/uploads", express.static(UPLOADS_DIR));
 
 const CONTENT_FILE_PATH = isVercel
   ? path.join("/tmp", "site_content.json")
-  : path.join(process.cwd(), "src", "data", "site_content.json");
+  : path.join(__dirname, "src", "data", "site_content.json");
 
 if (isVercel && !fs.existsSync(CONTENT_FILE_PATH)) {
   try {
-    const originalPath = path.join(process.cwd(), "src", "data", "site_content.json");
+    const originalPath = path.join(__dirname, "src", "data", "site_content.json");
     if (fs.existsSync(originalPath)) {
       const parentDir = path.dirname(CONTENT_FILE_PATH);
       if (!fs.existsSync(parentDir)) {
@@ -174,11 +177,11 @@ app.post("/api/upload", requireAdmin, (req, res) => {
 
 const ADMIN_CONFIG_PATH = isVercel
   ? path.join("/tmp", "admin_config.json")
-  : path.join(process.cwd(), "src", "data", "admin_config.json");
+  : path.join(__dirname, "src", "data", "admin_config.json");
 
 if (isVercel && !fs.existsSync(ADMIN_CONFIG_PATH)) {
   try {
-    const originalPath = path.join(process.cwd(), "src", "data", "admin_config.json");
+    const originalPath = path.join(__dirname, "src", "data", "admin_config.json");
     if (fs.existsSync(originalPath)) {
       const parentDir = path.dirname(ADMIN_CONFIG_PATH);
       if (!fs.existsSync(parentDir)) {
@@ -277,6 +280,7 @@ app.post("/api/logout", (req, res) => {
 // Setup Vite Dev Server / Static Files
 async function setupVite() {
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
