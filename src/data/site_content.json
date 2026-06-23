@@ -238,9 +238,11 @@
     "metricLeftLabel": "Verified",
     "metricLeftVal": "Drawing Mastery",
     "metricLeftSub": "Reyanssh Rahul Academy",
+    "metricLeftBackText": "Formally accredited by Reyanssh Rahul Academy. Validates professional instruction standard and mastery of graphite, charcoal, and dry media.",
     "metricRightLabel": "Credentials",
     "metricRightVal": "National Tutor",
     "metricRightSub": "Traditional Focus",
+    "metricRightBackText": "Highly recommended fine art authority with certified national-level master classes and standard-defining traditional techniques.",
     "recipientName": "Sneha Bansal",
     "summaryText": "This achievement represents verified completion of rigorous training or recognized academic accomplishments within traditional drawing disciplines. Under her administration, Sneha propagates these deep values to empower her students at the Kalakar Sneha platform.",
     "cards": [
@@ -272,6 +274,8 @@
   },
   "globalButtons": {
     "navbarContactLink": "",
-    "lessonsInquireLink": ""
+    "lessonsInquireLink": "",
+    "showcaseExploreLink": "#lessons",
+    "showcaseExploreText": "Explore curriculum"
   }
 }

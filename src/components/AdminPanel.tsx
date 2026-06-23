@@ -220,6 +220,8 @@ export default function AdminPanel() {
   const [globalButtonsForm, setGlobalButtonsForm] = useState({
     navbarContactLink: content.globalButtons?.navbarContactLink || '',
     lessonsInquireLink: content.globalButtons?.lessonsInquireLink || '',
+    showcaseExploreLink: content.globalButtons?.showcaseExploreLink || '',
+    showcaseExploreText: content.globalButtons?.showcaseExploreText || '',
   });
 
   const [aboutForm, setAboutForm] = useState({
@@ -257,9 +259,11 @@ export default function AdminPanel() {
     metricLeftLabel: content.achievements?.metricLeftLabel || defaultContent.achievements?.metricLeftLabel || '',
     metricLeftVal: content.achievements?.metricLeftVal || defaultContent.achievements?.metricLeftVal || '',
     metricLeftSub: content.achievements?.metricLeftSub || defaultContent.achievements?.metricLeftSub || '',
+    metricLeftBackText: content.achievements?.metricLeftBackText || defaultContent.achievements?.metricLeftBackText || '',
     metricRightLabel: content.achievements?.metricRightLabel || defaultContent.achievements?.metricRightLabel || '',
     metricRightVal: content.achievements?.metricRightVal || defaultContent.achievements?.metricRightVal || '',
     metricRightSub: content.achievements?.metricRightSub || defaultContent.achievements?.metricRightSub || '',
+    metricRightBackText: content.achievements?.metricRightBackText || defaultContent.achievements?.metricRightBackText || '',
     recipientName: content.achievements?.recipientName || defaultContent.achievements?.recipientName || '',
     summaryText: content.achievements?.summaryText || defaultContent.achievements?.summaryText || '',
   });
@@ -304,6 +308,8 @@ export default function AdminPanel() {
       setGlobalButtonsForm({
         navbarContactLink: content.globalButtons?.navbarContactLink || '',
         lessonsInquireLink: content.globalButtons?.lessonsInquireLink || '',
+        showcaseExploreLink: content.globalButtons?.showcaseExploreLink || '',
+        showcaseExploreText: content.globalButtons?.showcaseExploreText || '',
       });
       setAboutForm({
         badgeText: content.about?.badgeText || '',
@@ -338,9 +344,11 @@ export default function AdminPanel() {
         metricLeftLabel: content.achievements?.metricLeftLabel || defaultContent.achievements?.metricLeftLabel || '',
         metricLeftVal: content.achievements?.metricLeftVal || defaultContent.achievements?.metricLeftVal || '',
         metricLeftSub: content.achievements?.metricLeftSub || defaultContent.achievements?.metricLeftSub || '',
+        metricLeftBackText: content.achievements?.metricLeftBackText || defaultContent.achievements?.metricLeftBackText || '',
         metricRightLabel: content.achievements?.metricRightLabel || defaultContent.achievements?.metricRightLabel || '',
         metricRightVal: content.achievements?.metricRightVal || defaultContent.achievements?.metricRightVal || '',
         metricRightSub: content.achievements?.metricRightSub || defaultContent.achievements?.metricRightSub || '',
+        metricRightBackText: content.achievements?.metricRightBackText || defaultContent.achievements?.metricRightBackText || '',
         recipientName: content.achievements?.recipientName || defaultContent.achievements?.recipientName || '',
         summaryText: content.achievements?.summaryText || defaultContent.achievements?.summaryText || '',
       });
@@ -1388,6 +1396,15 @@ export default function AdminPanel() {
                           onChange={(e) => setAchievementsForm({ ...achievementsForm, metricLeftSub: e.target.value })}
                         />
                       </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-mono text-stone-400 block uppercase">Card Back Detail/Description</label>
+                        <textarea
+                          rows={2}
+                          className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs resize-none"
+                          value={achievementsForm.metricLeftBackText}
+                          onChange={(e) => setAchievementsForm({ ...achievementsForm, metricLeftBackText: e.target.value })}
+                        />
+                      </div>
                     </div>
 
                     {/* Right Metric card */}
@@ -1418,6 +1435,15 @@ export default function AdminPanel() {
                           className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs"
                           value={achievementsForm.metricRightSub}
                           onChange={(e) => setAchievementsForm({ ...achievementsForm, metricRightSub: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-mono text-stone-400 block uppercase">Card Back Detail/Description</label>
+                        <textarea
+                          rows={2}
+                          className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs resize-none"
+                          value={achievementsForm.metricRightBackText}
+                          onChange={(e) => setAchievementsForm({ ...achievementsForm, metricRightBackText: e.target.value })}
                         />
                       </div>
                     </div>
@@ -1991,6 +2017,36 @@ export default function AdminPanel() {
             {/* STUDENT SHOWCASE */}
             {activeTab === 'showcase' && (
               <div className="space-y-8">
+                {/* Showcase Call-to-Action Banner links configuration */}
+                <div className="p-5 rounded-xl border border-stone-200 dark:border-stone-850 bg-stone-50/50 dark:bg-stone-900/40 space-y-4">
+                  <h3 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">Showcase Bottom Banner (Explore Curriculum Link)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-mono text-stone-400 block uppercase">Button Text Label</label>
+                      <input
+                        type="text"
+                        className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs"
+                        value={globalButtonsForm.showcaseExploreText}
+                        placeholder="Explore curriculum"
+                        onChange={(e) => setGlobalButtonsForm({ ...globalButtonsForm, showcaseExploreText: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-mono text-stone-400 block uppercase">Redirect Link (Anchor or External, e.g. #lessons, /about, https://...)</label>
+                      <input
+                        type="text"
+                        className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs"
+                        value={globalButtonsForm.showcaseExploreLink}
+                        placeholder="#lessons"
+                        onChange={(e) => setGlobalButtonsForm({ ...globalButtonsForm, showcaseExploreLink: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[11px] font-sans font-light text-stone-500">
+                    ✦ Tip: Anchor tags beginning with <code className="font-mono bg-stone-200/50 dark:bg-stone-800 p-0.5 rounded px-1">#</code> will scroll smoothly on the page (e.g. <code className="font-mono">#lessons</code> or <code className="font-mono">#contact</code>). Full links (e.g. <code className="font-mono">https://external-website.com</code>) will open beautifully in a new tab.
+                  </p>
+                </div>
+
                 <div className="flex items-center justify-between pb-2 border-b border-stone-100 dark:border-stone-850">
                   <h3 className="text-sm font-semibold tracking-wide text-stone-700 dark:text-stone-300">Showcase Student list ({showcaseList.length})</h3>
                   <button

@@ -255,10 +255,12 @@ export default function StudentShowcase() {
             </p>
           </div>
           <a
-            href="#lessons"
+            href={content.globalButtons?.showcaseExploreLink || "#lessons"}
+            target={(content.globalButtons?.showcaseExploreLink && !content.globalButtons.showcaseExploreLink.startsWith('#')) ? "_blank" : undefined}
+            rel={(content.globalButtons?.showcaseExploreLink && !content.globalButtons.showcaseExploreLink.startsWith('#')) ? "noopener noreferrer" : undefined}
             className="px-5 py-2.5 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-stone-100 text-white dark:text-stone-950 text-xs font-mono tracking-widest rounded-lg uppercase whitespace-nowrap transition-all duration-300 cursor-pointer"
           >
-            Explore curriculum
+            {content.globalButtons?.showcaseExploreText || "Explore curriculum"}
           </a>
         </div>
 

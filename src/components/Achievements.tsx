@@ -16,9 +16,11 @@ export default function Achievements() {
     metricLeftLabel, 
     metricLeftVal, 
     metricLeftSub, 
+    metricLeftBackText,
     metricRightLabel, 
     metricRightVal, 
     metricRightSub, 
+    metricRightBackText,
     recipientName, 
     summaryText, 
     cards 
@@ -66,21 +68,70 @@ export default function Achievements() {
 
             {/* Quick Metrics of Authority */}
             <div className="pt-6 grid grid-cols-2 gap-4 border-t border-stone-200 dark:border-stone-850">
-              <div className="p-4 rounded-lg bg-stone-100/50 dark:bg-stone-850 border border-stone-200/50 dark:border-stone-750">
-                <div className="flex items-center gap-2 text-[#B38F4D]">
-                  <Crown className="w-4 h-4" />
-                  <span className="text-xs font-mono font-medium tracking-wider uppercase">{metricLeftLabel || "Verified"}</span>
+              {/* Left Metric flippable card */}
+              <div 
+                className="h-[145px] w-full perspective-1000 group cursor-pointer"
+                onClick={() => toggleFlip('metric-left')}
+              >
+                <div className={`relative w-full h-full duration-700 preserve-3d transition-all ${flippedCards['metric-left'] ? 'rotate-y-180' : ''}`}>
+                  {/* Front Side */}
+                  <div className="absolute inset-0 w-full h-full backface-hidden p-4 rounded-lg bg-stone-100/50 dark:bg-stone-850 border border-stone-200/50 dark:border-stone-750 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 text-[#B38F4D]">
+                        <Crown className="w-4 h-4" />
+                        <span className="text-[10px] font-mono font-medium tracking-wider uppercase">{metricLeftLabel || "Verified"}</span>
+                      </div>
+                      <div className="mt-1.5 text-base font-serif font-semibold text-stone-900 dark:text-stone-100 leading-tight">{metricLeftVal || "Drawing Mastery"}</div>
+                    </div>
+                    <div className="text-[10px] text-stone-500 font-sans flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                      <span className="truncate max-w-[110px]" title={metricLeftSub || "Reyanssh Rahul Academy"}>{metricLeftSub || "Reyanssh Rahul Academy"}</span>
+                      <span className="text-[#B38F4D] text-[9px] font-mono tracking-tighter opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">Tap back</span>
+                    </div>
+                  </div>
+                  {/* Back Side */}
+                  <div className="absolute inset-0 w-full h-full rotate-y-180 backface-hidden p-4 rounded-lg bg-stone-900 text-stone-100 border border-stone-800 flex flex-col justify-between overflow-hidden">
+                    <p className="text-[11px] text-stone-300 leading-normal font-sans line-clamp-3">
+                      {metricLeftBackText || "Formally accredited by Reyanssh Rahul Academy. Validates professional instruction standard and mastery of graphite, charcoal, and dry media."}
+                    </p>
+                    <div className="text-[9px] font-mono text-stone-500 uppercase tracking-wider flex justify-between items-center select-none pt-1">
+                      <span>Accreditation</span>
+                      <span className="text-[#D4AF37]">✦ Return</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-1 text-lg font-serif font-semibold text-stone-900 dark:text-stone-100">{metricLeftVal || "Drawing Mastery"}</div>
-                <div className="text-xs text-stone-500">{metricLeftSub || "Reyanssh Rahul Academy"}</div>
               </div>
-              <div className="p-4 rounded-lg bg-stone-100/50 dark:bg-stone-850 border border-stone-200/50 dark:border-stone-750">
-                <div className="flex items-center gap-2 text-[#B38F4D]">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span className="text-xs font-mono font-medium tracking-wider uppercase">{metricRightLabel || "Credentials"}</span>
+
+              {/* Right Metric flippable card */}
+              <div 
+                className="h-[145px] w-full perspective-1000 group cursor-pointer"
+                onClick={() => toggleFlip('metric-right')}
+              >
+                <div className={`relative w-full h-full duration-700 preserve-3d transition-all ${flippedCards['metric-right'] ? 'rotate-y-180' : ''}`}>
+                  {/* Front Side */}
+                  <div className="absolute inset-0 w-full h-full backface-hidden p-4 rounded-lg bg-stone-100/50 dark:bg-stone-850 border border-stone-200/50 dark:border-stone-750 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 text-[#B38F4D]">
+                        <ShieldCheck className="w-4 h-4" />
+                        <span className="text-[10px] font-mono font-medium tracking-wider uppercase">{metricRightLabel || "Credentials"}</span>
+                      </div>
+                      <div className="mt-1.5 text-base font-serif font-semibold text-stone-900 dark:text-stone-100 leading-tight">{metricRightVal || "National Tutor"}</div>
+                    </div>
+                    <div className="text-[10px] text-stone-500 font-sans flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                      <span className="truncate max-w-[110px]" title={metricRightSub || "Traditional Focus"}>{metricRightSub || "Traditional Focus"}</span>
+                      <span className="text-[#B38F4D] text-[9px] font-mono tracking-tighter opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">Tap back</span>
+                    </div>
+                  </div>
+                  {/* Back Side */}
+                  <div className="absolute inset-0 w-full h-full rotate-y-180 backface-hidden p-4 rounded-lg bg-stone-900 text-stone-100 border border-stone-800 flex flex-col justify-between overflow-hidden">
+                    <p className="text-[11px] text-stone-300 leading-normal font-sans line-clamp-3">
+                      {metricRightBackText || "Highly recommended fine art authority with certified national-level master classes and standard-defining traditional techniques."}
+                    </p>
+                    <div className="text-[9px] font-mono text-[#D4AF37] uppercase tracking-wider flex justify-between items-center select-none pt-1">
+                      <span>Pedagogy</span>
+                      <span className="text-[#D4AF37]">✦ Return</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="mt-1 text-lg font-serif font-semibold text-stone-900 dark:text-stone-100">{metricRightVal || "National Tutor"}</div>
-                <div className="text-xs text-stone-500">{metricRightSub || "Traditional Focus"}</div>
               </div>
             </div>
           </div>

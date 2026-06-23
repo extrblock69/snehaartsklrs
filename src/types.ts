@@ -110,6 +110,8 @@ export interface SiteContent {
   globalButtons?: {
     navbarContactLink?: string;
     lessonsInquireLink?: string;
+    showcaseExploreLink?: string;
+    showcaseExploreText?: string;
   };
   gallery: Artwork[];
   studentShowcase: StudentProject[];
@@ -123,9 +125,11 @@ export interface SiteContent {
     metricLeftLabel?: string;
     metricLeftVal?: string;
     metricLeftSub?: string;
+    metricLeftBackText?: string;
     metricRightLabel?: string;
     metricRightVal?: string;
     metricRightSub?: string;
+    metricRightBackText?: string;
     recipientName?: string;
     summaryText?: string;
     cards: {
