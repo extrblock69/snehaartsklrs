@@ -89,12 +89,17 @@ export const KalakarSnehaLogo: React.FC<AssetProps> = ({ className = '', style }
       </svg>
       
       {/* Brand typographic wordmark - seamless, crisp & highly readable */}
-      <span className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5 leading-none">
-        <span className={`font-sans font-bold tracking-[0.16em] uppercase text-xs sm:text-sm transition-colors duration-300 ${textCol}`}>
-          Kalakar
+      <span className="flex flex-col justify-center leading-none">
+        <span className="flex items-baseline gap-1 leading-none">
+          <span className={`font-brand text-lg sm:text-xl font-bold tracking-wide transition-colors duration-300 ${textCol}`}>
+            Kalakar
+          </span>
+          <span className={`font-brand italic font-normal text-lg sm:text-xl tracking-wide transition-colors duration-300 ${accentTextCol}`}>
+            Sneha
+          </span>
         </span>
-        <span className={`font-brand italic font-medium text-base sm:text-lg tracking-wide transition-colors duration-300 ${accentTextCol}`}>
-          Sneha
+        <span className="text-[8px] sm:text-[9px] uppercase tracking-[0.26em] text-stone-450 dark:text-stone-300 font-sans font-semibold mt-1 block opacity-85">
+          Fine Art & Sketch
         </span>
       </span>
     </div>

@@ -208,34 +208,43 @@ async function getSiteContent() {
   return normalizeClientUrls(content);
 }
 
-// Helper: save content
+// Helper: save content with comprehensive diagnostic logging
 async function saveSiteContent(data: any): Promise<boolean> {
+  const payloadStr = JSON.stringify(data);
+  const payloadSizeKb = (Buffer.byteLength(payloadStr, 'utf-8') / 1024).toFixed(2);
+  
+  console.log(`[BACKEND-DATA-SYNC] Initiating saveSiteContent payload. Size: ${payloadSizeKb} KB. Number of gallery items: ${data?.gallery?.length || 0}.`);
+
   let dbSaved = false;
 
   if (supabaseClient) {
     try {
+      console.log(`[BACKEND-DATA-SYNC] Attempting to upsert site_content payload to Supabase database table "public.site_configs"...`);
       const { error } = await supabaseClient
         .from("site_configs")
-        .upsert({ key: "site_content", value: data }, { onConflict: "key" });
+        .upsert({ key: "site_content", value: data, updated_at: new Date().toISOString() }, { onConflict: "key" });
       
       if (!error) {
         dbSaved = true;
-        console.log("Successfully persisted site content configurations to Supabase Cloud Row!");
+        console.log(`[BACKEND-DATA-SYNC] ✅ SUCCESS: Site content configuration successfully synchronized to Supabase Cloud "site_configs" table!`);
       } else {
-        console.warn("Could not upsert to Supabase site_configs table:", error.message);
+        const fullErrorInfo = `Code: ${error.code || 'N/A'} | Message: ${error.message} | Details: ${error.details || 'None'} | Hint: ${error.hint || 'None'}`;
+        console.error(`[BACKEND-DATA-SYNC] ❌ DATABASE WRITE ERROR: Supabase upsert returned rejection:`, error);
+        
         if (!allowLocalFallback) {
-          throw new Error(`Supabase DB Write error, local fallback is disabled in fallback.ts: ${error.message}`);
+          throw new Error(`Database Write Rejected. Supabase returned: [${error.message}] (Details: ${error.details || 'None'}, Hint: ${error.hint || 'None'}). Real-time local fallback is disabled in fallback.ts.`);
         }
       }
     } catch (err: any) {
-      console.error("Supabase upsert exception:", err.message);
+      console.error(`[BACKEND-DATA-SYNC] ❌ EXCEPTION: Threw database-level exception:`, err);
       if (!allowLocalFallback) {
-        throw err;
+        throw new Error(`Database write operation threw an exception. Error: [${err.message || String(err)}]. Local backup storage is disabled.`);
       }
     }
   } else {
+    console.warn(`[BACKEND-DATA-SYNC] ⚠️ Warning: Supabase client is not initialized (missing environment keys).`);
     if (!allowLocalFallback) {
-      throw new Error("Supabase is unconfigured, and local file fallback is disabled in fallback.ts.");
+      throw new Error(`Database service is unconfigured (SUPABASE_URL or SUPABASE_ANON_KEY are missing). Local storage fallback is disabled.`);
     }
   }
 
@@ -246,11 +255,15 @@ async function saveSiteContent(data: any): Promise<boolean> {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      fs.writeFileSync(CONTENT_FILE_PATH, JSON.stringify(data, null, 2), "utf-8");
+      fs.writeFileSync(CONTENT_FILE_PATH, payloadStr, "utf-8");
+      console.log(`[BACKEND-DATA-SYNC] ✅ SUCCESS: Site configs saved to local file backup [${CONTENT_FILE_PATH}].`);
       return true;
-    } catch (error) {
-      console.error("Error writing to site_content.json", error);
-      return dbSaved;
+    } catch (error: any) {
+      console.error(`[BACKEND-DATA-SYNC] ❌ LOCAL FALLBACK WRITE FAILURE: site_content.json saving failed:`, error);
+      if (dbSaved) {
+        return true;
+      }
+      throw new Error(`Failed to save locally: ${error.message || String(error)} and DB update was not completed.`);
     }
   }
 

@@ -3,7 +3,7 @@ import { useContent } from '../context/ContentContext';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
   HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload,
-  RefreshCw
+  RefreshCw, AlertCircle
 } from 'lucide-react';
 import { Artwork, Lesson, Testimonial, StudentProject, ArtCategory, LessonLevel } from '../types';
 
@@ -26,8 +26,13 @@ function FileUploader({ value, onChange, adminToken, label, placeholder, onUploa
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const fileSizeMb = (file.size / (1024 * 1024)).toFixed(2);
+    console.log(`[CLIENT-UPLOAD-DIAGNOSTIC] Initiating file input process for: "${file.name}" | Size: ${fileSizeMb} MB | Type: ${file.type}`);
+
     if (file.size > 15 * 1024 * 1024) {
-      setError('File is too large. Max size is 15MB.');
+      const sizeErr = `File is too large (${fileSizeMb} MB). Maximum allowed size is 15.00 MB.`;
+      console.warn(`[CLIENT-UPLOAD-DIAGNOSTIC] ⚠️ Validation failed: ${sizeErr}`);
+      setError(sizeErr);
       return;
     }
 
@@ -38,6 +43,7 @@ function FileUploader({ value, onChange, adminToken, label, placeholder, onUploa
     reader.onloadend = async () => {
       const base64Data = reader.result as string;
       try {
+        console.log(`[CLIENT-UPLOAD-DIAGNOSTIC] Reading file completed. Transmitting Base64 payload to ${API_BASE_URL}/api/upload...`);
         const response = await fetch(`${API_BASE_URL}/api/upload`, {
           method: 'POST',
           headers: {
@@ -52,16 +58,21 @@ function FileUploader({ value, onChange, adminToken, label, placeholder, onUploa
 
         const data = await response.json();
         if (response.ok && data.success) {
+          console.log(`[CLIENT-UPLOAD-DIAGNOSTIC] ✅ SUCCESS: Upload resolved to public URL:`, data.url);
           onChange(data.url);
           if (onUploaded) {
             onUploaded(data.url);
           }
         } else {
-          setError(data.error || 'Failed to upload image.');
+          const apiErr = data.error || 'Server rejected the file package without a specified message.';
+          const detailStr = data.details ? ` (${data.details})` : '';
+          const joinedError = `${apiErr}${detailStr}`;
+          console.error(`[CLIENT-UPLOAD-DIAGNOSTIC] ❌ SERVER REJECTION (Status: ${response.status}):`, joinedError);
+          setError(`Upload unsuccessful: ${joinedError}`);
         }
-      } catch (err) {
-        console.error('Upload request failed:', err);
-        setError('Server network error uploading file.');
+      } catch (err: any) {
+        console.error('[CLIENT-UPLOAD-DIAGNOSTIC] ❌ HTTP DISRUPTED / SERVICE TIMEOUT:', err);
+        setError(`Connection failure: ${err?.message || 'Check terminal server logs for specific database synchronization exceptions.'}`);
       } finally {
         setUploading(false);
       }
@@ -75,12 +86,17 @@ function FileUploader({ value, onChange, adminToken, label, placeholder, onUploa
       <div className="flex gap-2">
         <input
           type="text"
-          className="flex-1 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+          className="flex-1 bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono select-all transition-all duration-300 focus:ring-1 focus:ring-wood disabled:opacity-50"
           placeholder={placeholder || "https://... or choose file on right"}
           value={value}
+          disabled={uploading}
           onChange={(e) => onChange(e.target.value)}
         />
-        <label className="relative shrink-0 flex items-center justify-center px-4 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-350 hover:text-stone-900 border border-stone-300 dark:border-stone-700 rounded-lg cursor-pointer text-xs transition duration-150 select-none">
+        <label className={`relative shrink-0 flex items-center justify-center px-4 rounded-lg cursor-pointer text-xs transition duration-150 select-none border ${
+          uploading
+            ? 'bg-stone-100 dark:bg-stone-900 border-stone-300 dark:border-stone-800 text-stone-400'
+            : 'bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-350 hover:text-stone-900 border-stone-300 dark:border-stone-700'
+        }`}>
           {uploading ? (
             <span className="flex items-center gap-1.5 font-bold font-mono text-[10px] uppercase tracking-wide">
               <span className="w-3.5 h-3.5 border-2 border-stone-500 border-t-transparent rounded-full animate-spin" />
@@ -101,7 +117,11 @@ function FileUploader({ value, onChange, adminToken, label, placeholder, onUploa
           />
         </label>
       </div>
-      {error && <span className="text-[10px] text-red-500 font-mono block mt-1">{error}</span>}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 p-2.5 rounded-lg text-[11px] font-mono leading-relaxed mt-1 block">
+          <b>⚠️ UPLOAD REJECTED:</b> {error}
+        </div>
+      )}
     </div>
   );
 }
@@ -113,6 +133,7 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab ] = useState<'hero' | 'about' | 'contact' | 'gallery' | 'showcase' | 'lessons' | 'testimonials' | 'security' | 'media'>('hero');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [uploadedImages, setUploadedImages] = useState<string[]>(content.uploadedImages || []);
   const [mediaUploadUrl, setMediaUploadUrl] = useState('');
   const [selectedReplacerUrl, setSelectedReplacerUrl] = useState('');
@@ -390,6 +411,7 @@ export default function AdminPanel() {
   const handlePersistChanges = async () => {
     setIsSaving(true);
     setSaveSuccess(false);
+    setSaveError('');
 
     const updatedPayload = {
       hero: heroForm,
@@ -402,13 +424,33 @@ export default function AdminPanel() {
       uploadedImages: uploadedImages,
     };
 
-    const result = await updateContent(updatedPayload);
-    setIsSaving(false);
-    if (result.success) {
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 4000);
-    } else {
-      alert(`Error saving configurations: ${result.error || 'Could not save settings to the server database. Ensure details are correct.'}`);
+    console.log(`[CLIENT-SAVE-DIAGNOSTIC] preparing to save content payload copy...`, {
+      heroKeys: Object.keys(heroForm),
+      galleryCount: galleryList.length,
+      studentShowcaseCount: showcaseList.length,
+      lessonsCount: lessonsList.length,
+      uploadedCount: uploadedImages.length
+    });
+
+    try {
+      const result = await updateContent(updatedPayload);
+      setIsSaving(false);
+      if (result.success) {
+        console.log(`[CLIENT-SAVE-DIAGNOSTIC] ✅ Save completed and ACKed by Express backend!`);
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 5000);
+      } else {
+        const errorString = result.error || 'Server rejected save configuration without detailing the cause.';
+        console.error(`[CLIENT-SAVE-DIAGNOSTIC] ❌ Save configurations database write failed:`, errorString);
+        setSaveError(errorString);
+        alert(`Error saving configurations: ${errorString}`);
+      }
+    } catch (err: any) {
+      const errorMsg = err?.message || 'Check network connection or server status telemetry.';
+      console.error(`[CLIENT-SAVE-DIAGNOSTIC] ❌ HTTP Exception in save operation:`, err);
+      setSaveError(errorMsg);
+      setIsSaving(false);
+      alert(`Error saving configurations: ${errorMsg}`);
     }
   };
 
@@ -789,6 +831,21 @@ export default function AdminPanel() {
               </div>
               <p className="text-[11px] leading-relaxed">
                 Changes compiled successfully! Edits are now live across all mobile devices, tablets, and computers worldwide.
+              </p>
+            </div>
+          )}
+
+          {saveError && (
+            <div className="bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 p-4 rounded-xl text-xs space-y-1.5 animate-fadeIn">
+              <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider font-mono text-[10px]">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-500 animate-bounce" />
+                <span>SAVE REJECTED</span>
+              </div>
+              <p className="text-[11px] font-mono leading-relaxed break-all bg-stone-50 dark:bg-stone-950 p-2.5 rounded border border-rose-500/15 max-h-48 overflow-y-auto">
+                {saveError}
+              </p>
+              <p className="text-[10px] text-stone-500 leading-snug dark:text-stone-400 mt-1">
+                To fix: Check database logs, ensure table structures are initialized, or check if the backend token expired.
               </p>
             </div>
           )}

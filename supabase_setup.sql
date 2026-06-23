@@ -123,16 +123,28 @@ ON CONConflict(key) DO NOTHING;
 ALTER TABLE public.site_configs ENABLE ROW LEVEL SECURITY;
 
 -- Allow anonymous and public users to read configurations
+DROP POLICY IF EXISTS "Allow public select access to site metadata" ON public.site_configs;
 CREATE POLICY "Allow public select access to site metadata" 
 ON public.site_configs 
 FOR SELECT 
+TO public, anon, authenticated
 USING (true);
 
--- Allow authenticated or custom backend tokens (bypass RLS via Service Role Key, 
--- or enable public write policy since the express server mediates authorizations)
-CREATE POLICY "Allow unrestricted write access for site admin" 
+-- Allow authenticated or public clients to insert configurations
+DROP POLICY IF EXISTS "Allow unrestricted write access for site admin" ON public.site_configs;
+DROP POLICY IF EXISTS "Allow admin inserts to site configs" ON public.site_configs;
+CREATE POLICY "Allow admin inserts to site configs" 
 ON public.site_configs 
-FOR ALL 
+FOR INSERT 
+TO public, anon, authenticated
+WITH CHECK (true);
+
+-- Allow authenticated or public clients to update configurations
+DROP POLICY IF EXISTS "Allow admin updates to site configs" ON public.site_configs;
+CREATE POLICY "Allow admin updates to site configs" 
+ON public.site_configs 
+FOR UPDATE 
+TO public, anon, authenticated
 USING (true)
 WITH CHECK (true);
 
