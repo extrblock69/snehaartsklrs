@@ -1,4 +1,5 @@
-import { Mail, Phone, MapPin, ArrowUpCircle, Instagram, Youtube, Facebook, Linkedin } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, Phone, MapPin, ArrowUpCircle, Instagram, Youtube, Facebook } from 'lucide-react';
 import { KalakarSnehaLogo } from './KalakarSnehaAssets';
 import { useContent } from '../context/ContentContext';
 
@@ -6,11 +7,32 @@ export default function Footer() {
   const { content } = useContent();
   const socials = content.socials;
 
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
+
   const scrollBackToTop = () => {
     window.scrollTo({
       top: 0,
       behavior: 'smooth',
     });
+  };
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newsletterEmail.trim()) {
+      try {
+        const subs = JSON.parse(localStorage.getItem('sneha_newsletter_subscribers') || '[]');
+        if (!subs.includes(newsletterEmail.trim().toLowerCase())) {
+          subs.push(newsletterEmail.trim().toLowerCase());
+          localStorage.setItem('sneha_newsletter_subscribers', JSON.stringify(subs));
+        }
+        setSubscribed(true);
+        setNewsletterEmail('');
+        setTimeout(() => setSubscribed(false), 5000);
+      } catch (err) {
+        console.error('Error saving subscriber', err);
+      }
+    }
   };
 
   return (
@@ -20,13 +42,13 @@ export default function Footer() {
     >
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 items-start relative z-10 text-left">
         
-        {/* Bio block col 1 (6 cols layout) */}
-        <div className="md:col-span-6 space-y-5">
+        {/* Bio block col 1 (5 cols layout) */}
+        <div className="md:col-span-5 space-y-5">
           <div className="flex items-center gap-2">
             <KalakarSnehaLogo className="h-10 w-auto text-white" />
           </div>
 
-          <p className="text-stone-400 font-light text-xs leading-relaxed max-w-md">
+          <p className="text-stone-400 font-light text-xs leading-relaxed max-w-sm">
             Educating beginners and classical veterans in the fine visual tradition. 
             Training eyes, hands, and minds to translation and draftsmanship accuracy across raw graphite and vine charcoal mediums.
           </p>
@@ -66,17 +88,6 @@ export default function Footer() {
                 <Facebook className="w-4 h-4" />
               </a>
             )}
-            {socials?.linkedin && (
-              <a
-                href={socials.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="LinkedIn Profile"
-                className="w-9 h-9 rounded-full border border-stone-800 hover:border-wood bg-stone-950 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
-              >
-                <Linkedin className="w-4 h-4" />
-              </a>
-            )}
             {socials?.mail && (
               <a
                 href={`mailto:${socials.mail}`}
@@ -109,10 +120,41 @@ export default function Footer() {
               </a>
             )}
           </div>
+        </div>
 
-          <p className="text-[10px] font-mono text-stone-500 uppercase tracking-widest pt-2">
-            &copy; {new Date().getFullYear()} Sneha. All structural rights reserved.
+        {/* Newsletter Signup (4 cols layout) */}
+        <div id="newsletter-signup" className="md:col-span-4 space-y-4 font-sans text-xs">
+          <h4 className="font-mono text-[10px] tracking-widest text-white uppercase font-bold">
+            WORKSHOP ANNOUNCEMENTS
+          </h4>
+          <p className="text-stone-400 font-light leading-relaxed">
+            Subscribe to receive infrequent notices regarding seasonal classical drawing workshops, studio intensives, and private exhibitions.
           </p>
+          <form onSubmit={handleNewsletterSubmit} className="space-y-2">
+            <div className="flex gap-2">
+              <input
+                type="email"
+                required
+                placeholder="Enter email address"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                className="bg-stone-950 border border-stone-800 text-stone-300 placeholder-stone-600 rounded px-3 py-2 text-xs focus:outline-none focus:border-wood flex-grow transition-colors"
+                id="newsletter-email-input"
+              />
+              <button
+                type="submit"
+                className="bg-wood hover:bg-opacity-90 text-white font-mono text-[10px] tracking-wider uppercase px-4 py-2 rounded transition-all duration-300 cursor-pointer flex-shrink-0"
+                id="newsletter-subscribe-btn"
+              >
+                Subscribe
+              </button>
+            </div>
+            {subscribed && (
+              <p className="text-[#a0c598] font-mono text-[10px] mt-1.5 animate-pulse">
+                ✓ Enrolled successfully. Welcome aboard!
+              </p>
+            )}
+          </form>
         </div>
 
         {/* Studio Info (3 cols layout) */}
@@ -136,26 +178,30 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Coordinates & Back to top (3 cols layout) */}
-        <div className="md:col-span-3 flex flex-col items-start md:items-end justify-between h-full space-y-6 md:space-y-0 text-left md:text-right min-h-[140px]">
-          <button
-            onClick={scrollBackToTop}
-            aria-label="Scroll back to top of page"
-            className="p-2.5 border border-stone-850 hover:border-stone-700 bg-stone-900 group hover:bg-stone-850 text-stone-400 hover:text-stone-100 rounded-full duration-300 flex items-center gap-1 cursor-pointer focus:outline-none"
-          >
-            <ArrowUpCircle className="w-6 h-6 transition-transform group-hover:-translate-y-0.5" />
-          </button>
-          
-          <div className="pt-2">
-            <span className="font-serif italic text-xs text-stone-500 block">
-              Arts Instructor & Fine-Art Coach
-            </span>
-            <span className="font-mono text-[9px] tracking-widest text-stone-600 block uppercase mt-1">
-              LAT. 26.3150° N &bull; LON. 77.6186° E
-            </span>
-          </div>
+      </div>
+
+      {/* Bottom coordinate, copyright and action deck */}
+      <div className="max-w-7xl mx-auto px-6 border-t border-stone-800/80 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+        <p className="text-[10px] font-mono text-stone-500 uppercase tracking-widest text-center md:text-left">
+          &copy; {new Date().getFullYear()} Sneha. All structural rights reserved.
+        </p>
+        
+        <div className="flex flex-col items-center md:items-end text-center md:text-right">
+          <span className="font-serif italic text-xs text-stone-550 block">
+            Arts Instructor & Fine-Art Coach
+          </span>
+          <span className="font-mono text-[9px] tracking-widest text-stone-600 block uppercase mt-1">
+            LAT. 26.3150° N &bull; LON. 77.6186° E
+          </span>
         </div>
 
+        <button
+          onClick={scrollBackToTop}
+          aria-label="Scroll back to top of page"
+          className="p-2.5 border border-stone-850 hover:border-stone-700 bg-stone-900 group hover:bg-stone-850 text-stone-400 hover:text-stone-100 rounded-full duration-300 flex items-center justify-center cursor-pointer focus:outline-none"
+        >
+          <ArrowUpCircle className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
+        </button>
       </div>
     </footer>
   );

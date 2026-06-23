@@ -91,11 +91,13 @@ export default function Gallery() {
               >
                 {/* Image layout */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800">
-                  <img
+                  <motion.img
                     src={art.imageUrl}
                     alt={art.title}
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover transition-transform duration-[850ms] group-hover:scale-105"
+                    className="w-full h-full object-cover"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
                   />
                   {/* Subtle hover overlay details */}
                   <div className="absolute inset-0 bg-stone-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">

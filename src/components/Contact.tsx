@@ -48,7 +48,7 @@ export default function Contact() {
     'Custom Artworks',
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.message) {
       alert('Please fill out all required fields.');
@@ -57,10 +57,28 @@ export default function Contact() {
 
     setStatus('submitting');
     
-    // Simulate API transmission
-    setTimeout(() => {
-      setStatus('success');
-    }, 1500);
+    try {
+      const apiBaseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+      const res = await fetch(`${apiBaseUrl}/api/contact/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        setStatus('success');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.error || 'The server could not accept this inquiry. Please verify server logs.');
+        setStatus('idle');
+      }
+    } catch (err: any) {
+      console.error('Contact submit error:', err);
+      alert('Network transmission failed. Please check your connection or contact Sneha directly.');
+      setStatus('idle');
+    }
   };
 
   const handleReset = () => {

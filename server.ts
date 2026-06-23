@@ -5,6 +5,7 @@ import * as dotenv from "dotenv";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
 import { allowLocalFallback } from "./fallback";
+import { Resend } from "resend";
 
 dotenv.config();
 
@@ -459,6 +460,233 @@ app.post("/api/content", requireAdmin, async (req, res) => {
     console.error("❌ Exception persisting site content configurations:", err.message || err);
     return res.status(500).json({
       error: `Database sync failure: ${err.message || String(err)}`
+    });
+  }
+});
+
+// API: Contact Form Submission via Resend.com
+app.post("/api/contact/submit", async (req, res) => {
+  const { name, email, phone, inquiryType, mediumOfInterest, message } = req.body;
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "Name, email, and message are required fields." });
+  }
+
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const toEmail = process.env.RESEND_TO_EMAIL || "sneha@fineart-morena.com";
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev";
+
+  if (!resendApiKey) {
+    console.warn("[RESEND EMAIL] API key is not configured. Simulating successful local delivery of drawing inquiry:");
+    console.log(`[RESEND EMAIL DUMP]:
+      From: ${name} <${email}>
+      Phone: ${phone || "None"}
+      To: ${toEmail}
+      Inquiry: ${inquiryType} (Medium: ${mediumOfInterest})
+      Message: ${message}
+    `);
+    return res.json({ 
+      success: true, 
+      simulated: true, 
+      message: "Form accepted. (Direct e-mail routing skipped - RESEND_API_KEY is not configured in current environment)." 
+    });
+  }
+
+  try {
+    const resend = new Resend(resendApiKey);
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Inquiry Request - Sneha Art Academy</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #fcfbf9;
+      color: #292524;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrapper {
+      width: 100%;
+      background-color: #fcfbf9;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border: 1px solid #e7e5e4;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+    .accent-bar {
+      height: 6px;
+      background-color: #937562;
+    }
+    .header {
+      padding: 32px 40px;
+      text-align: center;
+      border-bottom: 1px solid #f5f5f4;
+    }
+    .header h1 {
+      margin: 0;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      color: #1c1917;
+    }
+    .header p {
+      margin: 4px 0 0 0;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-family: Menlo, Monaco, Consolas, monospace;
+      letter-spacing: 0.15em;
+      color: #78716c;
+    }
+    .content {
+      padding: 32px 40px;
+    }
+    .intro {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #57534e;
+      margin-bottom: 24px;
+    }
+    .grid {
+      border: 1px solid #f5f5f4;
+      border-radius: 8px;
+      background-color: #fafaf9;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+    .grid-row {
+      padding: 10px 0;
+      border-bottom: 1px dashed #e7e5e4;
+    }
+    .grid-row:last-child {
+      border-bottom: none;
+    }
+    .label {
+      font-size: 10px;
+      font-family: Menlo, Monaco, Consolas, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #78716c;
+      margin-bottom: 2px;
+    }
+    .value {
+      font-size: 14px;
+      color: #1c1917;
+      font-weight: 500;
+    }
+    .message-container {
+      background-color: #fdfcfa;
+      border-left: 3px solid #937562;
+      padding: 16px 20px;
+      font-style: italic;
+      color: #44403c;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      border-radius: 0 8px 8px 0;
+    }
+    .footer {
+      background-color: #1c1917;
+      color: #a8a29e;
+      padding: 24px 40px;
+      text-align: center;
+      font-size: 11px;
+    }
+    .footer p {
+      margin: 4px 0;
+      line-height: 1.5;
+    }
+    .footer a {
+      color: #937562;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="accent-bar"></div>
+      <div class="header">
+        <h1>Sneha Art Academy</h1>
+        <p>New Student Inquiry Received</p>
+      </div>
+      <div class="content">
+        <div class="intro">
+          Hello Sneha, you have received a new academic drawing inquiry form submission from your portfolio website. Here are the contact and inquiry details:
+        </div>
+        
+        <div class="grid">
+          <div class="grid-row">
+            <div class="label">Student Name</div>
+            <div class="value">${name}</div>
+          </div>
+          <div class="grid-row">
+            <div class="label">Email Address</div>
+            <div class="value">${email}</div>
+          </div>
+          <div class="grid-row">
+            <div class="label">Phone Number</div>
+            <div class="value">${phone || "Not provided"}</div>
+          </div>
+          <div class="grid-row">
+            <div class="label">Inquiry Program</div>
+            <div class="value">${inquiryType}</div>
+          </div>
+          <div class="grid-row">
+            <div class="label">Course Medium Intent</div>
+            <div class="value">${mediumOfInterest}</div>
+          </div>
+        </div>
+
+        <div class="label" style="margin-bottom: 8px;">Detailed Message / Drawing Background</div>
+        <div class="message-container">
+          "${message}"
+        </div>
+
+        <div style="text-align: center; margin-top: 32px;">
+          <a href="mailto:${email}" style="display: inline-block; background-color: #937562; color: #ffffff; text-decoration: none; font-size: 12px; font-family: Menlo, Monaco, Consolas, monospace; text-transform: uppercase; letter-spacing: 0.1em; padding: 12px 24px; border-radius: 6px; font-weight: bold; transition: background-color 0.2s;">
+            Reply to Subscriber
+          </a>
+        </div>
+      </div>
+      <div class="footer">
+        <p>&copy; 2026 Sneha Art Academy. All rights reserved.</p>
+        <p>Kailaras, Morena, Madhya Pradesh, India &bull; <a href="https://sneha-art-portfolio.com">Live Portfolio</a></p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
+    console.log(`[RESEND EMAIL] Requesting delivery of email from ${fromEmail} to ${toEmail}`);
+    const data = await resend.emails.send({
+      from: fromEmail,
+      to: [toEmail],
+      replyTo: email,
+      subject: `📐 New Inquiry Request: ${name} (${inquiryType})`,
+      html: htmlContent,
+    });
+
+    console.log("[RESEND EMAIL] Delivery response:", data);
+    return res.json({ success: true, data });
+  } catch (error: any) {
+    console.error("[RESEND EMAIL] Delivery failed:", error);
+    return res.status(500).json({ 
+      error: "Resend email transmission failed due to server error or credentials configuration.", 
+      details: error.message || String(error)
     });
   }
 });

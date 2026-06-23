@@ -3,7 +3,7 @@ import { useContent } from '../context/ContentContext';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
   HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload,
-  RefreshCw, AlertCircle
+  RefreshCw, AlertCircle, Copy, Search
 } from 'lucide-react';
 import { Artwork, Lesson, Testimonial, StudentProject, ArtCategory, LessonLevel } from '../types';
 
@@ -130,7 +130,7 @@ export default function AdminPanel() {
   const { content, login, logout, isAdmin, updateContent, adminToken } = useContent();
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab ] = useState<'hero' | 'about' | 'contact' | 'gallery' | 'showcase' | 'lessons' | 'testimonials' | 'security' | 'media'>('hero');
+  const [activeTab, setActiveTab ] = useState<'hero' | 'about' | 'contact' | 'gallery' | 'showcase' | 'lessons' | 'testimonials' | 'security' | 'media' | 'subscribers'>('hero');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -139,6 +139,49 @@ export default function AdminPanel() {
   const [selectedReplacerUrl, setSelectedReplacerUrl] = useState('');
   const [replacerTarget, setReplacerTarget] = useState('hero-teacher');
   const [replaceNotice, setReplaceNotice] = useState<{ type: 'success' | 'error' | '', message: string }>({ type: '', message: '' });
+
+  // Newsletter Subscribers CMS States
+  const [subscribers, setSubscribers] = useState<string[]>([]);
+  const [subSearch, setSubSearch] = useState('');
+  const [copyStatus, setCopyStatus] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'subscribers') {
+      const stored = localStorage.getItem('sneha_newsletter_subscribers');
+      if (stored) {
+        setSubscribers(JSON.parse(stored));
+      } else {
+        const demo = [
+          'clara.ross@academy-classical.com',
+          'rahul.kapoor@fine-art-forum.org',
+          'sneha_student_2026@gmail.com',
+          'parent_mentor@yahoo.co.in'
+        ];
+        localStorage.setItem('sneha_newsletter_subscribers', JSON.stringify(demo));
+        setSubscribers(demo);
+      }
+    }
+  }, [activeTab]);
+
+  const handleDeleteSubscriber = (emailToDelete: string) => {
+    const updated = subscribers.filter(email => email !== emailToDelete);
+    localStorage.setItem('sneha_newsletter_subscribers', JSON.stringify(updated));
+    setSubscribers(updated);
+  };
+
+  const handleClearAllSubscribers = () => {
+    if (window.confirm('Are you sure you want to permanently clear all newsletter subscribers? This cannot be undone.')) {
+      localStorage.setItem('sneha_newsletter_subscribers', JSON.stringify([]));
+      setSubscribers([]);
+    }
+  };
+
+  const handleCopySubscribers = () => {
+    if (subscribers.length === 0) return;
+    navigator.clipboard.writeText(subscribers.join(', '));
+    setCopyStatus(true);
+    setTimeout(() => setCopyStatus(false), 3000);
+  };
 
   // Password alteration states
   const [newPassphrase, setNewPassphrase] = useState('');
@@ -841,6 +884,7 @@ export default function AdminPanel() {
             { id: 'lessons', label: '📚 Study Programs' },
             { id: 'testimonials', label: '⭐ Testimonials Review' },
             { id: 'media', label: '📷 Media & Image Hub' },
+            { id: 'subscribers', label: '📨 Newsletter Subscribers' },
             { id: 'security', label: '🛡️ Security Settings' },
           ].map((tab) => (
             <button
@@ -897,6 +941,7 @@ export default function AdminPanel() {
               {activeTab === 'lessons' && 'Academic Study Programs & Curriculum'}
               {activeTab === 'testimonials' && 'Before & After Drawing Slider Testimonials'}
               {activeTab === 'media' && 'Media Library & Section Image Replacer'}
+              {activeTab === 'subscribers' && 'Newsletter Subscribers List'}
               {activeTab === 'security' && 'Security Credits & Admin Passphrase'}
             </h2>
             <p className="text-xs text-stone-400 mt-1">
@@ -908,6 +953,7 @@ export default function AdminPanel() {
               {activeTab === 'lessons' && 'Define the actual syllabus, hourly mentoring prices, key subtopics, and difficulty levels.'}
               {activeTab === 'testimonials' && 'Log actual before-and-after progress slider images showing academic student improvement.'}
               {activeTab === 'media' && 'Manage uploaded local image files stored in the application\'s state and dynamically swap them in any portfolio section.'}
+              {activeTab === 'subscribers' && 'View, search, clear or copy the mailing addresses subscribed via the footer newsletter workshops form.'}
               {activeTab === 'security' && 'Change the credential passphrase needed to access the Sneha Art Academy dashboard.'}
             </p>
           </div>
@@ -2528,8 +2574,108 @@ export default function AdminPanel() {
               </div>
             )}
 
+            {/* NEWSLETTER SUBSCRIBERS */}
+            {activeTab === 'subscribers' && (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row gap-4 items-center justify-between border-b border-stone-200 dark:border-stone-800 pb-4">
+                  <div className="relative w-full sm:max-w-xs">
+                    <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search subscriber email..."
+                      value={subSearch}
+                      onChange={(e) => setSubSearch(e.target.value)}
+                      className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg pl-9 pr-4 py-2.5 text-xs focus:outline-none focus:border-wood transition-all"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <button
+                      type="button"
+                      onClick={handleCopySubscribers}
+                      disabled={subscribers.length === 0}
+                      className="px-4 py-2.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-200 font-mono text-[10px] tracking-wider uppercase rounded-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-55"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{copyStatus ? 'COPIED!' : 'COPY ALL EMAILS'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleClearAllSubscribers}
+                      disabled={subscribers.length === 0}
+                      className="px-4 py-2.5 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-455 font-mono text-[10px] tracking-wider uppercase rounded-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-55"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>CLEAR MAILING LIST</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800/80 rounded-xl overflow-hidden shadow-sm">
+                  {subscribers.filter(s => s.toLowerCase().includes(subSearch.toLowerCase())).length === 0 ? (
+                    <div className="p-8 text-center text-stone-400 font-light text-xs space-y-1">
+                      <p>No active workshop mailing subscribers found matching your term.</p>
+                      <p className="text-[10px] text-stone-500 font-mono">Use the footer subscription form or clear search terms to query other records.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left font-sans text-xs">
+                        <thead>
+                          <tr className="bg-stone-50 dark:bg-stone-950 border-b border-stone-200 dark:border-stone-800 text-[10px] font-mono tracking-wider text-stone-500 uppercase font-bold">
+                            <th className="px-6 py-3.5">Subscriber Mailing Address</th>
+                            <th className="px-6 py-3.5">Recruiting Status</th>
+                            <th className="px-6 py-3.5 text-right">Administrative Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-stone-250/50 dark:divide-stone-800/85">
+                          {subscribers
+                            .filter(s => s.toLowerCase().includes(subSearch.toLowerCase()))
+                            .map((email, idx) => (
+                              <tr key={idx} className="hover:bg-stone-50/50 dark:hover:bg-stone-950/30 transition-colors">
+                                <td className="px-6 py-4.5 font-mono font-medium text-stone-900 dark:text-stone-100">
+                                  {email}
+                                </td>
+                                <td className="px-6 py-4.5">
+                                  <span className="inline-flex items-center gap-1 rounded bg-emerald-500/10 px-2 py-0.5 text-[9px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 uppercase">
+                                    ● Enrolled Live
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4.5 text-right">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteSubscriber(email)}
+                                    title="Unsubscribe address"
+                                    className="p-1 px-2.5 text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-[10px] font-mono tracking-wider uppercase rounded transition-all cursor-pointer inline-flex items-center gap-1 font-semibold"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>Remove</span>
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-stone-50 dark:bg-stone-950 border border-stone-200/50 dark:border-stone-800 p-4 rounded-xl text-left">
+                  <div className="flex gap-2.5">
+                    <Sparkles className="w-4 h-4 text-wood mt-0.5 flex-shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-semibold text-stone-900 dark:text-white">Continuous Synced Mailer Integration</h4>
+                      <p className="text-[10px] text-stone-500 mt-1 leading-relaxed">
+                        To announce next-quarter live drawings, academic workshops, and student cohort pricing updates, press <strong>COPY ALL EMAILS</strong>, then paste the full list of comma-delimited mail loops seamlessly inside your active Gmail template or MailChimp dashboard.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Bottom Save Trigger action */}
-            {activeTab !== 'security' && (
+            {activeTab !== 'security' && activeTab !== 'subscribers' && (
               <div className="border-t border-stone-100 dark:border-stone-800 pt-6 flex justify-end">
                 <button
                   type="button"
