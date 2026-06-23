@@ -2,13 +2,42 @@ import React, { useState } from 'react';
 import { Mail, Phone, MapPin, ArrowUpCircle, Instagram, Youtube, Facebook } from 'lucide-react';
 import { KalakarSnehaLogo } from './KalakarSnehaAssets';
 import { useContent } from '../context/ContentContext';
+import defaultContent from '../data/site_content.json';
 
 export default function Footer() {
   const { content } = useContent();
-  const socials = content.socials;
+  const socials = content.socials || defaultContent.socials;
 
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+
+  const getInstagramUrl = (handle: string) => {
+    if (!handle) return '';
+    if (handle.startsWith('http://') || handle.startsWith('https://')) return handle;
+    const clean = handle.replace(/^@/, '');
+    return `https://instagram.com/${clean}`;
+  };
+
+  const getYoutubeUrl = (handle: string) => {
+    if (!handle) return '';
+    if (handle.startsWith('http://') || handle.startsWith('https://')) return handle;
+    const clean = handle.startsWith('@') ? handle : `@${handle}`;
+    return `https://youtube.com/${clean}`;
+  };
+
+  const getFacebookUrl = (handle: string) => {
+    if (!handle) return '';
+    if (handle.startsWith('http://') || handle.startsWith('https://')) return handle;
+    const clean = handle.replace(/^@/, '');
+    return `https://facebook.com/${clean}`;
+  };
+
+  const getWhatsappUrl = (phone: string) => {
+    if (!phone) return '';
+    if (phone.startsWith('http://') || phone.startsWith('https://')) return phone;
+    const clean = phone.replace(/[^0-9]/g, '');
+    return `https://wa.me/${clean}`;
+  };
 
   const scrollBackToTop = () => {
     window.scrollTo({
@@ -57,7 +86,7 @@ export default function Footer() {
           <div className="flex flex-wrap items-center gap-3.5 pt-1">
             {socials?.instagram && (
               <a
-                href={socials.instagram}
+                href={getInstagramUrl(socials.instagram)}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Instagram Profile"
@@ -68,7 +97,7 @@ export default function Footer() {
             )}
             {socials?.youtube && (
               <a
-                href={socials.youtube}
+                href={getYoutubeUrl(socials.youtube)}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="YouTube Channel"
@@ -79,7 +108,7 @@ export default function Footer() {
             )}
             {socials?.facebook && (
               <a
-                href={socials.facebook}
+                href={getFacebookUrl(socials.facebook)}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Facebook Page"
@@ -108,7 +137,7 @@ export default function Footer() {
             )}
             {socials?.whatsapp && (
               <a
-                href={socials.whatsapp.startsWith('http') ? socials.whatsapp : `https://wa.me/${socials.whatsapp.replace(/[^0-9]/g, '')}`}
+                href={getWhatsappUrl(socials.whatsapp)}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="WhatsApp Chat"

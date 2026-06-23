@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
+import defaultContent from '../data/site_content.json';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
   HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload,
@@ -207,13 +208,13 @@ export default function AdminPanel() {
   });
 
   const [socialsForm, setSocialsForm] = useState({
-    instagram: content.socials?.instagram || '',
-    youtube: content.socials?.youtube || '',
-    facebook: content.socials?.facebook || '',
-    linkedin: content.socials?.linkedin || '',
-    mail: content.socials?.mail || '',
-    phone: content.socials?.phone || '',
-    whatsapp: content.socials?.whatsapp || '',
+    instagram: content.socials?.instagram || defaultContent.socials?.instagram || '',
+    youtube: content.socials?.youtube || defaultContent.socials?.youtube || '',
+    facebook: content.socials?.facebook || defaultContent.socials?.facebook || '',
+    linkedin: content.socials?.linkedin || defaultContent.socials?.linkedin || '',
+    mail: content.socials?.mail || defaultContent.socials?.mail || '',
+    phone: content.socials?.phone || defaultContent.socials?.phone || '',
+    whatsapp: content.socials?.whatsapp || defaultContent.socials?.whatsapp || '',
   });
 
   const [globalButtonsForm, setGlobalButtonsForm] = useState({
@@ -274,13 +275,13 @@ export default function AdminPanel() {
         ctaSecondaryLink: content.hero?.ctaSecondaryLink || '',
       });
       setSocialsForm({
-        instagram: content.socials?.instagram || '',
-        youtube: content.socials?.youtube || '',
-        facebook: content.socials?.facebook || '',
-        linkedin: content.socials?.linkedin || '',
-        mail: content.socials?.mail || '',
-        phone: content.socials?.phone || '',
-        whatsapp: content.socials?.whatsapp || '',
+        instagram: content.socials?.instagram || defaultContent.socials?.instagram || '',
+        youtube: content.socials?.youtube || defaultContent.socials?.youtube || '',
+        facebook: content.socials?.facebook || defaultContent.socials?.facebook || '',
+        linkedin: content.socials?.linkedin || defaultContent.socials?.linkedin || '',
+        mail: content.socials?.mail || defaultContent.socials?.mail || '',
+        phone: content.socials?.phone || defaultContent.socials?.phone || '',
+        whatsapp: content.socials?.whatsapp || defaultContent.socials?.whatsapp || '',
       });
       setGlobalButtonsForm({
         navbarContactLink: content.globalButtons?.navbarContactLink || '',

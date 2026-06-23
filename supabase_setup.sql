@@ -111,10 +111,23 @@ VALUES (
           "description": "A dedicated study in line-weight control and outline exactness, practicing Charles Bargue''s Sight-Size classical methodology of geometric simplification.",
           "teacherMentorshipNotes": "Clarissa started with zero formal drawing experience. By teaching her to squint and simplify complex contours into straight, angled vectors first, she overcame the fear of free-hand portraiture. Her precision in the forehead slope and nose contour is exceptional."
         }
-      ]
+      ],
+      "socials": {
+        "instagram": "https://instagram.com/kalakar_sneha",
+        "youtube": "https://youtube.com/@kalakar_sneha",
+        "facebook": "https://facebook.com/kalakar.sneha",
+        "linkedin": "https://linkedin.com/in/sneha",
+        "mail": "sneha@fineart-morena.com",
+        "phone": "+917562224809",
+        "whatsapp": "https://wa.me/917562224809"
+      },
+      "globalButtons": {
+        "navbarContactLink": "",
+        "lessonsInquireLink": ""
+      }
     }'::jsonb
 )
-ON CONConflict(key) DO NOTHING;
+ON CONFLICT(key) DO NOTHING;
 
 -- --------------------------------------------------------------------
 -- 3. Configure Table Row Level Security (RLS)
