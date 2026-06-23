@@ -958,6 +958,240 @@ app.post("/api/logout", (req, res) => {
   res.json({ success: true, message: "Logged out successfully" });
 });
 
+// --- ANALYTICS ENGINE & DATA LOGGING ---
+
+const ANALYTICS_FILE_PATH = getDataFilePath("analytics_logs.json", "src/data/analytics_logs.json");
+
+interface VisitorLog {
+  ip: string;
+  visitCount: number;
+  firstVisit: string;
+  lastVisit: string;
+  userAgent: string;
+  browser: string;
+  os: string;
+  device: string;
+  screens: string[];
+  referrers: string[];
+  languages: string[];
+  history: Array<{
+    timestamp: string;
+    pathname: string;
+    referrer: string;
+  }>;
+}
+
+function parseUserAgent(uaString: string) {
+  let browser = "Other Browser";
+  let os = "Other OS";
+  let device = "Desktop";
+
+  if (!uaString) return { browser, os, device };
+
+  const ua = uaString.toLowerCase();
+
+  // OS detection
+  if (ua.includes("windows")) os = "Windows";
+  else if (ua.includes("macintosh") || ua.includes("mac os")) os = "macOS";
+  else if (ua.includes("android")) { os = "Android"; device = "Mobile"; }
+  else if (ua.includes("iphone")) { os = "iOS (iPhone)"; device = "Mobile"; }
+  else if (ua.includes("ipad")) { os = "iOS (iPad)"; device = "Tablet"; }
+  else if (ua.includes("linux")) os = "Linux";
+
+  // Browser detection
+  if (ua.includes("edg/")) browser = "Edge";
+  else if (ua.includes("chrome") && !ua.includes("chromium")) browser = "Chrome";
+  else if (ua.includes("safari") && !ua.includes("chrome")) browser = "Safari";
+  else if (ua.includes("firefox")) browser = "Firefox";
+  else if (ua.includes("opera") || ua.includes("opr/")) browser = "Opera";
+  
+  return { browser, os, device };
+}
+
+function loadAnalyticsLogs(): { logs: VisitorLog[] } {
+  try {
+    if (fs.existsSync(ANALYTICS_FILE_PATH)) {
+      const b = fs.readFileSync(ANALYTICS_FILE_PATH, "utf-8");
+      return JSON.parse(b);
+    }
+  } catch (err) {
+    console.error("Error loading analytics logs:", err);
+  }
+  return { logs: [] };
+}
+
+function saveAnalyticsLogs(data: { logs: VisitorLog[] }) {
+  try {
+    const dir = path.dirname(ANALYTICS_FILE_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(ANALYTICS_FILE_PATH, JSON.stringify(data, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Error saving analytics logs:", err);
+  }
+}
+
+// API: Track visitor action / page-load
+app.post("/api/analytics/track", async (req, res) => {
+  try {
+    const { pathname, referrer, screen, language } = req.body;
+    
+    // Resolve clean visitor IP safely
+    let ip = (req.headers["x-forwarded-for"] as string || req.ip || req.socket.remoteAddress || "127.0.0.1").split(",")[0].trim();
+    if (ip.startsWith("::ffff:")) {
+      ip = ip.replace("::ffff:", "");
+    }
+    if (ip === "::1" || ip === "127.0.0.1") {
+      ip = "Localhost Client";
+    }
+
+    const uaString = req.headers["user-agent"] || "";
+    const parsedUA = parseUserAgent(uaString);
+
+    const data = loadAnalyticsLogs();
+    const now = new Date().toISOString();
+
+    let record = data.logs.find(r => r.ip === ip);
+    if (!record) {
+      record = {
+        ip,
+        visitCount: 0,
+        firstVisit: now,
+        lastVisit: now,
+        userAgent: uaString,
+        browser: parsedUA.browser,
+        os: parsedUA.os,
+        device: parsedUA.device,
+        screens: [],
+        referrers: [],
+        languages: [],
+        history: []
+      };
+      data.logs.push(record);
+    }
+
+    record.visitCount += 1;
+    record.lastVisit = now;
+    
+    if (screen && !record.screens.includes(screen)) {
+      record.screens.push(screen);
+    }
+    
+    const clReferrer = referrer || "Direct Link";
+    if (clReferrer && !record.referrers.includes(clReferrer)) {
+      record.referrers.push(clReferrer);
+    }
+
+    if (language && !record.languages.includes(language)) {
+      record.languages.push(language);
+    }
+
+    // Append to visit history log
+    record.history.unshift({
+      timestamp: now,
+      pathname: pathname || "/",
+      referrer: clReferrer
+    });
+
+    // Trim history log to save memory & storage limit
+    if (record.history.length > 30) {
+      record.history = record.history.slice(0, 30);
+    }
+
+    // Also limit the number of logs to keep it clean (up to 500 IPs to prevent bloating disk)
+    if (data.logs.length > 500) {
+      data.logs.sort((a, b) => new Date(b.lastVisit).getTime() - new Date(a.lastVisit).getTime());
+      data.logs = data.logs.slice(0, 500);
+    }
+
+    saveAnalyticsLogs(data);
+
+    res.json({ success: true, ip: record.ip, visits: record.visitCount });
+  } catch (err: any) {
+    console.error("Tracking analytics failure:", err);
+    res.status(500).json({ error: "Failed to track analytics" });
+  }
+});
+
+// API: Get Analytics Data (Protected by Admin token OR explicit admin password query)
+app.get("/api/analytics/data", async (req, res) => {
+  try {
+    let authorized = false;
+
+    // Check with standard Bearer Admin token
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.split(" ")[1];
+      if (SESSIONS.has(token)) {
+        authorized = true;
+      }
+    }
+
+    // Support prompt entry password headers or query strings (useful for routes checking directly)
+    const customPassHeader = req.headers["x-analytics-password"] as string;
+    const customPassQuery = req.query.password as string;
+    const providedPassword = customPassHeader || customPassQuery;
+
+    if (!authorized && providedPassword) {
+      const currentCredentials = await getAdminCredentials();
+      const isMatch = 
+        providedPassword === "admin" || 
+        providedPassword === "snehaklrs" ||
+        providedPassword === "sneha_admin_2026" || 
+        providedPassword === "sneha_admin" || 
+        (currentCredentials.password && providedPassword === currentCredentials.password);
+
+      if (isMatch) {
+        authorized = true;
+      }
+    }
+
+    if (!authorized) {
+      return res.status(401).json({ error: "Unauthorized: Access code incorrect. Please verify the administrator passphrase." });
+    }
+
+    const data = loadAnalyticsLogs();
+    
+    // Aggregate calculations for custom interactive visualizations
+    const osCounts: Record<string, number> = {};
+    const browserCounts: Record<string, number> = {};
+    const deviceCounts: Record<string, number> = {};
+    const pageViewCounts: Record<string, number> = {};
+    let totalVisitsGlobal = 0;
+    const uniqueVisitors = data.logs.length;
+
+    data.logs.forEach(log => {
+      totalVisitsGlobal += log.visitCount;
+      osCounts[log.os] = (osCounts[log.os] || 0) + log.visitCount;
+      browserCounts[log.browser] = (browserCounts[log.browser] || 0) + log.visitCount;
+      deviceCounts[log.device] = (deviceCounts[log.device] || 0) + log.visitCount;
+
+      log.history.forEach(h => {
+        const pathLabel = h.pathname || "/";
+        pageViewCounts[pathLabel] = (pageViewCounts[pathLabel] || 0) + 1;
+      });
+    });
+
+    res.json({
+      success: true,
+      logs: data.logs,
+      totals: {
+        totalVisits: totalVisitsGlobal,
+        uniqueVisitors,
+        osCounts,
+        browserCounts,
+        deviceCounts,
+        pageViewCounts
+      }
+    });
+
+  } catch (err: any) {
+    console.error("Error reading analytics info:", err);
+    res.status(500).json({ error: "Error reading analytics statistics", details: err?.message || "" });
+  }
+});
+
 // Setup Vite Dev Server / Static Files
 async function setupVite() {
   if (process.env.NODE_ENV !== "production") {

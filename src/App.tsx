@@ -10,6 +10,7 @@ import StudentShowcase from './components/StudentShowcase';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
+import AnalyticsPanel from './components/AnalyticsPanel';
 import NotFound from './components/NotFound';
 
 export default function App() {
@@ -19,9 +20,12 @@ export default function App() {
     const path = window.location.pathname;
     const isHome = path === '/' || path === '/index.html';
     const isAdmin = path === '/admin' || window.location.hash === '#admin';
+    const isAnalytics = path === '/analytics' || window.location.hash === '#analytics';
     
     if (isAdmin) {
       return 'admin';
+    } else if (isAnalytics) {
+      return 'analytics';
     } else if (isHome) {
       return 'home';
     } else {
@@ -29,7 +33,7 @@ export default function App() {
     }
   };
 
-  const [currentView, setCurrentView] = useState<'home' | 'admin' | '404'>(getRouteState());
+  const [currentView, setCurrentView] = useState<'home' | 'admin' | 'analytics' | '404'>(getRouteState());
 
   useEffect(() => {
     const handleLocationChange = () => {
@@ -45,6 +49,26 @@ export default function App() {
     };
   }, []);
 
+  // Track visitor views when mounting or navigating to 'home'
+  useEffect(() => {
+    if (currentView === 'home' && !loading) {
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pathname: window.location.pathname + window.location.hash,
+          referrer: document.referrer || 'Direct / Bookmark',
+          screen: `${window.innerWidth}x${window.innerHeight}`,
+          language: navigator.language || 'en-US'
+        }),
+      }).catch(err => {
+        console.warn('Analytics tracking not processed offline:', err);
+      });
+    }
+  }, [currentView, loading]);
+
   const handleReturnHome = () => {
     window.history.pushState({}, '', '/');
     setCurrentView('home');
@@ -54,6 +78,8 @@ export default function App() {
     switch (currentView) {
       case 'admin':
         return <AdminPanel />;
+      case 'analytics':
+        return <AnalyticsPanel />;
       case '404':
         return <NotFound onReturnHome={handleReturnHome} />;
       case 'home':

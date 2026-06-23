@@ -5,7 +5,7 @@ import ThemeToggle from './ThemeToggle';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
   HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload,
-  RefreshCw, AlertCircle, Copy, Search, Award
+  RefreshCw, AlertCircle, Copy, Search, Award, BarChart3
 } from 'lucide-react';
 import { Artwork, Lesson, Testimonial, StudentProject, ArtCategory, LessonLevel } from '../types';
 
@@ -132,7 +132,7 @@ export default function AdminPanel() {
   const { content, login, logout, isAdmin, updateContent, adminToken } = useContent();
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab ] = useState<'hero' | 'about' | 'achievements' | 'contact' | 'gallery' | 'showcase' | 'lessons' | 'testimonials' | 'security' | 'media' | 'subscribers'>('hero');
+  const [activeTab, setActiveTab ] = useState<'hero' | 'about' | 'achievements' | 'contact' | 'gallery' | 'showcase' | 'lessons' | 'testimonials' | 'security' | 'media' | 'subscribers' | 'analytics'>('hero');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -978,6 +978,7 @@ export default function AdminPanel() {
             { id: 'media', label: '📷 Media & Image Hub' },
             { id: 'subscribers', label: '📨 Newsletter Subscribers' },
             { id: 'security', label: '🛡️ Security Settings' },
+            { id: 'analytics', label: '📊 Viewers & IP Logs' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1035,7 +1036,8 @@ export default function AdminPanel() {
               {activeTab === 'testimonials' && 'Before & After Drawing Slider Testimonials'}
               {activeTab === 'media' && 'Media Library & Section Image Replacer'}
               {activeTab === 'subscribers' && 'Newsletter Subscribers List'}
-              {activeTab === 'security' && 'Security Credits & Admin Passphrase'}
+              {activeTab === 'security' && 'Security Settings & Admin Passphrase'}
+              {activeTab === 'analytics' && 'Studio Viewers Monitor & Real-time IP Logs'}
             </h2>
             <p className="text-xs text-stone-400 mt-1">
               {activeTab === 'hero' && 'Customize the introductory section, main punchlines, and action buttons.'}
@@ -1049,6 +1051,7 @@ export default function AdminPanel() {
               {activeTab === 'media' && 'Manage uploaded local image files stored in the application\'s state and dynamically swap them in any portfolio section.'}
               {activeTab === 'subscribers' && 'View, search, clear or copy the mailing addresses subscribed via the footer newsletter workshops form.'}
               {activeTab === 'security' && 'Change the credential passphrase needed to access the Sneha Art Academy dashboard.'}
+              {activeTab === 'analytics' && 'Analyze real-time visitor demographics, devices, operating systems, and page interaction loops.'}
             </p>
           </div>
 
@@ -3070,6 +3073,69 @@ export default function AdminPanel() {
                         To announce next-quarter live drawings, academic workshops, and student cohort pricing updates, press <strong>COPY ALL EMAILS</strong>, then paste the full list of comma-delimited mail loops seamlessly inside your active Gmail template or MailChimp dashboard.
                       </p>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* STUDIO VISITOR ANALYTICS CONTROL PANEL */}
+            {activeTab === 'analytics' && (
+              <div className="space-y-6 text-left">
+                <div className="bg-[#B38F4D]/5 border border-[#B38F4D]/25 p-6 rounded-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-[#B38F4D]">
+                    <BarChart3 className="w-48 h-48" />
+                  </div>
+                  
+                  <div className="max-w-xl space-y-4 relative z-10">
+                    <span className="inline-flex items-center gap-1 bg-[#B38F4D]/15 text-[#B38F4D] border border-[#B38F4D]/25 font-mono text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-widest animate-pulse">
+                      SYSTEM MODULE ONLINE
+                    </span>
+                    <h3 className="text-2xl font-serif text-stone-900 dark:text-stone-50 font-semibold tracking-tight">
+                      Studio Viewers Monitor & Real-time IP Logs
+                    </h3>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 leading-relaxed font-light">
+                      The application is dynamically recording client visitor IP addresses, devices, operating systems, browsers, and detailed navigation paths. You can analyze traffic directly via the secure analytics module.
+                    </p>
+                    
+                    <div className="pt-2 flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.location.hash = '#analytics';
+                          window.dispatchEvent(new HashChangeEvent('hashchange'));
+                        }}
+                        className="px-5 py-3 bg-[#B38F4D] hover:bg-[#8b714c] text-white text-xs font-mono font-bold tracking-widest uppercase rounded-lg transition-all duration-300 shadow cursor-pointer flex items-center gap-2"
+                      >
+                        <Eye className="w-4 h-4" /> LAUNCH ANALYTICS ROOM
+                      </button>
+                      
+                      <a 
+                        href="/analytics" 
+                        target="_blank" 
+                        rel="noopener"
+                        className="px-5 py-3 border border-stone-250 dark:border-stone-800 hover:bg-stone-100 dark:hover:bg-stone-850 text-stone-700 dark:text-stone-250 text-xs font-mono font-bold tracking-widest uppercase rounded-lg transition-all flex items-center gap-1.5"
+                      >
+                        OPEN IN NEW TAB ↗
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-5 border border-stone-150 dark:border-stone-805 rounded-xl space-y-2.5 bg-stone-50/50 dark:bg-stone-950/25">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold block">Security Passphrase Link</span>
+                    <h4 className="text-xs font-semibold text-stone-900 dark:text-stone-100">Synchronized Admin Passphrase</h4>
+                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                      Your separate analytics page is automatically encrypted. It uses the exact administrator passcode configured in your <strong>Security Settings</strong> tab to grant viewer logs authorization.
+                    </p>
+                  </div>
+
+                  <div className="p-5 border border-stone-150 dark:border-stone-805 rounded-xl space-y-2.5 bg-stone-50/50 dark:bg-stone-950/25">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-stone-400 font-bold block">Interactive Capabilities</span>
+                    <h4 className="text-xs font-semibold text-stone-900 dark:text-stone-100">Live Diagnostics & Aggregates</h4>
+                    <p className="text-[11px] text-stone-500 leading-relaxed">
+                      Unlock instant search queries, descending/ascending count sorting, device profile distribution percentages, page view densities, and step-by-step visitor chronology timelines.
+                    </p>
                   </div>
                 </div>
               </div>
