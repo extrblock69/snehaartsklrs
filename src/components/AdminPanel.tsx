@@ -4,7 +4,7 @@ import defaultContent from '../data/site_content.json';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
   HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload,
-  RefreshCw, AlertCircle, Copy, Search
+  RefreshCw, AlertCircle, Copy, Search, Award
 } from 'lucide-react';
 import { Artwork, Lesson, Testimonial, StudentProject, ArtCategory, LessonLevel } from '../types';
 
@@ -131,7 +131,7 @@ export default function AdminPanel() {
   const { content, login, logout, isAdmin, updateContent, adminToken } = useContent();
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
-  const [activeTab, setActiveTab ] = useState<'hero' | 'about' | 'contact' | 'gallery' | 'showcase' | 'lessons' | 'testimonials' | 'security' | 'media' | 'subscribers'>('hero');
+  const [activeTab, setActiveTab ] = useState<'hero' | 'about' | 'achievements' | 'contact' | 'gallery' | 'showcase' | 'lessons' | 'testimonials' | 'security' | 'media' | 'subscribers'>('hero');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
@@ -250,6 +250,24 @@ export default function AdminPanel() {
     metricRightLabel: content.contact?.metricRightLabel || "",
   });
 
+  const [achievementsForm, setAchievementsForm] = useState({
+    badgeText: content.achievements?.badgeText || defaultContent.achievements?.badgeText || '',
+    title: content.achievements?.title || defaultContent.achievements?.title || '',
+    paragraphs: content.achievements?.paragraphs || defaultContent.achievements?.paragraphs || [],
+    metricLeftLabel: content.achievements?.metricLeftLabel || defaultContent.achievements?.metricLeftLabel || '',
+    metricLeftVal: content.achievements?.metricLeftVal || defaultContent.achievements?.metricLeftVal || '',
+    metricLeftSub: content.achievements?.metricLeftSub || defaultContent.achievements?.metricLeftSub || '',
+    metricRightLabel: content.achievements?.metricRightLabel || defaultContent.achievements?.metricRightLabel || '',
+    metricRightVal: content.achievements?.metricRightVal || defaultContent.achievements?.metricRightVal || '',
+    metricRightSub: content.achievements?.metricRightSub || defaultContent.achievements?.metricRightSub || '',
+    recipientName: content.achievements?.recipientName || defaultContent.achievements?.recipientName || '',
+    summaryText: content.achievements?.summaryText || defaultContent.achievements?.summaryText || '',
+  });
+
+  const [achievementsCardsList, setAchievementsCardsList] = useState<any[]>(
+    content.achievements?.cards || defaultContent.achievements?.cards || []
+  );
+
   const [galleryList, setGalleryList] = useState<Artwork[]>([...content.gallery]);
   const [showcaseList, setShowcaseList] = useState<StudentProject[]>([...content.studentShowcase]);
   const [lessonsList, setLessonsList] = useState<Lesson[]>([...content.lessons]);
@@ -313,6 +331,22 @@ export default function AdminPanel() {
         metricRightVal: content.contact?.metricRightVal || "",
         metricRightLabel: content.contact?.metricRightLabel || "",
       });
+      setAchievementsForm({
+        badgeText: content.achievements?.badgeText || defaultContent.achievements?.badgeText || '',
+        title: content.achievements?.title || defaultContent.achievements?.title || '',
+        paragraphs: content.achievements?.paragraphs || defaultContent.achievements?.paragraphs || [],
+        metricLeftLabel: content.achievements?.metricLeftLabel || defaultContent.achievements?.metricLeftLabel || '',
+        metricLeftVal: content.achievements?.metricLeftVal || defaultContent.achievements?.metricLeftVal || '',
+        metricLeftSub: content.achievements?.metricLeftSub || defaultContent.achievements?.metricLeftSub || '',
+        metricRightLabel: content.achievements?.metricRightLabel || defaultContent.achievements?.metricRightLabel || '',
+        metricRightVal: content.achievements?.metricRightVal || defaultContent.achievements?.metricRightVal || '',
+        metricRightSub: content.achievements?.metricRightSub || defaultContent.achievements?.metricRightSub || '',
+        recipientName: content.achievements?.recipientName || defaultContent.achievements?.recipientName || '',
+        summaryText: content.achievements?.summaryText || defaultContent.achievements?.summaryText || '',
+      });
+      setAchievementsCardsList(
+        content.achievements?.cards ? [...content.achievements?.cards] : (defaultContent.achievements?.cards ? [...defaultContent.achievements?.cards] : [])
+      );
       setGalleryList(content.gallery ? [...content.gallery] : []);
       setShowcaseList(content.studentShowcase ? [...content.studentShowcase] : []);
       setLessonsList(content.lessons ? [...content.lessons] : []);
@@ -502,6 +536,10 @@ export default function AdminPanel() {
       lessons: lessonsList,
       testimonials: testimonialsList,
       uploadedImages: uploadedImages,
+      achievements: {
+        ...achievementsForm,
+        cards: achievementsCardsList,
+      },
     };
 
     console.log(`[CLIENT-SAVE-DIAGNOSTIC] preparing to save content payload copy...`, {
@@ -612,6 +650,47 @@ export default function AdminPanel() {
   const handleRemoveAboutParagraph = (index: number) => {
     const nextParas = aboutForm.paragraphs.filter((_, i) => i !== index);
     setAboutForm({ ...aboutForm, paragraphs: nextParas });
+  };
+
+  // --- ACHIEVEMENTS Helpers ---
+  const handleAchievementsParagraphChange = (index: number, val: string) => {
+    const nextParas = [...achievementsForm.paragraphs];
+    nextParas[index] = val;
+    setAchievementsForm({ ...achievementsForm, paragraphs: nextParas });
+  };
+
+  const handleAddAchievementsParagraph = () => {
+    setAchievementsForm({ ...achievementsForm, paragraphs: [...achievementsForm.paragraphs, "New milestone description paragraph."] });
+  };
+
+  const handleRemoveAchievementsParagraph = (index: number) => {
+    const nextParas = achievementsForm.paragraphs.filter((_, i) => i !== index);
+    setAchievementsForm({ ...achievementsForm, paragraphs: nextParas });
+  };
+
+  const handleAddAchievementsCard = () => {
+    const newCard = {
+      id: 'ach-' + Date.now().toString(36),
+      title: 'Academy Honor or Certification',
+      issuer: 'Awarding Body or Council',
+      year: new Date().getFullYear().toString(),
+      description: 'Award description showcasing excellence details and curriculum coverage.',
+      imageUrl: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=800',
+    };
+    setAchievementsCardsList([...achievementsCardsList, newCard]);
+  };
+
+  const handleRemoveAchievementsCard = (id: string) => {
+    setAchievementsCardsList(achievementsCardsList.filter(item => item.id !== id));
+  };
+
+  const handleUpdateAchievementsCard = (id: string, field: string, val: any) => {
+    setAchievementsCardsList(achievementsCardsList.map(item => {
+      if (item.id === id) {
+        return { ...item, [field]: val };
+      }
+      return item;
+    }));
   };
 
   // --- GALLERY TABLE HELPERS ---
@@ -879,6 +958,7 @@ export default function AdminPanel() {
           {[
             { id: 'hero', label: '✏️ Hero Banner' },
             { id: 'about', label: '✨ Biography & Stats' },
+            { id: 'achievements', label: '🏆 Achievements Plaque' },
             { id: 'contact', label: '📞 Contact Details' },
             { id: 'gallery', label: '🖼️ Gallery (Artworks)' },
             { id: 'showcase', label: '🎓 Student Showroom' },
@@ -936,6 +1016,7 @@ export default function AdminPanel() {
             <h2 className="font-serif text-xl font-light text-stone-900 dark:text-stone-100">
               {activeTab === 'hero' && 'Hero Banner Editor'}
               {activeTab === 'about' && 'Biography & Academy Metrics Editor'}
+              {activeTab === 'achievements' && 'Honors & Technical Achievements Manager'}
               {activeTab === 'contact' && 'Contact Form & Studio Address Editor'}
               {activeTab === 'gallery' && 'Fine Art Portfolio Manager'}
               {activeTab === 'showcase' && 'Student Success Showroom'}
@@ -948,6 +1029,7 @@ export default function AdminPanel() {
             <p className="text-xs text-stone-400 mt-1">
               {activeTab === 'hero' && 'Customize the introductory section, main punchlines, and action buttons.'}
               {activeTab === 'about' && 'Update Sneha\'s teacher bio narrative paragraphs, years of training, and students mentored.'}
+              {activeTab === 'achievements' && 'Manage academic certifications, credentials, honors of distinction, and credentials paragraphs.'}
               {activeTab === 'contact' && 'Change the direct phone line, email address, physical layout workspace coordinates, metrics, and quotes.'}
               {activeTab === 'gallery' && 'Add, remove, or modify high-fidelity drawings, sizes, mediums, techniques and gallery categories.'}
               {activeTab === 'showcase' && 'Display exemplary artworks made by students under Sneha\'s precise supervision.'}
@@ -1243,6 +1325,265 @@ export default function AdminPanel() {
                       value={aboutForm.authorRole}
                       onChange={(e) => setAboutForm({ ...aboutForm, authorRole: e.target.value })}
                     />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ACHIEVEMENTS MODULE */}
+            {activeTab === 'achievements' && (
+              <div className="space-y-6 text-left">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Achievements Badge Accent Info</label>
+                    <input
+                      type="text"
+                      className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs"
+                      value={achievementsForm.badgeText}
+                      onChange={(e) => setAchievementsForm({ ...achievementsForm, badgeText: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Achievements Title</label>
+                    <input
+                      type="text"
+                      className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs"
+                      value={achievementsForm.title}
+                      onChange={(e) => setAchievementsForm({ ...achievementsForm, title: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                {/* Metrics and Credentials Authority badge inputs */}
+                <div className="p-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/40 space-y-4">
+                  <h3 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">Quick Metrics & Authority Badges</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Left Metric card */}
+                    <div className="space-y-3.5 border-r border-stone-200/50 dark:border-stone-800/50 pr-0 md:pr-6">
+                      <h4 className="text-xs font-serif italic text-stone-600 dark:text-stone-300">Left Indicator Card (Verified Badge)</h4>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-mono text-stone-400 block uppercase">Label Tracker</label>
+                        <input
+                          type="text"
+                          className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs"
+                          value={achievementsForm.metricLeftLabel}
+                          onChange={(e) => setAchievementsForm({ ...achievementsForm, metricLeftLabel: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-mono text-stone-400 block uppercase">Achievement Value Header</label>
+                        <input
+                          type="text"
+                          className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs"
+                          value={achievementsForm.metricLeftVal}
+                          onChange={(e) => setAchievementsForm({ ...achievementsForm, metricLeftVal: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-mono text-stone-400 block uppercase">Issuing Academy/Subtitle</label>
+                        <input
+                          type="text"
+                          className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs"
+                          value={achievementsForm.metricLeftSub}
+                          onChange={(e) => setAchievementsForm({ ...achievementsForm, metricLeftSub: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Right Metric card */}
+                    <div className="space-y-3.5">
+                      <h4 className="text-xs font-serif italic text-stone-600 dark:text-stone-300">Right Indicator Card (National Badge)</h4>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-mono text-stone-400 block uppercase">Label Tracker</label>
+                        <input
+                          type="text"
+                          className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs"
+                          value={achievementsForm.metricRightLabel}
+                          onChange={(e) => setAchievementsForm({ ...achievementsForm, metricRightLabel: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-mono text-stone-400 block uppercase">Achievement Value Header</label>
+                        <input
+                          type="text"
+                          className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs"
+                          value={achievementsForm.metricRightVal}
+                          onChange={(e) => setAchievementsForm({ ...achievementsForm, metricRightVal: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-mono text-stone-400 block uppercase">Issuing Academy/Subtitle</label>
+                        <input
+                          type="text"
+                          className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs"
+                          value={achievementsForm.metricRightSub}
+                          onChange={(e) => setAchievementsForm({ ...achievementsForm, metricRightSub: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recipient details and credential summary */}
+                <div className="p-4 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/40 space-y-4">
+                  <h3 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">Parchment plaque Recipient & Summary details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="space-y-1.5 md:col-span-1">
+                      <label className="text-[10px] font-mono text-stone-400 block uppercase">Recipient Name (In-Plaque)</label>
+                      <input
+                        type="text"
+                        className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs"
+                        value={achievementsForm.recipientName}
+                        onChange={(e) => setAchievementsForm({ ...achievementsForm, recipientName: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1.5 md:col-span-2">
+                      <label className="text-[10px] font-mono text-stone-400 block uppercase">Credential bottom summary info paragraph</label>
+                      <textarea
+                        rows={2}
+                        className="w-full bg-white dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs resize-none outline-none"
+                        value={achievementsForm.summaryText}
+                        onChange={(e) => setAchievementsForm({ ...achievementsForm, summaryText: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">Description Paragraphs</h3>
+                    <button
+                      type="button"
+                      onClick={handleAddAchievementsParagraph}
+                      className="text-xs text-[#B38F4D] font-mono hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Paragraph
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    {achievementsForm.paragraphs.map((para, i) => (
+                      <div key={i} className="flex gap-3 items-start bg-stone-50 dark:bg-stone-950 p-3 rounded-lg border border-stone-200 dark:border-stone-850">
+                        <span className="font-mono text-xs text-stone-400 pt-3 flex-shrink-0">P{i+1}</span>
+                        <textarea
+                          rows={3}
+                          className="flex-grow bg-transparent border-none text-xs focus:ring-0 p-0 resize-none outline-none text-stone-800 dark:text-stone-100"
+                          value={para || ""}
+                          onChange={(e) => handleAchievementsParagraphChange(i, e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveAchievementsParagraph(i)}
+                          className="text-stone-400 hover:text-red-500 pt-2 cursor-pointer"
+                          title="Remove paragraph block"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-stone-100 dark:border-stone-800 pt-6 mt-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-serif font-light text-stone-800 dark:text-stone-100">Honor & Award Cards (Gallery Deck)</h4>
+                      <p className="text-[11px] text-stone-400">Add credentials that users can flip, read details of, or magnify into a certificate plaque.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddAchievementsCard}
+                      className="text-xs font-mono bg-stone-900 border border-stone-850 hover:bg-stone-800 text-white rounded-lg px-3 py-1.5 flex items-center gap-1 cursor-pointer shadow"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Award Plaque
+                    </button>
+                  </div>
+
+                  <div className="space-y-6">
+                    {achievementsCardsList.map((ach, idx) => (
+                      <div key={ach.id || idx} className="p-5 rounded-xl border border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-950/60 relative space-y-4">
+                        <div className="absolute top-4 right-4 flex items-center gap-2">
+                          <span className="text-[9px] font-mono text-stone-400 px-2 py-0.5 rounded border border-stone-200/60 dark:border-stone-800">
+                            ID: {ach.id}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAchievementsCard(ach.id)}
+                            className="p-1 rounded bg-stone-100 hover:bg-red-500 dark:bg-stone-900 hover:text-white text-stone-500 transition-colors cursor-pointer"
+                            title="Delete this award card"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="md:col-span-1 space-y-2">
+                            <span className="text-[10px] font-mono text-stone-400 block uppercase">Plaque Image</span>
+                            <div className="h-32 w-full rounded-md bg-stone-100 dark:bg-stone-905 border border-stone-200 dark:border-stone-850 overflow-hidden flex items-center justify-center relative">
+                              {ach.imageUrl ? (
+                                <img
+                                  src={ach.imageUrl}
+                                  alt="Award preview"
+                                  className="w-full h-full object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                              ) : (
+                                <Award className="w-8 h-8 text-stone-300" />
+                              )}
+                            </div>
+                            <div className="w-full mt-2">
+                              <FileUploader
+                                value={ach.imageUrl}
+                                adminToken={adminToken}
+                                onChange={(url) => handleUpdateAchievementsCard(ach.id, 'imageUrl', url)}
+                                placeholder="https://images.unsplash.com/..."
+                                onUploaded={handleNewUploadRecord}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Award/Honor Title</span>
+                              <input
+                                type="text"
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs text-stone-800 dark:text-stone-100"
+                                value={ach.title}
+                                onChange={(e) => handleUpdateAchievementsCard(ach.id, 'title', e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Awarding Institution</span>
+                              <input
+                                type="text"
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs text-stone-800 dark:text-stone-100"
+                                value={ach.issuer}
+                                onChange={(e) => handleUpdateAchievementsCard(ach.id, 'issuer', e.target.value)}
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Year Awarded</span>
+                              <input
+                                type="text"
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs text-stone-800 dark:text-stone-100"
+                                value={ach.year}
+                                onChange={(e) => handleUpdateAchievementsCard(ach.id, 'year', e.target.value)}
+                              />
+                            </div>
+                            <div className="sm:col-span-2 space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Excellence Description (Flip Side)</span>
+                              <textarea
+                                rows={2}
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded p-2 text-xs text-stone-800 dark:text-stone-100 resize-none outline-none"
+                                value={ach.description}
+                                onChange={(e) => handleUpdateAchievementsCard(ach.id, 'description', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

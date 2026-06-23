@@ -227,6 +227,49 @@
     "phone": "+917562224809",
     "whatsapp": "https://wa.me/917562224809"
   },
+  "achievements": {
+    "badgeText": "ACADEMIC EXCELLENCE & HONORS",
+    "title": "Honors & Milestones",
+    "paragraphs": [
+      "Sneha's dedication to classical fine art has been recognized by national institutes and international academy circles. Her precise technical command over charcoal drawing, structural values, and Sight-Size execution has earned her academic distinctions.",
+      "Most notably, she has been certified in the elite Drawing Mastery Program by Reyanssh Rahul Academy, establishing her among India's most recommended traditional fine art tutors and drawing authorities.",
+      "Under her leadership, her students have gone on to win prestigious youth art prizes and showcase works in national galleries across Madhya Pradesh and beyond."
+    ],
+    "metricLeftLabel": "Verified",
+    "metricLeftVal": "Drawing Mastery",
+    "metricLeftSub": "Reyanssh Rahul Academy",
+    "metricRightLabel": "Credentials",
+    "metricRightVal": "National Tutor",
+    "metricRightSub": "Traditional Focus",
+    "recipientName": "Sneha Bansal",
+    "summaryText": "This achievement represents verified completion of rigorous training or recognized academic accomplishments within traditional drawing disciplines. Under her administration, Sneha propagates these deep values to empower her students at the Kalakar Sneha platform.",
+    "cards": [
+      {
+        "id": "ach-1",
+        "title": "Drawing Mastery Certification",
+        "issuer": "Reyanssh Rahul Academy",
+        "year": "2024",
+        "description": "Awarded for exceptional mastery of traditional fine art drawing principles, advanced value rendering, and consistent excellence in Sight-Size portrait methods.",
+        "imageUrl": "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=800"
+      },
+      {
+        "id": "ach-2",
+        "title": "Outstanding Fine Art Tutor",
+        "issuer": "National Arts Council",
+        "year": "2023",
+        "description": "Recognized for her contribution to reviving traditional chiaroscuro academic techniques and mentoring over 450+ students with systematic instructions.",
+        "imageUrl": "https://images.unsplash.com/photo-1447069387593-a5de0862481e?auto=format&fit=crop&q=80&w=800"
+      },
+      {
+        "id": "ach-3",
+        "title": "Classical Plaster Study First Prize",
+        "issuer": "Siena Academy Circle",
+        "year": "2022",
+        "description": "Awarded first place for her detailed graphite plaster cast study replicas demonstrating precise edge-hierarchies and monumental negative volumes.",
+        "imageUrl": "https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=800"
+      }
+    ]
+  },
   "globalButtons": {
     "navbarContactLink": "",
     "lessonsInquireLink": ""

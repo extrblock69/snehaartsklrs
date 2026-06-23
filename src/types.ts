@@ -116,6 +116,27 @@ export interface SiteContent {
   lessons: Lesson[];
   testimonials: Testimonial[];
   uploadedImages?: string[];
+  achievements?: {
+    badgeText: string;
+    title: string;
+    paragraphs: string[];
+    metricLeftLabel?: string;
+    metricLeftVal?: string;
+    metricLeftSub?: string;
+    metricRightLabel?: string;
+    metricRightVal?: string;
+    metricRightSub?: string;
+    recipientName?: string;
+    summaryText?: string;
+    cards: {
+      id: string;
+      title: string;
+      issuer: string;
+      year: string;
+      description: string;
+      imageUrl: string;
+    }[];
+  };
 }
 
 

@@ -178,10 +178,6 @@ export default function Hero() {
                 </p>
               </div>
 
-              {/* Artistic pencil sketch signature look-alike */}
-              <div className="font-serif italic text-xs text-stone-400 dark:text-stone-500 pr-1">
-                {about.authorName ? about.authorName.split(' ')[0] : "Sneha"}
-              </div>
             </div>
           </motion.div>
 

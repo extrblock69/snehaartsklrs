@@ -4,6 +4,7 @@ import Loader from './components/Loader';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
+import Achievements from './components/Achievements';
 import Gallery from './components/Gallery';
 import StudentShowcase from './components/StudentShowcase';
 import Contact from './components/Contact';
@@ -80,6 +81,16 @@ export default function App() {
                 transition={{ duration: 0.8, ease: "easeOut" }}
               >
                 <About />
+              </motion.div>
+
+              {/* 2.5 Honors & Achievements */}
+              <motion.div
+                initial={{ opacity: 0, y: 35 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <Achievements />
               </motion.div>
 
               {/* 3. High-resolution Gallery of Sketches */}

@@ -45,11 +45,15 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     fetchContent();
 
-    // High performance background real-time sync (polls every 5 seconds)
+    // High performance background real-time sync (polls every 15 seconds)
     // Ensures multiple devices viewing/editing the site have immediate consistency
+    // Avoids wiping unsaved form inputs of an actively editing admin
     const intervalId = setInterval(() => {
-      fetchContent(true);
-    }, 5000);
+      const hasToken = !!localStorage.getItem("sneha_admin_token");
+      if (!hasToken) {
+        fetchContent(true);
+      }
+    }, 15000);
 
     return () => clearInterval(intervalId);
   }, []);
