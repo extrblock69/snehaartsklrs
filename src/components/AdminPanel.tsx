@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useContent } from '../context/ContentContext';
 import defaultContent from '../data/site_content.json';
+import ThemeToggle from './ThemeToggle';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
   HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload,
@@ -920,6 +921,8 @@ export default function AdminPanel() {
 
         {/* Global actions: Preview, Save, Logout */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
+
           <a
             href="/"
             className="h-10 px-4 border border-stone-300 hover:border-stone-400 dark:border-stone-700 dark:hover:border-stone-600 text-stone-700 dark:text-stone-300 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all uppercase tracking-wider font-mono"
