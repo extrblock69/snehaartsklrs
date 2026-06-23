@@ -168,6 +168,9 @@ export default function AdminPanel() {
     youtube: content.socials?.youtube || '',
     facebook: content.socials?.facebook || '',
     linkedin: content.socials?.linkedin || '',
+    mail: content.socials?.mail || '',
+    phone: content.socials?.phone || '',
+    whatsapp: content.socials?.whatsapp || '',
   });
 
   const [globalButtonsForm, setGlobalButtonsForm] = useState({
@@ -232,6 +235,9 @@ export default function AdminPanel() {
         youtube: content.socials?.youtube || '',
         facebook: content.socials?.facebook || '',
         linkedin: content.socials?.linkedin || '',
+        mail: content.socials?.mail || '',
+        phone: content.socials?.phone || '',
+        whatsapp: content.socials?.whatsapp || '',
       });
       setGlobalButtonsForm({
         navbarContactLink: content.globalButtons?.navbarContactLink || '',
@@ -742,9 +748,6 @@ export default function AdminPanel() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-250 dark:border-stone-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-wood focus:ring-1 focus:ring-wood transition-all"
               />
-              <span className="block text-[10px] text-stone-500 font-sans mt-1 leading-relaxed">
-                Default credentials: Enter <code className="bg-stone-150 dark:bg-stone-800 px-1 py-0.5 rounded font-mono font-bold text-wood">sneha_admin_2026</code> or <code className="bg-stone-150 dark:bg-stone-800 px-1 py-0.5 rounded font-mono font-bold text-wood">admin</code>
-              </span>
             </div>
 
             {loginError && (
@@ -1348,13 +1351,13 @@ export default function AdminPanel() {
                   </div>
 
                   <div className="border-t border-stone-200 dark:border-stone-800 pt-5 mt-6 space-y-4">
-                    <h4 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">Footer Social Profiles (Touch Enabled)</h4>
+                    <h4 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">Footer Social Profiles & Contact Anchors</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-1.5">
                         <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Instagram Profile URL</label>
                         <input
                           type="text"
-                          placeholder="https://instagram.com/kalakaar_sneha"
+                          placeholder="https://instagram.com/kalakar_sneha"
                           className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
                           value={socialsForm.instagram}
                           onChange={(e) => setSocialsForm({ ...socialsForm, instagram: e.target.value })}
@@ -1364,7 +1367,7 @@ export default function AdminPanel() {
                         <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">YouTube Channel URL</label>
                         <input
                           type="text"
-                          placeholder="https://youtube.com/@kalakaar_sneha"
+                          placeholder="https://youtube.com/@kalakar_sneha"
                           className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
                           value={socialsForm.youtube}
                           onChange={(e) => setSocialsForm({ ...socialsForm, youtube: e.target.value })}
@@ -1377,7 +1380,7 @@ export default function AdminPanel() {
                         <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Facebook Page URL</label>
                         <input
                           type="text"
-                          placeholder="https://facebook.com/kalakaar.sneha"
+                          placeholder="https://facebook.com/kalakar.sneha"
                           className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
                           value={socialsForm.facebook}
                           onChange={(e) => setSocialsForm({ ...socialsForm, facebook: e.target.value })}
@@ -1391,6 +1394,39 @@ export default function AdminPanel() {
                           className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
                           value={socialsForm.linkedin}
                           onChange={(e) => setSocialsForm({ ...socialsForm, linkedin: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Contact Email (Mail)</label>
+                        <input
+                          type="text"
+                          placeholder="sneha@fineart-morena.com"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={socialsForm.mail}
+                          onChange={(e) => setSocialsForm({ ...socialsForm, mail: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Call Button Number</label>
+                        <input
+                          type="text"
+                          placeholder="+917562224809"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={socialsForm.phone}
+                          onChange={(e) => setSocialsForm({ ...socialsForm, phone: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">WhatsApp (wa.me link or number)</label>
+                        <input
+                          type="text"
+                          placeholder="https://wa.me/917562224809"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={socialsForm.whatsapp}
+                          onChange={(e) => setSocialsForm({ ...socialsForm, whatsapp: e.target.value })}
                         />
                       </div>
                     </div>

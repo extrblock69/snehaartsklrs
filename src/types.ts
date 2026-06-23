@@ -103,6 +103,9 @@ export interface SiteContent {
     youtube?: string;
     facebook?: string;
     linkedin?: string;
+    mail?: string;
+    phone?: string;
+    whatsapp?: string;
   };
   globalButtons?: {
     navbarContactLink?: string;

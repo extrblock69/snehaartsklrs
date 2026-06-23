@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, Image, Sparkles, Pencil, GraduationCap, Heart, Mail, Clock } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
-import { KalakaarSnehaLogo } from './KalakarSnehaAssets';
+import { KalakarSnehaLogo } from './KalakarSnehaAssets';
 import { useContent } from '../context/ContentContext';
 
 export default function Navbar() {
@@ -10,6 +10,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   // Track scrolling to apply blur backgrounds or set active section
   useEffect(() => {
@@ -32,8 +33,20 @@ export default function Navbar() {
       }
     };
 
+    const handleScrollProgress = () => {
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (totalHeight > 0) {
+        const progress = (window.scrollY / totalHeight) * 100;
+        setScrollProgress(progress);
+      }
+    };
+
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScrollProgress);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', handleScrollProgress);
+    };
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -56,23 +69,29 @@ export default function Navbar() {
   ];
 
   return (
-    <nav
-      id="main-navigation"
-      className={`fixed top-0 left-0 right-0 z-45 transition-all duration-300 border-b ${
-        scrolled
-          ? 'bg-stone-50/80 dark:bg-stone-950/80 backdrop-blur-md py-4 border-stone-200/50 dark:border-stone-800/50 shadow-sm'
-          : 'bg-transparent py-6 border-transparent'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        {/* Logo */}
-        <button
-          onClick={() => scrollToSection('home')}
-          className="flex items-center gap-1.5 group cursor-pointer focus:outline-none"
-          id="navbar-logo"
-        >
-          <KalakaarSnehaLogo className="h-10 sm:h-12 w-auto group-hover:scale-[1.03] transition-all duration-300" />
-        </button>
+    <>
+      {/* Slim, elegant scroll progress bar at the top edge of the viewport */}
+      <div 
+        className="fixed top-0 left-0 h-[3px] bg-wood dark:bg-[#7a654f] z-[100] transition-all duration-75 ease"
+        style={{ width: `${scrollProgress}%` }}
+      />
+      <nav
+        id="main-navigation"
+        className={`fixed top-0 left-0 right-0 z-45 transition-all duration-300 border-b ${
+          scrolled
+            ? 'bg-stone-50/80 dark:bg-stone-950/80 backdrop-blur-md py-4 border-stone-200/50 dark:border-stone-800/50 shadow-sm'
+            : 'bg-transparent py-6 border-transparent'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          {/* Logo */}
+          <button
+            onClick={() => scrollToSection('home')}
+            className="flex items-center gap-1.5 group cursor-pointer focus:outline-none"
+            id="navbar-logo"
+          >
+            <KalakarSnehaLogo className="h-10 sm:h-12 w-auto group-hover:scale-[1.03] transition-all duration-300" />
+          </button>
 
         {/* Desktop Links */}
         <div className="hidden lg:flex items-center gap-8">
@@ -198,5 +217,6 @@ export default function Navbar() {
         )}
       </AnimatePresence>
     </nav>
+    </>
   );
 }

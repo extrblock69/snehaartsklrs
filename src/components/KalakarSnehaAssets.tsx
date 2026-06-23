@@ -10,7 +10,7 @@ interface AssetProps {
  * It attempts to load '/assets/kalakar_sneha_logo.png' first; if it fails or is not found,
  * it falls back to a gorgeous, high-fidelity responsive SVG that mimics the branding in the photo perfectly.
  */
-export const KalakaarSnehaLogo: React.FC<AssetProps> = ({ className = '', style }) => {
+export const KalakarSnehaLogo: React.FC<AssetProps> = ({ className = '', style }) => {
   // Inspect if caller passes color override like text-white (for the dark footer)
   const isLightText = className.includes('text-white') || className.includes('text-stone-100') || className.includes('text-stone-300');
 
@@ -91,7 +91,7 @@ export const KalakaarSnehaLogo: React.FC<AssetProps> = ({ className = '', style 
       <span className="flex flex-col justify-center leading-none">
         <span className="flex items-baseline gap-1 leading-none">
           <span className={`font-brand text-lg sm:text-xl font-bold tracking-wide transition-colors duration-300 ${textCol}`}>
-            Kalakaar
+            Kalakar
           </span>
           <span className={`font-brand italic font-normal text-lg sm:text-xl tracking-wide transition-colors duration-300 ${accentTextCol}`}>
             Sneha
@@ -111,7 +111,7 @@ export const KalakaarSnehaLogo: React.FC<AssetProps> = ({ className = '', style 
  * It defaults to '/assets/sneha_photo.png' but gracefully falls back to a gorgeous interactive
  * CSS and SVG composition if the asset isn't present.
  */
-export const KalakaarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ className = 'w-full h-full', style, src }) => {
+export const KalakarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ className = 'w-full h-full', style, src }) => {
   const [loadFailed, setLoadFailed] = useState(false);
   const imageSrc = src || "https://images.unsplash.com/photo-1608155686393-8fdd966d784d?auto=format&fit=crop&q=80&w=800";
 
@@ -280,7 +280,7 @@ export const KalakaarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ cl
 
           {/* Signature Label */}
           <text x="15" y="238" fill="#8C7965" fontFamily="Georgia, serif" fontSize="7" fontStyle="italic" opacity="0.9">
-            Kalakaar Sneha &copy; 2026
+            Kalakar Sneha &copy; 2026
           </text>
           
           {/* Scientific diagram index */}
@@ -292,7 +292,7 @@ export const KalakaarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ cl
         {/* Brand bar banner signature layout */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-stone-900/90 text-stone-100 flex items-center justify-center py-2 px-4 shadow rounded-lg w-[88%] border border-stone-800">
           <div className="flex flex-col items-center">
-            <span className="font-brand italic text-base leading-tight">Kalakaar_sneha</span>
+            <span className="font-brand italic text-base leading-tight">Kalakar_sneha</span>
             <span className="text-[8px] font-mono tracking-widest text-[#EAB308] uppercase mt-0.5">WINGS OF FUTURE</span>
           </div>
         </div>
@@ -301,5 +301,5 @@ export const KalakaarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ cl
   );
 };
 
-export const KalakarSnehaLogo = KalakaarSnehaLogo;
-export const KalakarSnehaPhoto = KalakaarSnehaPhoto;
+export const KalakaarSnehaLogo = KalakarSnehaLogo;
+export const KalakaarSnehaPhoto = KalakarSnehaPhoto;

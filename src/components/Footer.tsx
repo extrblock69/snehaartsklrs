@@ -1,5 +1,5 @@
 import { Mail, Phone, MapPin, ArrowUpCircle, Instagram, Youtube, Facebook, Linkedin } from 'lucide-react';
-import { KalakaarSnehaLogo } from './KalakarSnehaAssets';
+import { KalakarSnehaLogo } from './KalakarSnehaAssets';
 import { useContent } from '../context/ContentContext';
 
 export default function Footer() {
@@ -23,7 +23,7 @@ export default function Footer() {
         {/* Bio block col 1 (6 cols layout) */}
         <div className="md:col-span-6 space-y-5">
           <div className="flex items-center gap-2">
-            <KalakaarSnehaLogo className="h-10 w-auto text-white" />
+            <KalakarSnehaLogo className="h-10 w-auto text-white" />
           </div>
 
           <p className="text-stone-400 font-light text-xs leading-relaxed max-w-md">
@@ -75,6 +75,37 @@ export default function Footer() {
                 className="w-9 h-9 rounded-full border border-stone-800 hover:border-wood bg-stone-950 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <Linkedin className="w-4 h-4" />
+              </a>
+            )}
+            {socials?.mail && (
+              <a
+                href={`mailto:${socials.mail}`}
+                title="Email Contact"
+                className="w-9 h-9 rounded-full border border-stone-800 hover:border-wood bg-stone-950 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Mail className="w-4 h-4" />
+              </a>
+            )}
+            {socials?.phone && (
+              <a
+                href={`tel:${socials.phone}`}
+                title="Phone Number"
+                className="w-9 h-9 rounded-full border border-stone-800 hover:border-wood bg-stone-950 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Phone className="w-4 h-4" />
+              </a>
+            )}
+            {socials?.whatsapp && (
+              <a
+                href={socials.whatsapp.startsWith('http') ? socials.whatsapp : `https://wa.me/${socials.whatsapp.replace(/[^0-9]/g, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="WhatsApp Chat"
+                className="w-9 h-9 rounded-full border border-stone-800 hover:border-emerald-500 bg-stone-950 flex items-center justify-center text-stone-400 hover:text-emerald-400 transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.004 0C5.38 0 0 5.38 0 12.004c0 2.115.548 4.184 1.59 6.012L.057 24l6.17-1.618a11.95 11.95 0 005.777 1.623c6.623 0 12.004-5.38 12.004-12.004C24.008 5.38 18.627 0 12.004 0zm6.827 16.924c-.26.732-1.34 1.321-1.848 1.378-.456.05-1.042.08-2.915-.694a12.164 12.164 0 01-5.115-3.415c-.213-.231-1.587-2.115-1.587-4.041 0-1.926.993-2.87 1.347-3.23.308-.314.67-.394.887-.394.217 0 .438.004.629.012.197.008.462-.075.72.544.264.633.91 2.213.988 2.373.08.16.131.35.024.562-.107.213-.16.346-.32.532-.158.188-.334.346-.477.5-.157.173-.323.363-.14.676.183.313.81 1.336 1.74 2.164.93.828 1.71 1.085 2.022 1.229.314.145.497.121.68-.088.183-.21.782-.91.99-.122a61.1 61.1 0 011.08.125c.346.16.576.24.738.513.163.272.163 1.173-.098 1.905z"/>
+                </svg>
               </a>
             )}
           </div>

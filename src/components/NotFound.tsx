@@ -67,7 +67,7 @@ export default function NotFound({ onReturnHome }: NotFoundProps) {
         </motion.div>
 
         <p className="font-mono text-[9px] tracking-widest text-stone-400 dark:text-stone-500 uppercase select-none">
-          Kalakaar Sneha Art Academy
+          Kalakar Sneha Art Academy
         </p>
       </div>
     </div>
