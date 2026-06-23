@@ -222,7 +222,7 @@ async function saveSiteContent(data: any): Promise<boolean> {
       console.log(`[BACKEND-DATA-SYNC] Attempting to upsert site_content payload to Supabase database table "public.site_configs"...`);
       const { error } = await supabaseClient
         .from("site_configs")
-        .upsert({ key: "site_content", value: data, updated_at: new Date().toISOString() }, { onConflict: "key" });
+        .upsert({ key: "site_content", value: data }, { onConflict: "key" });
       
       if (!error) {
         dbSaved = true;
