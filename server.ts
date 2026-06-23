@@ -110,9 +110,6 @@ if (SUPABASE_URL && SUPABASE_ANON_KEY) {
   console.log("Supabase parameters omitted in environment. Operating with high-resilience local JSON database file.");
 }
 
-// Memory caching to optimize read speed and reduce payload latency
-let cachedContent: any = null;
-
 // Helper: Normalize absolute image URLs lacking the http/https protocol prefix
 function normalizeClientUrls(obj: any): any {
   if (obj === null || obj === undefined) return obj;
@@ -152,27 +149,56 @@ async function getSiteContent() {
         .from("site_configs")
         .select("value")
         .eq("key", "site_content")
-        .single();
+        .maybeSingle(); // Use maybeSingle to prevent 406 row count errors if empty
       
       if (error) {
-        console.warn("Supabase database read notice (site_configs table may verify or require creation):", error.message);
+        console.warn("Supabase database read notice:", error.message);
+        if (!allowLocalFallback) {
+          throw new Error(`Supabase database query failed and local storage is strictly disabled in fallback.ts: ${error.message}`);
+        }
       } else if (data && data.value) {
-        cachedContent = data.value;
-        content = cachedContent;
+        content = data.value;
+      } else {
+        // If row doesn't exist in Supabase yet, attempt to seed it automatically from the default JSON
+        console.log("Seeding Supabase site_configs table with default content blueprint...");
+        try {
+          const raw = fs.readFileSync(CONTENT_FILE_PATH, "utf-8");
+          const parsed = JSON.parse(raw);
+          const { error: upsertError } = await supabaseClient
+            .from("site_configs")
+            .upsert({ key: "site_content", value: parsed });
+          if (!upsertError) {
+            content = parsed;
+            console.log("Successfully seeded Supabase with initial site content.");
+          } else {
+            console.error("Supabase content seeding error:", upsertError.message);
+            if (!allowLocalFallback) {
+              throw new Error(`Supabase content seeding failed: ${upsertError.message}`);
+            }
+          }
+        } catch (seedErr: any) {
+          console.error("Failed to seed default content to Supabase:", seedErr.message);
+          if (!allowLocalFallback) {
+            throw seedErr;
+          }
+        }
       }
     } catch (err: any) {
       console.error("Supabase load exception:", err.message);
+      if (!allowLocalFallback) {
+        throw err;
+      }
     }
   }
 
   if (!content) {
+    if (!allowLocalFallback) {
+      throw new Error("Supabase has no content row, is offline, or uninitialized, and local file fallback is disabled.");
+    }
     try {
-      if (cachedContent) {
-        content = cachedContent;
-      } else if (fs.existsSync(CONTENT_FILE_PATH)) {
+      if (fs.existsSync(CONTENT_FILE_PATH)) {
         const raw = fs.readFileSync(CONTENT_FILE_PATH, "utf-8");
-        cachedContent = JSON.parse(raw);
-        content = cachedContent;
+        content = JSON.parse(raw);
       }
     } catch (error) {
       console.error("Error reading site_content.json, using fallback empty state", error);
@@ -184,7 +210,6 @@ async function getSiteContent() {
 
 // Helper: save content
 async function saveSiteContent(data: any): Promise<boolean> {
-  cachedContent = data;
   let dbSaved = false;
 
   if (supabaseClient) {
@@ -197,24 +222,39 @@ async function saveSiteContent(data: any): Promise<boolean> {
         dbSaved = true;
         console.log("Successfully persisted site content configurations to Supabase Cloud Row!");
       } else {
-        console.warn("Could not upsert to Supabase site_configs table, falling back to local file:", error.message);
+        console.warn("Could not upsert to Supabase site_configs table:", error.message);
+        if (!allowLocalFallback) {
+          throw new Error(`Supabase DB Write error, local fallback is disabled in fallback.ts: ${error.message}`);
+        }
       }
     } catch (err: any) {
       console.error("Supabase upsert exception:", err.message);
+      if (!allowLocalFallback) {
+        throw err;
+      }
+    }
+  } else {
+    if (!allowLocalFallback) {
+      throw new Error("Supabase is unconfigured, and local file fallback is disabled in fallback.ts.");
     }
   }
 
-  try {
-    const dir = path.dirname(CONTENT_FILE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+  // Only save to local site_content.json file as fallback if local fallback is allowed!
+  if (allowLocalFallback) {
+    try {
+      const dir = path.dirname(CONTENT_FILE_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(CONTENT_FILE_PATH, JSON.stringify(data, null, 2), "utf-8");
+      return true;
+    } catch (error) {
+      console.error("Error writing to site_content.json", error);
+      return dbSaved;
     }
-    fs.writeFileSync(CONTENT_FILE_PATH, JSON.stringify(data, null, 2), "utf-8");
-    return true;
-  } catch (error) {
-    console.error("Error writing to site_content.json", error);
-    return dbSaved;
   }
+
+  return dbSaved;
 }
 
 // In-memory sessions list
@@ -239,11 +279,22 @@ const requireAdmin = (req: express.Request, res: express.Response, next: express
 
 // API: Get Current Content
 app.get("/api/content", async (req, res) => {
-  const content = await getSiteContent();
-  if (content) {
-    res.json(content);
-  } else {
-    res.status(500).json({ error: "Unable to retrieve site content" });
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  try {
+    const content = await getSiteContent();
+    if (content) {
+      return res.json(content);
+    } else {
+      return res.status(500).json({ error: "Unable to retrieve site content" });
+    }
+  } catch (err: any) {
+    console.error("Express /api/content loader error:", err.message || err);
+    return res.status(500).json({
+      error: "Unable to retrieve site content due to database configuration or policy rules violation.",
+      details: err.message || String(err)
+    });
   }
 });
 

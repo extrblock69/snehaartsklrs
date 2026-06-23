@@ -23,10 +23,12 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isAdmin, setIsAdmin] = useState<boolean>(!!localStorage.getItem("sneha_admin_token"));
 
   // Fetch from Express API
-  const fetchContent = async () => {
+  const fetchContent = async (isBackground = false) => {
     try {
-      setIsLoading(true);
-      const res = await fetch(`${API_BASE_URL}/api/content`);
+      if (!isBackground) {
+        setIsLoading(true);
+      }
+      const res = await fetch(`${API_BASE_URL}/api/content?t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         setContent(data);
@@ -34,12 +36,22 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } catch (error) {
       console.warn("Could not fetch site content from API, using default JSON fallback:", error);
     } finally {
-      setIsLoading(false);
+      if (!isBackground) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
     fetchContent();
+
+    // High performance background real-time sync (polls every 5 seconds)
+    // Ensures multiple devices viewing/editing the site have immediate consistency
+    const intervalId = setInterval(() => {
+      fetchContent(true);
+    }, 5000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   // Login handler
