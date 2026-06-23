@@ -10,102 +10,94 @@ interface AssetProps {
  * It attempts to load '/assets/kalakar_sneha_logo.png' first; if it fails or is not found,
  * it falls back to a gorgeous, high-fidelity responsive SVG that mimics the branding in the photo perfectly.
  */
-export const KalakarSnehaLogo: React.FC<AssetProps> = ({ className = 'h-12', style }) => {
-  const [loadFailed, setLoadFailed] = useState(false);
+export const KalakarSnehaLogo: React.FC<AssetProps> = ({ className = '', style }) => {
+  // Inspect if caller passes color override like text-white (for the dark footer)
+  const isLightText = className.includes('text-white') || className.includes('text-stone-100') || className.includes('text-stone-300');
 
-  if (!loadFailed) {
-    return (
-      <img
-        src="/assets/kalakar_sneha_logo.png"
-        alt="Kalakar Sneha"
-        onError={() => setLoadFailed(true)}
-        referrerPolicy="no-referrer"
-        className={className}
-        style={style}
-      />
-    );
-  }
+  const textCol = isLightText 
+    ? 'text-stone-100 group-hover:text-white' 
+    : 'text-stone-900 group-hover:text-stone-950 dark:text-stone-50 dark:group-hover:text-white';
+  
+  const accentTextCol = isLightText
+    ? 'text-stone-300'
+    : 'text-wood dark:text-stone-250';
 
-  // High-fidelity SVG Fallback mimicking the hand-drawn sketch, paintbrush, and artistic font
+  const iconCol = isLightText
+    ? 'text-stone-200'
+    : 'text-stone-800 dark:text-stone-100';
+
   return (
-    <svg
-      viewBox="0 0 350 100"
-      className={className}
-      style={{ display: 'block', ...style }}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <div 
+      className={`flex items-center gap-3 select-none ${className}`} 
+      style={style}
     >
-      {/* Background Yellow scaffolding lines on the left background */}
-      <g opacity="0.35">
-        <path d="M 12 40 L 42 20 L 72 40 L 72 80 L 42 98 L 12 80 Z" stroke="#EAB308" strokeWidth="1" strokeDasharray="2 2" />
-        <path d="M 42 20 L 42 98" stroke="#EAB308" strokeWidth="1" strokeDasharray="2 2" />
-        <path d="M 12 40 L 72 40" stroke="#EAB308" strokeWidth="0.5" />
-        <path d="M 12 80 L 72 80" stroke="#EAB308" strokeWidth="0.5" />
-        <circle cx="42" cy="20" r="1.5" fill="#EAB308" />
-        <circle cx="12" cy="40" r="1.5" fill="#EAB308" />
-        <circle cx="72" cy="40" r="1.5" fill="#EAB308" />
-      </g>
+      {/* High-craft, elegant SVG emblem representing precise charcoal draftmanship & organic flow */}
+      <svg
+        viewBox="0 0 40 40"
+        className={`w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 transition-transform duration-300 group-hover:scale-110 ${iconCol}`}
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Sacred geometry circles representing perspective structure in academic drawing */}
+        <circle 
+          cx="20" 
+          cy="20" 
+          r="16" 
+          stroke="currentColor" 
+          strokeWidth="1" 
+          className="opacity-20" 
+        />
+        <circle 
+          cx="20" 
+          cy="20" 
+          r="11" 
+          stroke="currentColor" 
+          strokeWidth="0.8" 
+          className="opacity-15" 
+          strokeDasharray="1.5 1.5"
+        />
+        
+        {/* Subtle coordinate alignment crosshair */}
+        <path 
+          d="M 20 4 L 20 36 M 4 20 L 36 20" 
+          stroke="currentColor" 
+          strokeWidth="0.6" 
+          className="opacity-10" 
+        />
 
-      {/* Styled Charcoal Sketch Mini Portrait of Sneha */}
-      <g stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" className="text-stone-850 dark:text-stone-100">
-        {/* Head/Hair outline */}
-        <path d="M 36 34 C 34 30, 35 25, 40 23 C 45 21, 50 25, 48 32 C 49 35, 46 39, 44 41" fill="none" />
-        {/* Hair strands */}
-        <path d="M 37 26 C 36 29, 36 34, 38 42 M 46 24 C 47 28, 48 34, 46 44" opacity="0.75" />
-        {/* Face Profile */}
-        <path d="M 39 33 C 40 33, 41 34, 41 35 C 41 36, 39 37, 39 37" /> {/* Nose */}
-        <path d="M 39 39 C 41 39, 42 38, 43 38" /> {/* Smile */}
-        <path d="M 37 36 C 37 35, 38 35, 38 36" fill="currentColor" /> {/* Eye */}
-        {/* Crossed Arms */}
-        <path d="M 33 46 C 36 45, 45 45, 47 48" />
-        <path d="M 41 48 C 41 48, 36 50, 34 53" />
-        <path d="M 32 49 C 30 52, 33 56, 44 56 C 49 56, 49 51, 46 48" />
-        {/* Shoulders */}
-        <path d="M 31 43 C 28 46, 29 55, 30 58 M 48 43 C 51 46, 50 54, 49 58" />
-      </g>
+        {/* Artistic paint smear / charcoal block path representing organic classical medium */}
+        <path 
+          d="M 12 28 C 8 20, 10 10, 20 10 C 26 10, 31 14, 29 20 C 27 26, 17 31, 14 26 C 11.5 22, 14 16, 20 14" 
+          stroke="#937562" 
+          strokeWidth="1.2" 
+          strokeLinecap="round"
+          className="opacity-80" 
+        />
 
-      {/* The main elegant brand script: "Kalakar_sneha" */}
-      <g fill="currentColor" className="text-stone-900 dark:text-stone-50">
-        {/* Kalakar text stylized to mimic custom brush handwriting */}
-        <text x="80" y="58" className="font-brand" fontSize="32" fontWeight="600" letterSpacing="0.5">
+        {/* Dynamic hand-contoured charcoal pencil + paintbrush tip intersecting cleanly */}
+        <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          {/* Pencil Shaft */}
+          <line x1="12" y1="28" x2="24" y2="16" strokeWidth="1.5" />
+          {/* Collar break */}
+          <line x1="24" y1="16" x2="26" y2="14" stroke="#937562" strokeWidth="1.5" />
+          {/* Ultra crisp graphite core tip */}
+          <path d="M 26 14 L 30 10" strokeWidth="2.2" />
+        </g>
+
+        {/* Tiny golden pivot point representing precision */}
+        <circle cx="20" cy="20" r="1.5" fill="#937562" />
+      </svg>
+      
+      {/* Brand typographic wordmark - seamless, crisp & highly readable */}
+      <span className="flex flex-col sm:flex-row sm:items-baseline sm:gap-1.5 leading-none">
+        <span className={`font-sans font-bold tracking-[0.16em] uppercase text-xs sm:text-sm transition-colors duration-300 ${textCol}`}>
           Kalakar
-        </text>
-        {/* Separator / Underscore line */}
-        <text x="175" y="58" className="font-brand" fontSize="32" fontWeight="600">
-          _
-        </text>
-        {/* sneha script text */}
-        <text x="195" y="58" className="font-brand italic" fontSize="32" fontWeight="400">
-          sneha
-        </text>
-      </g>
-
-      {/* Paintbrush icon on the right top overlapping the script */}
-      <g stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 dark:text-blue-400">
-        {/* Brush handle */}
-        <path d="M 235 34 L 210 50" strokeWidth="1.2" opacity="0.8" />
-        {/* Metal Ferrule */}
-        <path d="M 235 34 L 238 32 C 239 31, 241 33, 240 34 Z" fill="currentColor" />
-        {/* Brush bristle tip */}
-        <path d="M 240 34 C 243 32, 247 27, 245 22 C 242 24, 239 31, 239 33" fill="#1E3A8A" stroke="#1E40AF" strokeWidth="1" />
-      </g>
-
-      {/* Blue textured brush stroke underline representing the dark blue smear under writing */}
-      <path
-        d="M 80 72 C 120 71, 180 72, 280 70 C 290 70, 310 71, 320 72"
-        stroke="#1E1B4B"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-        opacity="0.9"
-      />
-      <path
-        d="M 95 74 C 135 73.5, 175 74, 260 72.8 C 285 72.4, 305 73, 315 74"
-        stroke="#1D4ED8"
-        strokeWidth="1"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-    </svg>
+        </span>
+        <span className={`font-brand italic font-medium text-base sm:text-lg tracking-wide transition-colors duration-300 ${accentTextCol}`}>
+          Sneha
+        </span>
+      </span>
+    </div>
   );
 };
 

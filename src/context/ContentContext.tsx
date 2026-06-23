@@ -9,7 +9,7 @@ interface ContentContextType {
   adminToken: string | null;
   login: (password: string) => Promise<boolean>;
   logout: () => void;
-  updateContent: (newContent: SiteContent) => Promise<boolean>;
+  updateContent: (newContent: SiteContent) => Promise<{ success: boolean; error?: string }>;
 }
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
@@ -90,12 +90,12 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   // Update handler
-  const updateContent = async (newContent: SiteContent): Promise<boolean> => {
-    if (!adminToken) return false;
-
+  const updateContent = async (newContent: SiteContent): Promise<{ success: boolean; error?: string }> => {
+    if (!adminToken) return { success: false, error: "Not logged in or session expired" };
+ 
     // Optimistically update UI
     setContent(newContent);
-
+ 
     try {
       const res = await fetch(`${API_BASE_URL}/api/content`, {
         method: "POST",
@@ -105,18 +105,27 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         },
         body: JSON.stringify(newContent),
       });
-
+ 
       if (res.ok) {
-        return true;
+        return { success: true };
       } else {
+        let errMessage = "Could not persist content on server";
+        try {
+          const errData = await res.json();
+          if (errData && errData.error) {
+            errMessage = errData.error;
+          }
+        } catch (jsonErr) {
+          // Response body is not JSON or could not be parsed
+        }
         // Revert on failure
         fetchContent();
-        return false;
+        return { success: false, error: errMessage };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Could not persist new content to Express API:", error);
       fetchContent();
-      return false;
+      return { success: false, error: error?.message || "Server connection or network timeout error" };
     }
   };
 

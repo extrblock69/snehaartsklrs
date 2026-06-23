@@ -216,7 +216,7 @@ async function saveSiteContent(data: any): Promise<boolean> {
     try {
       const { error } = await supabaseClient
         .from("site_configs")
-        .upsert({ key: "site_content", value: data });
+        .upsert({ key: "site_content", value: data }, { onConflict: "key" });
       
       if (!error) {
         dbSaved = true;
@@ -430,16 +430,23 @@ app.post("/api/supabase-test-write", async (req, res) => {
 
 // API: Update Site Content (Protected)
 app.post("/api/content", requireAdmin, async (req, res) => {
-  const newContent = req.body;
-  if (!newContent || typeof newContent !== "object") {
-    return res.status(400).json({ error: "Invalid data payload" });
-  }
+  try {
+    const newContent = req.body;
+    if (!newContent || typeof newContent !== "object") {
+      return res.status(400).json({ error: "Invalid data payload" });
+    }
 
-  const success = await saveSiteContent(newContent);
-  if (success) {
-    res.json({ message: "Content updated successfully!", content: newContent });
-  } else {
-    res.status(500).json({ error: "Could not persist content on server" });
+    const success = await saveSiteContent(newContent);
+    if (success) {
+      return res.json({ success: true, message: "Content updated successfully!", content: newContent });
+    } else {
+      return res.status(500).json({ error: "Could not persist content on server" });
+    }
+  } catch (err: any) {
+    console.error("❌ Exception persisting site content configurations:", err.message || err);
+    return res.status(500).json({
+      error: `Database sync failure: ${err.message || String(err)}`
+    });
   }
 });
 

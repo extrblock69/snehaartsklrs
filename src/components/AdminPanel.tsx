@@ -402,13 +402,13 @@ export default function AdminPanel() {
       uploadedImages: uploadedImages,
     };
 
-    const success = await updateContent(updatedPayload);
+    const result = await updateContent(updatedPayload);
     setIsSaving(false);
-    if (success) {
+    if (result.success) {
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 4000);
     } else {
-      alert('Error: Could not save settings to the server database. Ensure details are correct.');
+      alert(`Error saving configurations: ${result.error || 'Could not save settings to the server database. Ensure details are correct.'}`);
     }
   };
 
