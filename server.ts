@@ -141,9 +141,36 @@ function normalizeClientUrls(obj: any): any {
   return obj;
 }
 
+// Helper: Deep merge default content JSON keys with custom data from DB configurations
+function mergeDefaultContent(base: any, incoming: any): any {
+  if (incoming === null || incoming === undefined) return base;
+  if (typeof base !== "object" || Array.isArray(base) || base === null) {
+    return incoming;
+  }
+  if (typeof incoming !== "object" || Array.isArray(incoming) || incoming === null) {
+    return incoming;
+  }
+  const result = { ...base };
+  for (const key of Object.keys(incoming)) {
+    result[key] = mergeDefaultContent(base[key], incoming[key]);
+  }
+  return result;
+}
+
 // Helper: load content
 async function getSiteContent() {
   let content = null;
+  let defaultJson: any = null;
+
+  try {
+    if (fs.existsSync(CONTENT_FILE_PATH)) {
+      const raw = fs.readFileSync(CONTENT_FILE_PATH, "utf-8");
+      defaultJson = JSON.parse(raw);
+    }
+  } catch (err) {
+    console.error("Error reading base site_content.json:", err);
+  }
+
   if (supabaseClient) {
     try {
       const { data, error } = await supabaseClient
@@ -196,14 +223,9 @@ async function getSiteContent() {
     if (!allowLocalFallback) {
       throw new Error("Supabase has no content row, is offline, or uninitialized, and local file fallback is disabled.");
     }
-    try {
-      if (fs.existsSync(CONTENT_FILE_PATH)) {
-        const raw = fs.readFileSync(CONTENT_FILE_PATH, "utf-8");
-        content = JSON.parse(raw);
-      }
-    } catch (error) {
-      console.error("Error reading site_content.json, using fallback empty state", error);
-    }
+    content = defaultJson;
+  } else if (defaultJson) {
+    content = mergeDefaultContent(defaultJson, content);
   }
 
   return normalizeClientUrls(content);

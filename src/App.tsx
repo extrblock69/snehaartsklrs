@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import Loader from './components/Loader';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -61,21 +62,55 @@ export default function App() {
             {/* Header */}
             <Navbar />
 
-            <main id="portfolio-content-root">
+            <main id="portfolio-content-root" className="overflow-hidden">
               {/* 1. Hero Cover Intro */}
-              <Hero />
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <Hero />
+              </motion.div>
 
               {/* 2. Educational Philosophy & Journey */}
-              <About />
+              <motion.div
+                initial={{ opacity: 0, y: 35 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <About />
+              </motion.div>
 
               {/* 3. High-resolution Gallery of Sketches */}
-              <Gallery />
+              <motion.div
+                initial={{ opacity: 0, y: 35 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <Gallery />
+              </motion.div>
 
               {/* 3.5. Featured Student Showcase */}
-              <StudentShowcase />
+              <motion.div
+                initial={{ opacity: 0, y: 35 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <StudentShowcase />
+              </motion.div>
 
               {/* 7. Dedicated Contact & Inquiry Form */}
-              <Contact />
+              <motion.div
+                initial={{ opacity: 0, y: 35 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <Contact />
+              </motion.div>
             </main>
 
             {/* Concluding Footer */}
