@@ -68,6 +68,9 @@ export interface SiteContent {
     underlayPhotoUrl?: string;
     sigQuote?: string;
     sigSub?: string;
+    profilePhrase?: string;
+    ctaPrimaryLink?: string;
+    ctaSecondaryLink?: string;
   };
   about: {
     badgeText: string;
@@ -94,6 +97,16 @@ export interface SiteContent {
     metricLeftLabel: string;
     metricRightVal: string;
     metricRightLabel: string;
+  };
+  socials?: {
+    instagram?: string;
+    youtube?: string;
+    facebook?: string;
+    linkedin?: string;
+  };
+  globalButtons?: {
+    navbarContactLink?: string;
+    lessonsInquireLink?: string;
   };
   gallery: Artwork[];
   studentShowcase: StudentProject[];

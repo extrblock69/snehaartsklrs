@@ -81,13 +81,35 @@ export default function Hero() {
             className="flex flex-wrap items-center gap-4 pt-4"
           >
             <button
-              onClick={() => handleScrollToSection('contact')}
+              onClick={() => {
+                const link = hero.ctaPrimaryLink;
+                if (link) {
+                  if (link.startsWith('#')) {
+                    handleScrollToSection(link.substring(1));
+                  } else {
+                    window.open(link, '_blank', 'noopener,noreferrer');
+                  }
+                } else {
+                  handleScrollToSection('contact');
+                }
+              }}
               className="px-6 py-3.5 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-white text-white dark:text-stone-950 text-xs font-semibold tracking-widest uppercase rounded-lg border border-stone-950 dark:border-stone-50 cursor-pointer shadow-sm transition-all duration-300 hover:translate-y-[-1px]"
             >
               {hero.ctaPrimaryText}
             </button>
             <button
-              onClick={() => handleScrollToSection('gallery')}
+              onClick={() => {
+                const link = hero.ctaSecondaryLink;
+                if (link) {
+                  if (link.startsWith('#')) {
+                    handleScrollToSection(link.substring(1));
+                  } else {
+                    window.open(link, '_blank', 'noopener,noreferrer');
+                  }
+                } else {
+                  handleScrollToSection('gallery');
+                }
+              }}
               className="px-6 py-3.5 border border-stone-300 hover:border-stone-400 dark:border-stone-800 dark:hover:border-stone-700 text-stone-850 dark:text-stone-200 hover:bg-stone-100/40 dark:hover:bg-stone-900/30 text-xs font-semibold tracking-widest uppercase rounded-lg cursor-pointer transition-all duration-300"
             >
               {hero.ctaSecondaryText}
@@ -141,7 +163,7 @@ export default function Hero() {
 
               {/* Float drawing paper tag */}
               <div className="absolute bottom-4 left-4 bg-stone-900/85 backdrop-blur-sm text-stone-50 px-3 py-1 rounded text-[10px] font-mono tracking-widest uppercase">
-                {about.authorName || "Sneha"}, Studio Profile
+                {hero.profilePhrase || `${about.authorName || "Sneha"}, Studio Profile`}
               </div>
             </div>
 

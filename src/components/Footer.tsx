@@ -1,7 +1,11 @@
-import { Mail, Phone, MapPin, ArrowUpCircle } from 'lucide-react';
-import { KalakarSnehaLogo } from './KalakarSnehaAssets';
+import { Mail, Phone, MapPin, ArrowUpCircle, Instagram, Youtube, Facebook, Linkedin } from 'lucide-react';
+import { KalakaarSnehaLogo } from './KalakarSnehaAssets';
+import { useContent } from '../context/ContentContext';
 
 export default function Footer() {
+  const { content } = useContent();
+  const socials = content.socials;
+
   const scrollBackToTop = () => {
     window.scrollTo({
       top: 0,
@@ -16,23 +20,71 @@ export default function Footer() {
     >
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-12 gap-12 items-start relative z-10 text-left">
         
-        {/* Bio block col 1 (5 cols) */}
-        <div className="md:col-span-5 space-y-4">
+        {/* Bio block col 1 (6 cols layout) */}
+        <div className="md:col-span-6 space-y-5">
           <div className="flex items-center gap-2">
-            <KalakarSnehaLogo className="h-10 w-auto text-white dark:text-white" />
+            <KalakaarSnehaLogo className="h-10 w-auto text-white" />
           </div>
 
-          <p className="text-stone-400 dark:text-stone-400 font-light text-xs leading-relaxed max-w-sm">
+          <p className="text-stone-400 font-light text-xs leading-relaxed max-w-md">
             Educating beginners and classical veterans in the fine visual tradition. 
             Training eyes, hands, and minds to translation and draftsmanship accuracy across raw graphite and vine charcoal mediums.
           </p>
 
-          <p className="text-[10px] font-mono text-stone-500 uppercase tracking-widest">
+          {/* Social media icons with touch functionality */}
+          <div className="flex flex-wrap items-center gap-3.5 pt-1">
+            {socials?.instagram && (
+              <a
+                href={socials.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Instagram Profile"
+                className="w-9 h-9 rounded-full border border-stone-800 hover:border-wood bg-stone-950 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+            )}
+            {socials?.youtube && (
+              <a
+                href={socials.youtube}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="YouTube Channel"
+                className="w-9 h-9 rounded-full border border-stone-800 hover:border-wood bg-stone-950 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Youtube className="w-4 h-4" />
+              </a>
+            )}
+            {socials?.facebook && (
+              <a
+                href={socials.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Facebook Page"
+                className="w-9 h-9 rounded-full border border-stone-800 hover:border-wood bg-stone-950 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+            )}
+            {socials?.linkedin && (
+              <a
+                href={socials.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="LinkedIn Profile"
+                className="w-9 h-9 rounded-full border border-stone-800 hover:border-wood bg-stone-950 flex items-center justify-center text-stone-400 hover:text-white transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <Linkedin className="w-4 h-4" />
+              </a>
+            )}
+          </div>
+
+          <p className="text-[10px] font-mono text-stone-500 uppercase tracking-widest pt-2">
             &copy; {new Date().getFullYear()} Sneha. All structural rights reserved.
           </p>
         </div>
 
-        {/* Studio Info (3 cols) */}
+        {/* Studio Info (3 cols layout) */}
         <div className="md:col-span-3 space-y-3 font-sans text-xs">
           <h4 className="font-mono text-[10px] tracking-widest text-white uppercase font-bold">
             THE STUDIO WORKSPACE
@@ -53,43 +105,22 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Academy links (2 cols) */}
-        <div className="md:col-span-2 space-y-3 text-xs">
-          <h4 className="font-mono text-[10px] tracking-widest text-white uppercase font-bold">
-            ACADEMIC RESOURCES
-          </h4>
-          <ul className="space-y-2 text-stone-400 font-mono text-[11px]">
-            <li>
-              <a href="#about" className="hover:text-white transition-colors">PHILOSOPHY</a>
-            </li>
-            <li>
-              <a href="#gallery" className="hover:text-white transition-colors">EXHIBITIONS</a>
-            </li>
-            <li>
-              <a href="#sketchpad" className="hover:text-white transition-colors">PRACTICE CANVASES</a>
-            </li>
-            <li>
-              <a href="#admin" className="hover:text-amber-500 hover:underline transition-colors tracking-wider font-bold">ADMIN PORTAL</a>
-            </li>
-          </ul>
-        </div>
-
-        {/* Back to top (2 cols) */}
-        <div className="md:col-span-2 flex flex-col items-start md:items-end justify-between h-full">
+        {/* Coordinates & Back to top (3 cols layout) */}
+        <div className="md:col-span-3 flex flex-col items-start md:items-end justify-between h-full space-y-6 md:space-y-0 text-left md:text-right min-h-[140px]">
           <button
             onClick={scrollBackToTop}
             aria-label="Scroll back to top of page"
-            className="p-2 border border-stone-850 hover:border-stone-605 bg-stone-900 group hover:bg-stone-855 text-stone-400 hover:text-stone-105 rounded-full duration-300 flex items-center gap-1 cursor-pointer focus:outline-none"
+            className="p-2.5 border border-stone-850 hover:border-stone-700 bg-stone-900 group hover:bg-stone-850 text-stone-400 hover:text-stone-100 rounded-full duration-300 flex items-center gap-1 cursor-pointer focus:outline-none"
           >
             <ArrowUpCircle className="w-6 h-6 transition-transform group-hover:-translate-y-0.5" />
           </button>
           
-          <div className="text-left md:text-right pt-6 md:pt-0">
+          <div className="pt-2">
             <span className="font-serif italic text-xs text-stone-500 block">
-              Triangulate, Contour, Sculpt
+              Arts Instructor & Fine-Art Coach
             </span>
-            <span className="font-mono text-[9px] tracking-widest text-stone-600 block uppercase mt-0.5">
-              LAT. 43.7696° N &bull; LON. 11.2558° E
+            <span className="font-mono text-[9px] tracking-widest text-stone-600 block uppercase mt-1">
+              LAT. 26.3150° N &bull; LON. 77.6186° E
             </span>
           </div>
         </div>

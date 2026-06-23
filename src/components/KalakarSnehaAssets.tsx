@@ -10,7 +10,7 @@ interface AssetProps {
  * It attempts to load '/assets/kalakar_sneha_logo.png' first; if it fails or is not found,
  * it falls back to a gorgeous, high-fidelity responsive SVG that mimics the branding in the photo perfectly.
  */
-export const KalakarSnehaLogo: React.FC<AssetProps> = ({ className = '', style }) => {
+export const KalakaarSnehaLogo: React.FC<AssetProps> = ({ className = '', style }) => {
   // Inspect if caller passes color override like text-white (for the dark footer)
   const isLightText = className.includes('text-white') || className.includes('text-stone-100') || className.includes('text-stone-300');
 
@@ -87,12 +87,11 @@ export const KalakarSnehaLogo: React.FC<AssetProps> = ({ className = '', style }
         {/* Tiny golden pivot point representing precision */}
         <circle cx="20" cy="20" r="1.5" fill="#937562" />
       </svg>
-      
       {/* Brand typographic wordmark - seamless, crisp & highly readable */}
       <span className="flex flex-col justify-center leading-none">
         <span className="flex items-baseline gap-1 leading-none">
           <span className={`font-brand text-lg sm:text-xl font-bold tracking-wide transition-colors duration-300 ${textCol}`}>
-            Kalakar
+            Kalakaar
           </span>
           <span className={`font-brand italic font-normal text-lg sm:text-xl tracking-wide transition-colors duration-300 ${accentTextCol}`}>
             Sneha
@@ -112,9 +111,9 @@ export const KalakarSnehaLogo: React.FC<AssetProps> = ({ className = '', style }
  * It defaults to '/assets/sneha_photo.png' but gracefully falls back to a gorgeous interactive
  * CSS and SVG composition if the asset isn't present.
  */
-export const KalakarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ className = 'w-full h-full', style, src }) => {
+export const KalakaarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ className = 'w-full h-full', style, src }) => {
   const [loadFailed, setLoadFailed] = useState(false);
-  const imageSrc = src || "/assets/sneha_photo.png";
+  const imageSrc = src || "https://images.unsplash.com/photo-1608155686393-8fdd966d784d?auto=format&fit=crop&q=80&w=800";
 
   useEffect(() => {
     setLoadFailed(false);
@@ -133,7 +132,7 @@ export const KalakarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ cla
     );
   }
 
-  // Majestic CSS + SVG Composition portraying the photograph/sketch requested
+  // Majestic CSS + SVG Composition portraying the "Wings of Future" blueprint/sketch requested
   return (
     <div
       className={`relative rounded-lg overflow-hidden flex flex-col items-center justify-center p-6 border border-stone-250 bg-stone-50 text-stone-900 dark:text-stone-100 ${className}`}
@@ -169,82 +168,138 @@ export const KalakarSnehaPhoto: React.FC<AssetProps & { src?: string }> = ({ cla
         </svg>
       </div>
 
-      {/* The high-contrast hand-shaded fine charcoal portrait of Sneha */}
+      {/* Majestic Classical Wings of Future Renaissance Blueprint Sketch */}
       <div className="relative z-10 w-64 md:w-72 aspect-[3/4] flex flex-col justify-end">
         <svg viewBox="0 0 200 250" className="w-full h-full text-stone-900 dark:text-stone-200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Subtle paper background texture for the sketch */}
-          <rect width="200" height="250" rx="6" fill="#F4EFE6" opacity="0.95" stroke="#D1C7BD" strokeWidth="0.75" />
+          {/* Paper texture base for classical look */}
+          <rect width="200" height="250" rx="8" fill="#F3EDE2" stroke="#C5B5A5" strokeWidth="1.5" />
           
-          <g stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-            {/* Hair back masses */}
-            <path d="M 70 80 Q 50 110 52 180 Q 53 210 65 240" strokeWidth="1.8" />
-            <path d="M 130 80 Q 150 110 148 180 Q 147 210 135 240" strokeWidth="1.8" />
+          {/* Subtle graph grid background to feel like architectural drawing book */}
+          <g stroke="#E6DBCC" strokeWidth="0.5">
+            <line x1="20" y1="0" x2="20" y2="250" />
+            <line x1="40" y1="0" x2="40" y2="250" />
+            <line x1="60" y1="0" x2="60" y2="250" />
+            <line x1="80" y1="0" x2="80" y2="250" />
+            <line x1="100" y1="0" x2="100" y2="250" strokeWidth="1" stroke="#DFD0BC" />
+            <line x1="120" y1="0" x2="120" y2="250" />
+            <line x1="140" y1="0" x2="140" y2="250" />
+            <line x1="160" y1="0" x2="160" y2="250" />
+            <line x1="180" y1="0" x2="180" y2="250" />
             
-            {/* Shirt outline with academic fold shading */}
-            <path d="M 75 160 Q 55 170 50 200 L 58 245 L 142 245 L 150 200 Q 145 170 125 160 Z" fill="#2E2A25" />
-            <path d="M 100 160 L 100 245" stroke="#F4EFE6" strokeWidth="1" opacity="0.3" />
-            
-            {/* Shading/texture on the shirt */}
-            <path d="M 58 190 L 68 230 M 75 185 L 85 235 M 142 190 L 132 230 M 125 185 L 115 235" stroke="#1C1814" strokeWidth="0.8" opacity="0.4" />
-            
-            {/* Neck */}
-            <path d="M 88 140 Q 88 165 92 170 M 112 140 Q 112 165 108 170" />
-            
-            {/* Portrait Face Contour */}
-            <path d="M 80 85 C 78 120, 80 142, 100 148 C 120 142, 122 120, 120 85" fill="#FAF5EC" />
-            
-            {/* Smiling Lips with hand-hatched value study */}
-            <path d="M 92 128 Q 100 135 108 128" strokeWidth="1.5" />
-            <path d="M 90 126 Q 100 129 110 126" strokeWidth="1" />
-            <line x1="96" y1="127" x2="96" y2="130" opacity="0.5" />
-            <line x1="104" y1="127" x2="104" y2="131" opacity="0.5" />
-            
-            {/* Smiling cheeks / dimple lines */}
-            <path d="M 85 118 Q 88 124 90 127" opacity="0.6" strokeWidth="0.8" />
-            <path d="M 115 118 Q 112 124 110 127" opacity="0.6" strokeWidth="0.8" />
-
-            {/* Nose study */}
-            <path d="M 98 102 Q 100 118 102 118 Q 104 118 105 115" strokeWidth="1.1" />
-
-            {/* Eyes */}
-            <path d="M 86 103 Q 91 99 96 103" strokeWidth="1.4" />
-            <path d="M 104 103 Q 109 99 114 103" strokeWidth="1.4" />
-            {/* Pupils & Eyebrows */}
-            <circle cx="91" cy="103" r="2.2" fill="currentColor" />
-            <circle cx="109" cy="103" r="2.2" fill="currentColor" />
-            <path d="M 84 97 Q 91 92 98 96" strokeWidth="1.8" />
-            <path d="M 102 96 Q 109 92 116 97" strokeWidth="1.8" />
-
-            {/* Hair front blocks and bangs framing the face */}
-            <path d="M 100 70 C 80 72, 75 88, 76 102 C 77 115, 80 135, 78 140 M 100 70 C 115 72, 122 88, 122 102 C 122 115, 118 135, 120 140" strokeWidth="1.8" />
-            {/* Hair volume details */}
-            <path d="M 72 75 C 62 82, 60 102, 62 130 C 64 150, 70 170, 71 190" strokeWidth="1.5" />
-            <path d="M 128 75 C 138 82, 140 102, 138 130 C 136 150, 130 170, 129 190" strokeWidth="1.5" />
-            <path d="M 100 68 L 100 80" strokeWidth="0.8" opacity="0.6" />
-
-            {/* Crossed arms overlapping bottom of image */}
-            <g strokeWidth="1.5" fill="#EAE5DC">
-              <path d="M 64 185 C 64 185, 90 178, 115 186 C 128 190, 134 200, 134 205 C 134 212, 110 216, 90 212 L 64 198 Z" />
-              <path d="M 136 190 C 120 190, 95 195, 78 206 C 72 210, 68 214, 73 222 C 78 230, 115 228, 136 218 Z" />
-            </g>
-            <path d="M 82 195 C 80 205, 85 210, 92 211" strokeWidth="1" opacity="0.8" />
-            <path d="M 110 195 C 114 203, 112 208, 106 210" strokeWidth="1" opacity="0.8" />
+            <line x1="0" y1="30" x2="200" y2="30" />
+            <line x1="0" y1="60" x2="200" y2="60" />
+            <line x1="0" y1="90" x2="200" y2="90" />
+            <line x1="0" y1="120" x2="200" y2="120" strokeWidth="1" stroke="#DFD0BC" />
+            <line x1="0" y1="150" x2="200" y2="150" />
+            <line x1="0" y1="180" x2="200" y2="180" />
+            <line x1="0" y1="210" x2="200" y2="210" />
           </g>
 
-          {/* Signature label */}
-          <text x="14" y="240" fill="#7A674B" fontFamily="Georgia, serif" fontSize="8" fontStyle="italic" opacity="0.8">
-            Kalakar Sneha &copy; 2026
+          {/* Golden ratio geometry and compass arcs, simulating 'Wings of Future' draft design */}
+          <g stroke="#7A654F" strokeWidth="0.8" opacity="0.6">
+            <circle cx="100" cy="115" r="45" strokeDasharray="3 2" />
+            <circle cx="100" cy="115" r="70" strokeDasharray="1 3" />
+            <line x1="10" y1="115" x2="190" y2="115" strokeDasharray="4 4" />
+            <line x1="100" y1="10" x2="100" y2="230" strokeDasharray="4 4" />
+            
+            {/* Focal measurement lines */}
+            <path d="M 64 64 L 136 166 M 136 64 L 64 166" opacity="0.3" />
+          </g>
+
+          {/* Majestic Outstretched Wings vector (Da Vinci mechanical & organic style) */}
+          <g stroke="#3D3227" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none">
+            {/* CENTRAL ANCHOR KEY OR COMPASS NEEDLE */}
+            <path d="M 100 85 L 100 150 M 96 90 L 104 90 M 94 145 L 106 145" strokeWidth="1.5" stroke="#7A654F" />
+            <circle cx="100" cy="115" r="5" fill="#F3EDE2" stroke="#7A654F" strokeWidth="1.5" />
+            
+            {/* --- LEFT WINGS OF THE FUTURE (Classical Hatching and flight ribs) --- */}
+            {/* Wing bone backbone structure */}
+            <path d="M 98 110 C 80 85, 45 75, 20 95 C 35 110, 50 120, 65 140 C 75 148, 85 152, 98 152" strokeWidth="2.2" />
+            <path d="M 98 110 Q 65 82, 35 105" strokeWidth="1.2" opacity="0.8" />
+            
+            {/* Feathers Row 1 (Primary Flight Feathers, long sweeping sweeps) */}
+            <path d="M 20 95 C 10 115, 15 135, 30 155" />
+            <path d="M 25 100 C 18 120, 24 142, 38 162" />
+            <path d="M 32 106 C 26 125, 33 148, 48 168" />
+            <path d="M 40 112 C 34 130, 42 153, 58 172" />
+            <path d="M 48 118 C 42 135, 52 158, 68 175" />
+            <path d="M 56 124 C 52 140, 62 162, 78 176" />
+            <path d="M 64 130 C 62 145, 72 165, 86 177" />
+            
+            {/* Feathers Row 2 (Secondary smaller inner feathers, beautifully layered and hatched) */}
+            <path d="M 38 110 Q 52 130, 66 142" strokeWidth="0.8" />
+            <path d="M 44 115 Q 58 134, 72 146" strokeWidth="0.8" />
+            <path d="M 52 120 Q 64 138, 78 150" strokeWidth="0.8" />
+            <path d="M 60 125 Q 70 142, 84 153" strokeWidth="0.8" />
+            
+            {/* Mechanical vector support struts indicating "Future" flight */}
+            <path d="M 98 125 Q 75 115, 50 112" stroke="#7A654F" strokeWidth="0.8" />
+            <path d="M 98 135 Q 80 130, 62 128" stroke="#7A654F" strokeWidth="0.8" />
+            <circle cx="50" cy="112" r="1.5" fill="#7A654F" />
+            <circle cx="62" cy="128" r="1.5" fill="#7A654F" />
+
+            {/* --- RIGHT WINGS OF THE FUTURE (Symmetrical masterpieces) --- */}
+            {/* Wing bone backbone structure */}
+            <path d="M 102 110 C 120 85, 155 75, 180 95 C 165 110, 150 120, 135 140 C 125 148, 115 152, 102 152" strokeWidth="2.2" />
+            <path d="M 102 110 Q 135 82, 165 105" strokeWidth="1.2" opacity="0.8" />
+            
+            {/* Feathers Row 1 */}
+            <path d="M 180 95 C 190 115, 185 135, 170 155" />
+            <path d="M 175 100 C 182 120, 176 142, 162 162" />
+            <path d="M 168 106 C 174 125, 167 148, 152 168" />
+            <path d="M 160 112 C 166 130, 158 153, 142 172" />
+            <path d="M 152 118 C 158 135, 148 158, 132 175" />
+            <path d="M 144 124 C 148 140, 138 162, 122 176" />
+            <path d="M 136 130 C 138 145, 128 165, 114 177" />
+            
+            {/* Feathers Row 2 */}
+            <path d="M 162 110 Q 148 130, 134 142" strokeWidth="0.8" />
+            <path d="M 156 115 Q 142 134, 128 146" strokeWidth="0.8" />
+            <path d="M 148 120 Q 136 138, 122 150" strokeWidth="0.8" />
+            <path d="M 140 125 Q 130 142, 116 153" strokeWidth="0.8" />
+            
+            {/* Mechanical vector support struts */}
+            <path d="M 102 125 Q 125 115, 150 112" stroke="#7A654F" strokeWidth="0.8" />
+            <path d="M 102 135 Q 120 130, 138 128" stroke="#7A654F" strokeWidth="0.8" />
+            <circle cx="150" cy="112" r="1.5" fill="#7A654F" />
+            <circle cx="138" cy="128" r="1.5" fill="#7A654F" />
+          </g>
+
+          {/* Academic callouts and text layout inside the sketch page */}
+          <text x="100" y="52" fill="#5A4738" fontFamily="'Courier New', Courier, monospace" fontSize="8" fontWeight="600" letterSpacing="1" textAnchor="middle">
+            PLANUM FLIGHT STUDY — SEC. G
+          </text>
+          
+          <text x="100" y="200" fill="#2E2A25" fontFamily="Georgia, serif" fontSize="11" fontStyle="italic" fontWeight="600" textAnchor="middle">
+            Wings of Future
+          </text>
+          
+          <text x="100" y="213" fill="#7A654F" fontFamily="'Courier New', Courier, monospace" fontSize="6.5" letterSpacing="0.5" textAnchor="middle">
+            LAT. 26.3150° N &bull; MORENA STUDIO 12
+          </text>
+
+          {/* Signature Label */}
+          <text x="15" y="238" fill="#8C7965" fontFamily="Georgia, serif" fontSize="7" fontStyle="italic" opacity="0.9">
+            Kalakaar Sneha &copy; 2026
+          </text>
+          
+          {/* Scientific diagram index */}
+          <text x="168" y="238" fill="#8C7965" fontFamily="'Courier New', Courier, monospace" fontSize="7" fontWeight="bold">
+            FIG. 1
           </text>
         </svg>
 
         {/* Brand bar banner signature layout */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-stone-900/90 text-stone-100 flex items-center justify-center py-2 px-4 shadow rounded-lg w-[88%] border border-stone-800">
           <div className="flex flex-col items-center">
-            <span className="font-brand italic text-base leading-tight">Kalakar_sneha</span>
-            <span className="text-[8px] font-mono tracking-widest text-[#EAB308] uppercase mt-0.5">STUDIO MASTER</span>
+            <span className="font-brand italic text-base leading-tight">Kalakaar_sneha</span>
+            <span className="text-[8px] font-mono tracking-widest text-[#EAB308] uppercase mt-0.5">WINGS OF FUTURE</span>
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+export const KalakarSnehaLogo = KalakaarSnehaLogo;
+export const KalakarSnehaPhoto = KalakaarSnehaPhoto;

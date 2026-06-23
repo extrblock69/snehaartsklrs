@@ -261,9 +261,19 @@ export default function Lessons() {
                       </button>
                       <button
                         onClick={() => {
-                          const element = document.getElementById('contact');
-                          if (element) {
-                            element.scrollIntoView({ behavior: 'smooth' });
+                          const link = content.globalButtons?.lessonsInquireLink;
+                          if (link) {
+                            if (link.startsWith('#')) {
+                              const el = document.getElementById(link.substring(1));
+                              if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            } else {
+                              window.open(link, '_blank', 'noopener,noreferrer');
+                            }
+                          } else {
+                            const element = document.getElementById('contact');
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth' });
+                            }
                           }
                         }}
                         className="flex-grow py-3 bg-stone-950 hover:bg-stone-900 dark:bg-stone-50 dark:hover:bg-stone-100 text-white dark:text-stone-950 text-xs font-semibold font-mono tracking-wider uppercase rounded-lg cursor-pointer text-center duration-300 transition-colors shadow-sm"

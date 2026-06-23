@@ -102,7 +102,13 @@ export default function StudentShowcase() {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         
         {/* Section Heading */}
-        <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="text-center max-w-2xl mx-auto space-y-4 mb-16"
+        >
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-wood/10 text-wood font-semibold rounded-full text-[10px] font-mono tracking-widest uppercase border border-wood/20">
             <Award className="w-3.5 h-3.5" />
             <span>ALUMNI ACCOMPLISHMENTS</span>
@@ -116,10 +122,16 @@ export default function StudentShowcase() {
             These draftsmanship exercises and final drawings were created by actual studio alumni, 
             ranging from complete beginners to advanced artists.
           </p>
-        </div>
+        </motion.div>
 
         {/* Level Filters */}
-        <div className="flex flex-wrap justify-center items-center gap-2 mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+          className="flex flex-wrap justify-center items-center gap-2 mb-12"
+        >
           {['All', 'Beginner', 'Intermediate', 'Advanced'].map((level) => (
             <button
               key={level}
@@ -133,7 +145,7 @@ export default function StudentShowcase() {
               {level === 'All' ? 'All Milestones' : `${level} Level`}
             </button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Art Gallery Grid */}
         <motion.div

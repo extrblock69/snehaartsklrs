@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, Image, Sparkles, Pencil, GraduationCap, Heart, Mail, Clock } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
-import { KalakarSnehaLogo } from './KalakarSnehaAssets';
+import { KalakaarSnehaLogo } from './KalakarSnehaAssets';
+import { useContent } from '../context/ContentContext';
 
 export default function Navbar() {
+  const { content } = useContent();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -69,7 +71,7 @@ export default function Navbar() {
           className="flex items-center gap-1.5 group cursor-pointer focus:outline-none"
           id="navbar-logo"
         >
-          <KalakarSnehaLogo className="h-10 sm:h-12 w-auto group-hover:scale-[1.03] transition-all duration-300" />
+          <KalakaarSnehaLogo className="h-10 sm:h-12 w-auto group-hover:scale-[1.03] transition-all duration-300" />
         </button>
 
         {/* Desktop Links */}
@@ -131,50 +133,63 @@ export default function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -15 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="lg:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-stone-950/95 backdrop-blur-xl border-b border-stone-200/60 dark:border-stone-850/60 px-8 py-10 flex flex-col gap-6 shadow-xl max-h-[85vh] overflow-y-auto"
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-stone-950/95 backdrop-blur-xl border-b border-stone-200/60 dark:border-stone-850/60 px-8 py-9 flex flex-col gap-5 shadow-2xl max-h-[85vh] overflow-y-auto"
           >
             {/* Minimalist Stack of Links */}
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-1">
               {navLinks.map((link, i) => (
                 <motion.button
                   key={link.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04, duration: 0.25 }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, duration: 0.35, ease: 'easeOut' }}
                   onClick={() => {
                     setIsOpen(false);
                     scrollToSection(link.id);
                   }}
-                  className={`text-left text-lg font-brand italic tracking-wide pb-1 border-b border-stone-200/30 dark:border-stone-800/20 transition-all duration-300 cursor-pointer focus:outline-none ${
+                  className={`text-left text-[11px] font-sans font-medium tracking-[0.2em] uppercase py-3.5 border-b border-stone-200/30 dark:border-stone-850/30 transition-all duration-300 cursor-pointer focus:outline-none flex items-center justify-between group ${
                     activeSection === link.id
-                      ? 'text-stone-950 dark:text-stone-50 font-semibold'
+                      ? 'text-stone-950 dark:text-stone-50 font-bold border-stone-300 dark:border-stone-750'
                       : 'text-stone-500 dark:text-stone-400 hover:text-stone-950 dark:hover:text-stone-50 hover:pl-1'
                   }`}
                 >
-                  {link.label}
+                  <span className="transition-transform duration-300 group-hover:translate-x-0.5">{link.label}</span>
+                  <span className={`w-1.5 h-1.5 rounded-full bg-wood transition-transform duration-300 ${
+                    activeSection === link.id ? 'scale-100' : 'scale-0 group-hover:scale-100'
+                  }`} />
                 </motion.button>
               ))}
             </div>
 
             {/* Empty Spacer Line for Aesthetic Brevity */}
-            <div className="h-[1px] bg-stone-200/50 dark:bg-stone-800/50 my-2" />
+            <div className="h-[1px] bg-stone-200/50 dark:bg-stone-850/50 my-1" />
 
-             {/* Drawer Action buttons with elegant minimal style and beautiful rounded corners */}
+            {/* Drawer Action buttons with elegant minimal style and beautiful rounded corners */}
             <div className="flex flex-col gap-3 pt-1">
               {/* Contact Button */}
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  const el = document.getElementById('contact');
-                  if (el) {
-                    el.scrollIntoView({ behavior: 'smooth' });
+                  const link = content.globalButtons?.navbarContactLink;
+                  if (link) {
+                    if (link.startsWith('#')) {
+                      const el = document.getElementById(link.substring(1));
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    } else {
+                      window.open(link, '_blank', 'noopener,noreferrer');
+                    }
+                  } else {
+                    const el = document.getElementById('contact');
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth' });
+                    }
                   }
                 }}
-                className="w-full py-3 px-6 bg-stone-950 hover:bg-stone-900 border border-stone-950 dark:bg-stone-50 dark:hover:bg-white text-white dark:text-stone-950 text-xs font-semibold tracking-wider rounded-xl transition-all duration-300 uppercase cursor-pointer text-center h-11 flex items-center justify-center shadow-sm"
+                className="w-full py-3 px-6 bg-stone-950 hover:bg-stone-900 border border-stone-950 dark:bg-stone-50 dark:hover:bg-white text-white dark:text-stone-950 text-xs font-semibold tracking-wider rounded-xl transition-all duration-300 uppercase cursor-pointer text-center h-11 flex items-center justify-center shadow-md font-sans"
               >
                 <span>Contact Teacher</span>
               </button>

@@ -158,6 +158,21 @@ export default function AdminPanel() {
     underlayPhotoUrl: content.hero.underlayPhotoUrl || '',
     sigQuote: content.hero.sigQuote || '',
     sigSub: content.hero.sigSub || '',
+    profilePhrase: content.hero.profilePhrase || '',
+    ctaPrimaryLink: content.hero.ctaPrimaryLink || '',
+    ctaSecondaryLink: content.hero.ctaSecondaryLink || '',
+  });
+
+  const [socialsForm, setSocialsForm] = useState({
+    instagram: content.socials?.instagram || '',
+    youtube: content.socials?.youtube || '',
+    facebook: content.socials?.facebook || '',
+    linkedin: content.socials?.linkedin || '',
+  });
+
+  const [globalButtonsForm, setGlobalButtonsForm] = useState({
+    navbarContactLink: content.globalButtons?.navbarContactLink || '',
+    lessonsInquireLink: content.globalButtons?.lessonsInquireLink || '',
   });
 
   const [aboutForm, setAboutForm] = useState({
@@ -208,6 +223,19 @@ export default function AdminPanel() {
         underlayPhotoUrl: content.hero?.underlayPhotoUrl || '',
         sigQuote: content.hero?.sigQuote || '',
         sigSub: content.hero?.sigSub || '',
+        profilePhrase: content.hero?.profilePhrase || '',
+        ctaPrimaryLink: content.hero?.ctaPrimaryLink || '',
+        ctaSecondaryLink: content.hero?.ctaSecondaryLink || '',
+      });
+      setSocialsForm({
+        instagram: content.socials?.instagram || '',
+        youtube: content.socials?.youtube || '',
+        facebook: content.socials?.facebook || '',
+        linkedin: content.socials?.linkedin || '',
+      });
+      setGlobalButtonsForm({
+        navbarContactLink: content.globalButtons?.navbarContactLink || '',
+        lessonsInquireLink: content.globalButtons?.lessonsInquireLink || '',
       });
       setAboutForm({
         badgeText: content.about?.badgeText || '',
@@ -417,6 +445,8 @@ export default function AdminPanel() {
       hero: heroForm,
       about: aboutForm,
       contact: contactForm,
+      socials: socialsForm,
+      globalButtons: globalButtonsForm,
       gallery: galleryList,
       studentShowcase: showcaseList,
       lessons: lessonsList,
@@ -1000,6 +1030,44 @@ export default function AdminPanel() {
                       />
                     </div>
                   </div>
+
+                  <div className="border-t border-stone-200 dark:border-stone-800 pt-5 mt-6 space-y-4">
+                    <h4 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">Interactive Button Actions & Photo Badges</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Hero Photo Profile Badge Text</label>
+                        <input
+                          type="text"
+                          placeholder="Sneha Bansal, Studio Profile"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs"
+                          value={heroForm.profilePhrase}
+                          onChange={(e) => setHeroForm({ ...heroForm, profilePhrase: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Primary CTA Redirect URL (Left Button, e.g. #contact or custom link)</label>
+                        <input
+                          type="text"
+                          placeholder="#contact"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs"
+                          value={heroForm.ctaPrimaryLink}
+                          onChange={(e) => setHeroForm({ ...heroForm, ctaPrimaryLink: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Secondary CTA Redirect URL (Right Button, e.g. #gallery or custom link)</label>
+                        <input
+                          type="text"
+                          placeholder="#gallery"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs"
+                          value={heroForm.ctaSecondaryLink}
+                          onChange={(e) => setHeroForm({ ...heroForm, ctaSecondaryLink: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -1275,6 +1343,81 @@ export default function AdminPanel() {
                             onChange={(e) => setContactForm({ ...contactForm, metricRightLabel: e.target.value })}
                           />
                         </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-stone-200 dark:border-stone-800 pt-5 mt-6 space-y-4">
+                    <h4 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">Footer Social Profiles (Touch Enabled)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Instagram Profile URL</label>
+                        <input
+                          type="text"
+                          placeholder="https://instagram.com/kalakaar_sneha"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={socialsForm.instagram}
+                          onChange={(e) => setSocialsForm({ ...socialsForm, instagram: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">YouTube Channel URL</label>
+                        <input
+                          type="text"
+                          placeholder="https://youtube.com/@kalakaar_sneha"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={socialsForm.youtube}
+                          onChange={(e) => setSocialsForm({ ...socialsForm, youtube: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Facebook Page URL</label>
+                        <input
+                          type="text"
+                          placeholder="https://facebook.com/kalakaar.sneha"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={socialsForm.facebook}
+                          onChange={(e) => setSocialsForm({ ...socialsForm, facebook: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">LinkedIn Profile URL</label>
+                        <input
+                          type="text"
+                          placeholder="https://linkedin.com/in/sneha"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={socialsForm.linkedin}
+                          onChange={(e) => setSocialsForm({ ...socialsForm, linkedin: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-stone-200 dark:border-stone-800 pt-5 mt-6 space-y-4">
+                    <h4 className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase">Global Button Inquiries & Links</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Interactive Navbar Consult Button Target (e.g. #contact or external link)</label>
+                        <input
+                          type="text"
+                          placeholder="#contact"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={globalButtonsForm.navbarContactLink}
+                          onChange={(e) => setGlobalButtonsForm({ ...globalButtonsForm, navbarContactLink: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Curriculum Syllabus Booking Target (e.g. #contact or external link)</label>
+                        <input
+                          type="text"
+                          placeholder="#contact"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={globalButtonsForm.lessonsInquireLink}
+                          onChange={(e) => setGlobalButtonsForm({ ...globalButtonsForm, lessonsInquireLink: e.target.value })}
+                        />
                       </div>
                     </div>
                   </div>

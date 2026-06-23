@@ -30,7 +30,13 @@ export default function Gallery() {
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Header Elements */}
-        <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
+          className="text-center max-w-2xl mx-auto space-y-4 mb-16"
+        >
           <span className="font-mono text-xs text-wood font-semibold tracking-widest uppercase block">
             PORTFOLIO SHOWCASE
           </span>
@@ -38,14 +44,20 @@ export default function Gallery() {
             Original Fine-Art Expositions
           </h2>
           <div className="h-[1px] w-12 bg-wood mx-auto" />
-          <p className="text-stone-500 dark:text-stone-400 font-light text-sm md:text-base">
+          <p className="text-stone-550 dark:text-stone-400 font-light text-sm md:text-base">
             Browse through some of Sneha's recent personal drawings and academic demonstrations. 
             Click any drawing study to view creation details, materials used, and pedagogical notes.
           </p>
-        </div>
+        </motion.div>
 
         {/* Category Filters row */}
-        <div className="flex flex-wrap justify-center items-center gap-1.5 md:gap-3 mb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-120px" }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+          className="flex flex-wrap justify-center items-center gap-1.5 md:gap-3 mb-12"
+        >
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
@@ -59,7 +71,7 @@ export default function Gallery() {
               {cat.label}
             </button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Artwork Grid with motion animate content layout */}
         <motion.div

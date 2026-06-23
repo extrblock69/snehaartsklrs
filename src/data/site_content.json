@@ -7,10 +7,13 @@
     "subheadingText": "Sneha teaches classical drawing techniques, from direct charcoal portraiture to complex architectural line perspective, guiding students from tentative markings to confident, beautiful fine artistry.",
     "ctaPrimaryText": "Contact Sneha",
     "ctaSecondaryText": "View Portfolio",
-    "teacherPhotoUrl": "/assets/sneha_photo.png",
+    "teacherPhotoUrl": "https://images.unsplash.com/photo-1608155686393-8fdd966d784d?auto=format&fit=crop&q=80&w=800",
     "underlayPhotoUrl": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=400",
     "sigQuote": "See, Shaded, Sculpted",
-    "sigSub": "Traditional Medium, Studio 12"
+    "sigSub": "Traditional Medium, Studio 12",
+    "profilePhrase": "Sneha Bansal, Studio Profile",
+    "ctaPrimaryLink": "",
+    "ctaSecondaryLink": ""
   },
   "about": {
     "badgeText": "THE FOUNDRY OF TECHNIQUE",
@@ -23,7 +26,7 @@
     "experienceYears": "8+",
     "studentsMentored": "450+",
     "quote": "We do not learn to draw to replicate a photo. We learn to draw so we can translate how light rolls over a surface, and make a flat piece of paper breathe.",
-    "avatarUrl": "/assets/sneha_photo.png",
+    "avatarUrl": "https://images.unsplash.com/photo-1608155686393-8fdd966d784d?auto=format&fit=crop&q=80&w=800",
     "authorName": "Sneha Bansal",
     "authorRole": "Academic Director, Kailaras, Morena, Madhya Pradesh, India"
   },
@@ -214,5 +217,15 @@
       "beforeImage": "https://images.unsplash.com/photo-1549887534-1541e9326642?auto=format&fit=crop&q=80&w=500",
       "afterImage": "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&q=80&w=500"
     }
-  ]
+  ],
+  "socials": {
+    "instagram": "https://instagram.com/kalakaar_sneha",
+    "youtube": "https://youtube.com/@kalakaar_sneha",
+    "facebook": "https://facebook.com/kalakaar.sneha",
+    "linkedin": "https://linkedin.com/in/sneha"
+  },
+  "globalButtons": {
+    "navbarContactLink": "",
+    "lessonsInquireLink": ""
+  }
 }
