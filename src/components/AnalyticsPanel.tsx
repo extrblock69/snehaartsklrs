@@ -6,6 +6,8 @@ import {
   Cpu, Layout, Compass, Info, Trash2, Zap, AlertCircle
 } from 'lucide-react';
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "").replace(/\/$/, "");
+
 interface VisitorHistoryItem {
   timestamp: string;
   pathname: string;
@@ -73,7 +75,7 @@ export default function AnalyticsPanel() {
     setLoading(true);
     setAuthError('');
     try {
-      const response = await fetch(`/api/analytics/data?password=${encodeURIComponent(passToVerify)}`);
+      const response = await fetch(`${API_BASE_URL}/api/analytics/data?password=${encodeURIComponent(passToVerify)}`);
       if (response.ok) {
         const result = await response.json();
         setData(result);
@@ -113,7 +115,7 @@ export default function AnalyticsPanel() {
     if (!savedPass) return;
     setLoading(true);
     try {
-      const response = await fetch(`/api/analytics/data?password=${encodeURIComponent(savedPass)}`);
+      const response = await fetch(`${API_BASE_URL}/api/analytics/data?password=${encodeURIComponent(savedPass)}`);
       if (response.ok) {
         const result = await response.json();
         setData(result);
@@ -128,7 +130,7 @@ export default function AnalyticsPanel() {
   // Trigger test synthetic visit log to instantly verify recording works
   const handleSimulateVisit = async () => {
     try {
-      await fetch('/api/analytics/track', {
+      await fetch(`${API_BASE_URL}/api/analytics/track`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

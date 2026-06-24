@@ -13,6 +13,8 @@ import AdminPanel from './components/AdminPanel';
 import AnalyticsPanel from './components/AnalyticsPanel';
 import NotFound from './components/NotFound';
 
+const API_BASE_URL = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "").replace(/\/$/, "");
+
 export default function App() {
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +54,7 @@ export default function App() {
   // Track visitor views when mounting or navigating to 'home'
   useEffect(() => {
     if (currentView === 'home' && !loading) {
-      fetch('/api/analytics/track', {
+      fetch(`${API_BASE_URL}/api/analytics/track`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

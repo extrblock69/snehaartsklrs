@@ -58,7 +58,7 @@ export default function Contact() {
     setStatus('submitting');
     
     try {
-      const apiBaseUrl = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+      const apiBaseUrl = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "").replace(/\/$/, "");
       const res = await fetch(`${apiBaseUrl}/api/contact/submit`, {
         method: 'POST',
         headers: {
