@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
+import { Analytics } from '@vercel/analytics/react';
 import Loader from './components/Loader';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -169,7 +170,7 @@ export default function App() {
           {renderContent()}
         </div>
       )}
+      <Analytics />
     </>
   );
 }
-
