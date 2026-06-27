@@ -55,6 +55,21 @@ export interface StudentProject {
   teacherMentorshipNotes: string;
 }
 
+export interface CourseOrWorkshop {
+  id: string;
+  title: string;
+  type: 'Course' | 'Workshop';
+  dateOrDuration: string;
+  time: string;
+  price: number;
+  location: string;
+  spotsLeft?: number;
+  description: string;
+  syllabusOrDetails: string[];
+  imageUrl: string;
+  isActive: boolean;
+}
+
 export interface SiteContent {
   hero: {
     badgeText: string;
@@ -140,6 +155,12 @@ export interface SiteContent {
       description: string;
       imageUrl: string;
     }[];
+  };
+  coursesAndWorkshops?: {
+    badgeText: string;
+    title: string;
+    description: string;
+    items: CourseOrWorkshop[];
   };
 }
 

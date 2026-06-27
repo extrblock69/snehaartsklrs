@@ -5,28 +5,52 @@ import { Sun, Moon } from 'lucide-react';
 export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
+  const updateThemeState = () => {
+    const isDarkClass = document.documentElement.classList.contains('dark');
+    setIsDark(isDarkClass);
+  };
+
   useEffect(() => {
-    // Check initial preference from localStorage or default to light mode
-    const storedTheme = localStorage.getItem('theme');
-    if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    } else {
-      setIsDark(false);
-      document.documentElement.classList.remove('dark');
-    }
+    // 1. Synchronize visual toggle handle with current document state on mount
+    updateThemeState();
+
+    // 2. Same-page sync across desktop, mobile and admin panel instances
+    const handleThemeSync = () => {
+      updateThemeState();
+    };
+    window.addEventListener('theme-sync', handleThemeSync);
+
+    // 3. Multi-tab storage state synchronization
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'theme') {
+        const nextDark = e.newValue === 'dark';
+        if (nextDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        window.dispatchEvent(new CustomEvent('theme-sync'));
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('theme-sync', handleThemeSync);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
+    const nextDark = !isDark;
+    if (nextDark) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
-      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
+    // Dispatch synchronization event to update other theme toggles on the page instantly
+    window.dispatchEvent(new CustomEvent('theme-sync'));
   };
 
   return (

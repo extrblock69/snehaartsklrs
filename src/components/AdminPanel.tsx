@@ -278,6 +278,16 @@ export default function AdminPanel() {
   const [lessonsList, setLessonsList] = useState<Lesson[]>([...content.lessons]);
   const [testimonialsList, setTestimonialsList] = useState<Testimonial[]>([...content.testimonials]);
 
+  const [coursesAndWorkshopsForm, setCoursesAndWorkshopsForm] = useState({
+    badgeText: content.coursesAndWorkshops?.badgeText || (defaultContent as any).coursesAndWorkshops?.badgeText || '',
+    title: content.coursesAndWorkshops?.title || (defaultContent as any).coursesAndWorkshops?.title || '',
+    description: content.coursesAndWorkshops?.description || (defaultContent as any).coursesAndWorkshops?.description || '',
+  });
+
+  const [coursesAndWorkshopsList, setCoursesAndWorkshopsList] = useState<any[]>(
+    content.coursesAndWorkshops?.items || (defaultContent as any).coursesAndWorkshops?.items || []
+  );
+
   // Dynamically synchronize local form states with fetched content configurations
   useEffect(() => {
     if (content) {
@@ -361,6 +371,14 @@ export default function AdminPanel() {
       setLessonsList(content.lessons ? [...content.lessons] : []);
       setTestimonialsList(content.testimonials ? [...content.testimonials] : []);
       setUploadedImages(content.uploadedImages || []);
+      setCoursesAndWorkshopsForm({
+        badgeText: content.coursesAndWorkshops?.badgeText || (defaultContent as any).coursesAndWorkshops?.badgeText || '',
+        title: content.coursesAndWorkshops?.title || (defaultContent as any).coursesAndWorkshops?.title || '',
+        description: content.coursesAndWorkshops?.description || (defaultContent as any).coursesAndWorkshops?.description || '',
+      });
+      setCoursesAndWorkshopsList(
+        content.coursesAndWorkshops?.items ? [...content.coursesAndWorkshops.items] : ((defaultContent as any).coursesAndWorkshops?.items ? [...(defaultContent as any).coursesAndWorkshops.items] : [])
+      );
     }
   }, [content]);
 
@@ -548,6 +566,10 @@ export default function AdminPanel() {
       achievements: {
         ...achievementsForm,
         cards: achievementsCardsList,
+      },
+      coursesAndWorkshops: {
+        ...coursesAndWorkshopsForm,
+        items: coursesAndWorkshopsList,
       },
     };
 
@@ -816,6 +838,68 @@ export default function AdminPanel() {
     }));
   };
 
+  // --- COURSES & WORKSHOPS HELPERS ---
+  const handleAddCourseOrWorkshop = () => {
+    const newItem = {
+      id: 'cw-' + Date.now().toString(36),
+      title: 'New Masterclass Session',
+      type: 'Workshop' as 'Course' | 'Workshop',
+      dateOrDuration: 'Weekend Workshop',
+      time: '11:00 AM - 1:00 PM IST',
+      price: 2500,
+      location: 'Kailaras Studio & Zoom Stream',
+      spotsLeft: 5,
+      description: 'Briefly describe what this educational drawing session covers and what the student will construct.',
+      syllabusOrDetails: ['Skill Highlight A', 'Skill Highlight B'],
+      imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800',
+      isActive: true,
+    };
+    setCoursesAndWorkshopsList([...coursesAndWorkshopsList, newItem]);
+  };
+
+  const handleRemoveCourseOrWorkshop = (id: string) => {
+    setCoursesAndWorkshopsList(coursesAndWorkshopsList.filter(item => item.id !== id));
+  };
+
+  const handleUpdateCourseOrWorkshop = (id: string, field: string, val: any) => {
+    setCoursesAndWorkshopsList(coursesAndWorkshopsList.map(item => {
+      if (item.id === id) {
+        return { ...item, [field]: val };
+      }
+      return item;
+    }));
+  };
+
+  const handleCourseSyllabusChange = (courseId: string, idx: number, val: string) => {
+    setCoursesAndWorkshopsList(coursesAndWorkshopsList.map(item => {
+      if (item.id === courseId) {
+        const nextSyl = [...item.syllabusOrDetails];
+        nextSyl[idx] = val;
+        return { ...item, syllabusOrDetails: nextSyl };
+      }
+      return item;
+    }));
+  };
+
+  const handleAddCourseSyllabus = (courseId: string) => {
+    setCoursesAndWorkshopsList(coursesAndWorkshopsList.map(item => {
+      if (item.id === courseId) {
+        return { ...item, syllabusOrDetails: [...item.syllabusOrDetails, "New Syllabus Bullet"] };
+      }
+      return item;
+    }));
+  };
+
+  const handleRemoveCourseSyllabus = (courseId: string, idx: number) => {
+    setCoursesAndWorkshopsList(coursesAndWorkshopsList.map(item => {
+      if (item.id === courseId) {
+        const nextSyl = item.syllabusOrDetails.filter((_, i) => i !== idx);
+        return { ...item, syllabusOrDetails: nextSyl };
+      }
+      return item;
+    }));
+  };
+
   // --- TESTIMONIALS HELPERS ---
   const handleAddTestimonialItem = () => {
     const newItem: Testimonial = {
@@ -974,6 +1058,7 @@ export default function AdminPanel() {
             { id: 'gallery', label: '🖼️ Gallery (Artworks)' },
             { id: 'showcase', label: '🎓 Student Showroom' },
             { id: 'lessons', label: '📚 Study Programs' },
+            { id: 'courses', label: '🎓 Workshops & Courses' },
             { id: 'testimonials', label: '⭐ Testimonials Review' },
             { id: 'media', label: '📷 Media & Image Hub' },
             { id: 'subscribers', label: '📨 Newsletter Subscribers' },
@@ -1033,6 +1118,7 @@ export default function AdminPanel() {
               {activeTab === 'gallery' && 'Fine Art Portfolio Manager'}
               {activeTab === 'showcase' && 'Student Success Showroom'}
               {activeTab === 'lessons' && 'Academic Study Programs & Curriculum'}
+              {activeTab === 'courses' && 'Workshops & Live Masterclasses'}
               {activeTab === 'testimonials' && 'Before & After Drawing Slider Testimonials'}
               {activeTab === 'media' && 'Media Library & Section Image Replacer'}
               {activeTab === 'subscribers' && 'Newsletter Subscribers List'}
@@ -1047,6 +1133,7 @@ export default function AdminPanel() {
               {activeTab === 'gallery' && 'Add, remove, or modify high-fidelity drawings, sizes, mediums, techniques and gallery categories.'}
               {activeTab === 'showcase' && 'Display exemplary artworks made by students under Sneha\'s precise supervision.'}
               {activeTab === 'lessons' && 'Define the actual syllabus, hourly mentoring prices, key subtopics, and difficulty levels.'}
+              {activeTab === 'courses' && 'Manage upcoming academic drawing workshops, active registration spots, schedules, locations, and pricing.'}
               {activeTab === 'testimonials' && 'Log actual before-and-after progress slider images showing academic student improvement.'}
               {activeTab === 'media' && 'Manage uploaded local image files stored in the application\'s state and dynamically swap them in any portfolio section.'}
               {activeTab === 'subscribers' && 'View, search, clear or copy the mailing addresses subscribed via the footer newsletter workshops form.'}
@@ -2323,6 +2410,252 @@ export default function AdminPanel() {
 
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* COURSES & WORKSHOPS CMS SECTION */}
+            {activeTab === 'courses' && (
+              <div className="space-y-8">
+                {/* Header Inputs */}
+                <div className="bg-stone-50 dark:bg-stone-950 p-6 rounded-xl border border-stone-200 dark:border-stone-850 space-y-4">
+                  <span className="font-mono text-[10px] text-wood font-extrabold uppercase">GENERAL SECTION DETAILS</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-stone-400 block uppercase">Section Badge Label</span>
+                      <input
+                        type="text"
+                        className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs font-semibold"
+                        value={coursesAndWorkshopsForm.badgeText}
+                        onChange={(e) => setCoursesAndWorkshopsForm({ ...coursesAndWorkshopsForm, badgeText: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-stone-400 block uppercase">Section Heading Title</span>
+                      <input
+                        type="text"
+                        className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs font-semibold"
+                        value={coursesAndWorkshopsForm.title}
+                        onChange={(e) => setCoursesAndWorkshopsForm({ ...coursesAndWorkshopsForm, title: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono text-stone-400 block uppercase">Section Subtitle Description</span>
+                    <textarea
+                      rows={2}
+                      className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs font-light leading-relaxed"
+                      value={coursesAndWorkshopsForm.description}
+                      onChange={(e) => setCoursesAndWorkshopsForm({ ...coursesAndWorkshopsForm, description: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                {/* Items List Header */}
+                <div className="flex items-center justify-between pb-2 border-b border-stone-100 dark:border-stone-850">
+                  <h3 className="text-sm font-semibold tracking-wide text-stone-700 dark:text-stone-300">
+                    Schedules & Programs ({coursesAndWorkshopsList.length})
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={handleAddCourseOrWorkshop}
+                    className="px-3.5 py-1.5 bg-stone-950 hover:bg-stone-900 dark:bg-stone-100 dark:text-stone-950 dark:hover:bg-white text-stone-50 font-mono text-[10px] tracking-wider uppercase rounded-lg flex items-center gap-1 cursor-pointer font-bold shadow-sm"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    Add Workshop or Course
+                  </button>
+                </div>
+
+                {/* Cards List */}
+                <div className="space-y-8">
+                  {coursesAndWorkshopsList.map((item, idx) => (
+                    <div key={item.id} className="bg-stone-50 dark:bg-stone-950 p-6 rounded-xl border border-stone-200 dark:border-stone-800 relative space-y-6">
+                      {/* Top Bar with delete */}
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] text-[#B38F4D] font-extrabold uppercase">
+                          PROGRAM EVENT #{idx + 1}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCourseOrWorkshop(item.id)}
+                          className="text-xs text-red-500 hover:text-red-650 font-mono flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Delete Program
+                        </button>
+                      </div>
+
+                      {/* Main Fields Grid */}
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Left Column: Image and Status */}
+                        <div className="lg:col-span-4 space-y-4">
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-mono text-stone-400 block uppercase">Program Cover Image</span>
+                            <div className="h-36 rounded-lg bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 overflow-hidden flex items-center justify-center relative mb-2">
+                              {item.imageUrl ? (
+                                <img
+                                  src={item.imageUrl}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                              ) : (
+                                <BookOpen className="w-8 h-8 text-stone-300" />
+                              )}
+                            </div>
+                            <FileUploader
+                              value={item.imageUrl}
+                              adminToken={adminToken}
+                              onChange={(url) => handleUpdateCourseOrWorkshop(item.id, 'imageUrl', url)}
+                              placeholder="https://images.unsplash.com/..."
+                              onUploaded={handleNewUploadRecord}
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-4 pt-2">
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                className="rounded border-stone-300 text-wood focus:ring-wood"
+                                checked={item.isActive}
+                                onChange={(e) => handleUpdateCourseOrWorkshop(item.id, 'isActive', e.target.checked)}
+                              />
+                              <span className="text-xs font-mono text-stone-600 dark:text-stone-300 uppercase tracking-wider font-semibold">Active & Visible</span>
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Right Column: Title and details */}
+                        <div className="lg:col-span-8 space-y-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1 col-span-1 sm:col-span-2">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Course/Workshop Title Name</span>
+                              <input
+                                type="text"
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs font-semibold"
+                                value={item.title}
+                                onChange={(e) => handleUpdateCourseOrWorkshop(item.id, 'title', e.target.value)}
+                              />
+                            </div>
+                            
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Program Classification</span>
+                              <select
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs font-mono"
+                                value={item.type}
+                                onChange={(e) => handleUpdateCourseOrWorkshop(item.id, 'type', e.target.value)}
+                              >
+                                <option value="Workshop">Workshop</option>
+                                <option value="Course">Course</option>
+                              </select>
+                            </div>
+
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Schedules / Dates</span>
+                              <input
+                                type="text"
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs"
+                                value={item.dateOrDuration}
+                                onChange={(e) => handleUpdateCourseOrWorkshop(item.id, 'dateOrDuration', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Class Hour Timings</span>
+                              <input
+                                type="text"
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs"
+                                value={item.time}
+                                onChange={(e) => handleUpdateCourseOrWorkshop(item.id, 'time', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Price (INR)</span>
+                              <input
+                                type="number"
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs font-mono"
+                                value={item.price}
+                                onChange={(e) => handleUpdateCourseOrWorkshop(item.id, 'price', parseInt(e.target.value) || 0)}
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Physical or Virtual Location</span>
+                              <input
+                                type="text"
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs"
+                                value={item.location}
+                                onChange={(e) => handleUpdateCourseOrWorkshop(item.id, 'location', e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-mono text-stone-400 block uppercase">Spots Left (Leave empty or 0 if unlimited)</span>
+                              <input
+                                type="number"
+                                className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs font-mono"
+                                value={item.spotsLeft || ''}
+                                onChange={(e) => handleUpdateCourseOrWorkshop(item.id, 'spotsLeft', parseInt(e.target.value) || undefined)}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <span className="text-[10px] font-mono text-stone-400 block uppercase">Program Overview Summary</span>
+                            <textarea
+                              rows={2}
+                              className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs font-light"
+                              value={item.description}
+                              onChange={(e) => handleUpdateCourseOrWorkshop(item.id, 'description', e.target.value)}
+                            />
+                          </div>
+
+                          {/* Syllabus Highlights Editor */}
+                          <div className="space-y-3 pt-2">
+                            <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-850 pb-1">
+                              <span className="text-[9px] font-mono text-stone-400 block uppercase tracking-wider font-bold">Syllabus Highlights Bullets</span>
+                              <button
+                                type="button"
+                                onClick={() => handleAddCourseSyllabus(item.id)}
+                                className="text-[10px] text-wood font-mono flex items-center gap-1 cursor-pointer font-bold"
+                              >
+                                <Plus className="w-3 h-3" /> Add Highlight
+                              </button>
+                            </div>
+                            <div className="space-y-2">
+                              {(item.syllabusOrDetails || []).map((bullet: string, bulletIdx: number) => (
+                                <div key={bulletIdx} className="flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    className="w-full bg-white dark:bg-stone-900 border border-stone-250 dark:border-stone-850 px-3 py-1.5 rounded text-xs"
+                                    value={bullet}
+                                    onChange={(e) => handleCourseSyllabusChange(item.id, bulletIdx, e.target.value)}
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRemoveCourseSyllabus(item.id, bulletIdx)}
+                                    className="text-stone-400 hover:text-red-500 cursor-pointer p-1"
+                                    title="Delete Bullet"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              ))}
+                              {(item.syllabusOrDetails || []).length === 0 && (
+                                <p className="text-[10px] text-stone-400 italic">No curriculum bullet highlights added yet.</p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {coursesAndWorkshopsList.length === 0 && (
+                    <div className="text-center py-12 bg-stone-50 dark:bg-stone-950 rounded-xl border border-dashed border-stone-200 dark:border-stone-800">
+                      <p className="text-xs text-stone-400 italic">No masterclass programs or workshops defined. Create one using the button above.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

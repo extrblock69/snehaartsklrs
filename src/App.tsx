@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Analytics } from '@vercel/analytics/react';
 import Loader from './components/Loader';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import About from './components/About';
 import Achievements from './components/Achievements';
 import Gallery from './components/Gallery';
+import CoursesAndWorkshops from './components/CoursesAndWorkshops';
 import StudentShowcase from './components/StudentShowcase';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
@@ -132,6 +132,16 @@ export default function App() {
                 <Gallery />
               </motion.div>
 
+              {/* 3.25. Courses & Workshops Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 35 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+              >
+                <CoursesAndWorkshops />
+              </motion.div>
+
               {/* 3.5. Featured Student Showcase */}
               <motion.div
                 initial={{ opacity: 0, y: 35 }}
@@ -170,7 +180,7 @@ export default function App() {
           {renderContent()}
         </div>
       )}
-      <Analytics />
     </>
   );
 }
+

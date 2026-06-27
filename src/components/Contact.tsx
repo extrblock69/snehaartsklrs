@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Phone, MapPin, Send, CheckCircle2, User, HelpCircle, Palette, Sparkles } from 'lucide-react';
 import { useContent } from '../context/ContentContext';
@@ -31,6 +31,21 @@ export default function Contact() {
   });
 
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+
+  useEffect(() => {
+    const handlePrefill = (e: Event) => {
+      const customEvent = e as CustomEvent<{ message: string; inquiryType?: string }>;
+      if (customEvent.detail) {
+        setFormData(prev => ({
+          ...prev,
+          message: customEvent.detail.message,
+          inquiryType: customEvent.detail.inquiryType || 'General Inquiry'
+        }));
+      }
+    };
+    window.addEventListener('prefill-inquiry', handlePrefill);
+    return () => window.removeEventListener('prefill-inquiry', handlePrefill);
+  }, []);
 
   const inquiryTypes = [
     '1-on-1 Mentorship',

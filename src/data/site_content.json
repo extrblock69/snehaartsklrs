@@ -272,6 +272,88 @@
       }
     ]
   },
+  "coursesAndWorkshops": {
+    "badgeText": "🎨 ART COURSES & MASTERCLASSES",
+    "title": "Nurture Your Artistic Talents",
+    "description": "Enroll in our highly structured drawing and painting courses. Under Sneha Bansal's direct, personalized mentorship, develop precise control, fine observation, and professional hand-eye coordination.",
+    "items": [
+      {
+        "id": "cw-kids",
+        "title": "Junior Kids Art Program",
+        "type": "Course",
+        "dateOrDuration": "1 Month",
+        "time": "1 Hour Class | Saturday & Sunday Off",
+        "price": 999,
+        "location": "Online via Zoom",
+        "spotsLeft": 12,
+        "description": "Perfect for building interest and creativity in early ages (5–10 Years). A gentle, fun introduction to shapes, drawing, and vibrant colouring.",
+        "syllabusOrDetails": [
+          "Fun drawing activities & interactive sketch games",
+          "Colouring techniques and medium control",
+          "Basic drawing (lines, shapes & primary forms)",
+          "Creative imagination exercises to spark storytelling"
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&q=80&w=800",
+        "isActive": true
+      },
+      {
+        "id": "cw-adv-drawing",
+        "title": "Basic to Advanced Drawing Training ⭐",
+        "type": "Course",
+        "dateOrDuration": "3 Months",
+        "time": "1 Hour Daily | Saturday & Sunday Off",
+        "price": 3999,
+        "location": "Live Online (Zoom) / Studio Hybrid",
+        "spotsLeft": 8,
+        "description": "Our most recommended comprehensive course designed to build a strong artistic foundation step-by-step. Perfect for absolute beginners to intermediate aspirants.",
+        "syllabusOrDetails": [
+          "Fundamentals: Lines, shapes & pencil control exercises",
+          "Shading techniques, light-direction, & tonal values",
+          "Still life, object drawing, & nature studies (landscapes)",
+          "Human anatomy basics (eyes, nose, lips, ears & full face structure)",
+          "Simplification, Grid method, & detailed portrait sketching"
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800",
+        "isActive": true
+      },
+      {
+        "id": "cw-watercolor",
+        "title": "Watercolour Painting Course",
+        "type": "Course",
+        "dateOrDuration": "1.5 Months",
+        "time": "1 Hour Daily | Saturday & Sunday Off",
+        "price": 1999,
+        "location": "Online via Zoom",
+        "spotsLeft": 15,
+        "description": "Master the beautiful, fluid transparency of watercolour paint. Learn wash techniques, color mixing, and organic form rendering.",
+        "syllabusOrDetails": [
+          "Colour theory, temperature dynamics & mixing control",
+          "Nature-based painting (organic flowers, leaves & scenery)",
+          "Basic human portrait painting in classic watercolour wash"
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1579783928621-7a13d66a62d1?auto=format&fit=crop&q=80&w=800",
+        "isActive": true
+      },
+      {
+        "id": "cw-pastels",
+        "title": "Pencil Colours & Oil Pastels Course",
+        "type": "Course",
+        "dateOrDuration": "1 Month",
+        "time": "Flexible practice-based learning",
+        "price": 1499,
+        "location": "Online / Custom Mentored Schedule",
+        "spotsLeft": 10,
+        "description": "Unlock vibrant blending techniques and textures. Learn to mix dry-mediums for rich, hyper-pigmented illustration outcomes.",
+        "syllabusOrDetails": [
+          "Layering and seamless colour blending techniques",
+          "Texture creation (fur, metallic sheen, and glass textures)",
+          "Creative artwork creation with premium pencils & oil pastels"
+        ],
+        "imageUrl": "https://images.unsplash.com/photo-1519751138087-5bf79df62d5b?auto=format&fit=crop&q=80&w=800",
+        "isActive": true
+      }
+    ]
+  },
   "globalButtons": {
     "navbarContactLink": "",
     "lessonsInquireLink": "",

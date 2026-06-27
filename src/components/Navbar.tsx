@@ -17,7 +17,7 @@ export default function Navbar() {
       setScrolled(window.scrollY > 40);
 
       // Simple active link tracker
-      const sections = ['home', 'about', 'achievements', 'gallery', 'student-showcase', 'contact'];
+      const sections = ['home', 'about', 'achievements', 'gallery', 'courses-workshops', 'student-showcase', 'contact'];
       const scrollPos = window.scrollY + 120;
 
       for (const section of sections) {
@@ -54,6 +54,7 @@ export default function Navbar() {
     { label: 'About', id: 'about' },
     { label: 'Achievements', id: 'achievements' },
     { label: 'Gallery', id: 'gallery' },
+    { label: 'Masterclasses', id: 'courses-workshops' },
     { label: 'Student Showcase', id: 'student-showcase' },
     { label: 'Contact', id: 'contact' },
   ];
