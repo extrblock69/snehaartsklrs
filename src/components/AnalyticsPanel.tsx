@@ -5,6 +5,7 @@ import {
   Clock, ArrowLeft, Globe, Monitor, Smartphone, Tablet, ChevronDown, ChevronUp,
   Cpu, Layout, Compass, Info, Trash2, Zap, AlertCircle
 } from 'lucide-react';
+import WorldMap from './WorldMap';
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL || "").replace(/\/$/, "");
 
@@ -27,6 +28,30 @@ interface VisitorLog {
   referrers: string[];
   languages: string[];
   history: VisitorHistoryItem[];
+  // Geolocation
+  country?: string;
+  countryCode?: string;
+  region?: string;
+  regionName?: string;
+  city?: string;
+  zip?: string;
+  lat?: number;
+  lon?: number;
+  timezone?: string;
+  isp?: string;
+  org?: string;
+  as?: string;
+  // Tech Specs
+  screenResolution?: string;
+  windowSize?: string;
+  timezoneBrowser?: string;
+  platform?: string;
+  cores?: number;
+  memory?: number;
+  connection?: string;
+  touchSupported?: string;
+  cookieEnabled?: string;
+  colorDepth?: string;
 }
 
 interface AnalyticsData {
@@ -173,7 +198,12 @@ export default function AnalyticsPanel() {
         log.browser.toLowerCase().includes(query) ||
         log.os.toLowerCase().includes(query) ||
         log.device.toLowerCase().includes(query) ||
-        (log.userAgent && log.userAgent.toLowerCase().includes(query))
+        (log.userAgent && log.userAgent.toLowerCase().includes(query)) ||
+        (log.country && log.country.toLowerCase().includes(query)) ||
+        (log.city && log.city.toLowerCase().includes(query)) ||
+        (log.regionName && log.regionName.toLowerCase().includes(query)) ||
+        (log.isp && log.isp.toLowerCase().includes(query)) ||
+        (log.org && log.org.toLowerCase().includes(query))
       );
     }
 
@@ -481,92 +511,97 @@ export default function AnalyticsPanel() {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+                className="space-y-6"
               >
-                {/* Device Breakdown */}
-                <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-850 rounded-xl p-5 shadow-sm space-y-4">
-                  <h3 className="text-xs font-mono tracking-wider font-bold uppercase text-stone-400 flex items-center gap-1.5 border-b border-stone-100 dark:border-stone-850 pb-2">
-                    <Monitor className="w-3.5 h-3.5" /> Client Device Profile
-                  </h3>
-                  <div className="space-y-4">
-                    {Object.entries(data.totals?.deviceCounts || {}).map(([device, count]) => {
-                      const countNum = count as number;
-                      const total = data.totals?.totalVisits || 1;
-                      const pct = Math.round((countNum / total) * 100);
-                      return (
-                        <div key={device} className="space-y-1">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="font-mono flex items-center gap-1.5 text-stone-700 dark:text-stone-300">
-                              {getDeviceIcon(device)}
-                              {device}
-                            </span>
-                            <span className="font-mono font-medium">{countNum} views ({pct}%)</span>
-                          </div>
-                          <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden">
-                            <div className="bg-[#B38F4D] h-full" style={{ width: `${pct}%` }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {Object.keys(data.totals?.deviceCounts || {}).length === 0 && (
-                      <div className="text-center text-xs text-stone-400 py-6">No visitor data captured yet.</div>
-                    )}
-                  </div>
-                </div>
+                {/* Simplified World Map Geographic distribution of visitors */}
+                <WorldMap logs={data.logs} />
 
-                {/* Operating System Breakdown */}
-                <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-850 rounded-xl p-5 shadow-sm space-y-4">
-                  <h3 className="text-xs font-mono tracking-wider font-bold uppercase text-stone-400 flex items-center gap-1.5 border-b border-stone-100 dark:border-stone-850 pb-2">
-                    <Cpu className="w-3.5 h-3.5" /> Operating System usage
-                  </h3>
-                  <div className="space-y-4">
-                    {Object.entries(data.totals?.osCounts || {}).map(([os, count]) => {
-                      const countNum = count as number;
-                      const total = data.totals?.totalVisits || 1;
-                      const pct = Math.round((countNum / total) * 100);
-                      return (
-                        <div key={os} className="space-y-1">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="font-sans text-stone-700 dark:text-stone-300">{os}</span>
-                            <span className="font-mono font-medium">{countNum} views ({pct}%)</span>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Device Breakdown */}
+                  <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-850 rounded-xl p-5 shadow-sm space-y-4">
+                    <h3 className="text-xs font-mono tracking-wider font-bold uppercase text-stone-400 flex items-center gap-1.5 border-b border-stone-100 dark:border-stone-850 pb-2">
+                      <Monitor className="w-3.5 h-3.5" /> Client Device Profile
+                    </h3>
+                    <div className="space-y-4">
+                      {Object.entries(data.totals?.deviceCounts || {}).map(([device, count]) => {
+                        const countNum = count as number;
+                        const total = data.totals?.totalVisits || 1;
+                        const pct = Math.round((countNum / total) * 100);
+                        return (
+                          <div key={device} className="space-y-1">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="font-mono flex items-center gap-1.5 text-stone-700 dark:text-stone-300">
+                                {getDeviceIcon(device)}
+                                {device}
+                              </span>
+                              <span className="font-mono font-medium">{countNum} views ({pct}%)</span>
+                            </div>
+                            <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden">
+                              <div className="bg-[#B38F4D] h-full" style={{ width: `${pct}%` }} />
+                            </div>
                           </div>
-                          <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden">
-                            <div className="bg-stone-700 dark:bg-stone-400 h-full" style={{ width: `${pct}%` }} />
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {Object.keys(data.totals?.osCounts || {}).length === 0 && (
-                      <div className="text-center text-xs text-stone-400 py-6">No visitor data captured yet.</div>
-                    )}
+                        );
+                      })}
+                      {Object.keys(data.totals?.deviceCounts || {}).length === 0 && (
+                        <div className="text-center text-xs text-stone-400 py-6">No visitor data captured yet.</div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Web Browsers Breakdown */}
-                <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-850 rounded-xl p-5 shadow-sm space-y-4">
-                  <h3 className="text-xs font-mono tracking-wider font-bold uppercase text-stone-400 flex items-center gap-1.5 border-b border-stone-100 dark:border-stone-850 pb-2">
-                    <Compass className="w-3.5 h-3.5" /> Web Browser distribution
-                  </h3>
-                  <div className="space-y-4">
-                    {Object.entries(data.totals?.browserCounts || {}).map(([browser, count]) => {
-                      const countNum = count as number;
-                      const total = data.totals?.totalVisits || 1;
-                      const pct = Math.round((countNum / total) * 100);
-                      return (
-                        <div key={browser} className="space-y-1">
-                          <div className="flex justify-between items-center text-xs">
-                            <span className="font-sans text-stone-700 dark:text-stone-300">{browser}</span>
-                            <span className="font-mono font-medium">{countNum} views ({pct}%)</span>
+                  {/* Operating System Breakdown */}
+                  <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-850 rounded-xl p-5 shadow-sm space-y-4">
+                    <h3 className="text-xs font-mono tracking-wider font-bold uppercase text-stone-400 flex items-center gap-1.5 border-b border-stone-100 dark:border-stone-850 pb-2">
+                      <Cpu className="w-3.5 h-3.5" /> Operating System usage
+                    </h3>
+                    <div className="space-y-4">
+                      {Object.entries(data.totals?.osCounts || {}).map(([os, count]) => {
+                        const countNum = count as number;
+                        const total = data.totals?.totalVisits || 1;
+                        const pct = Math.round((countNum / total) * 100);
+                        return (
+                          <div key={os} className="space-y-1">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="font-sans text-stone-700 dark:text-stone-300">{os}</span>
+                              <span className="font-mono font-medium">{countNum} views ({pct}%)</span>
+                            </div>
+                            <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden">
+                              <div className="bg-stone-700 dark:bg-stone-400 h-full" style={{ width: `${pct}%` }} />
+                            </div>
                           </div>
-                          <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden">
-                            <div className="bg-[#B38F4D]/50 dark:bg-[#B38F4D]/70 h-full" style={{ width: `${pct}%` }} />
+                        );
+                      })}
+                      {Object.keys(data.totals?.osCounts || {}).length === 0 && (
+                        <div className="text-center text-xs text-stone-400 py-6">No visitor data captured yet.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Web Browsers Breakdown */}
+                  <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-850 rounded-xl p-5 shadow-sm space-y-4">
+                    <h3 className="text-xs font-mono tracking-wider font-bold uppercase text-stone-400 flex items-center gap-1.5 border-b border-stone-100 dark:border-stone-850 pb-2">
+                      <Compass className="w-3.5 h-3.5" /> Web Browser distribution
+                    </h3>
+                    <div className="space-y-4">
+                      {Object.entries(data.totals?.browserCounts || {}).map(([browser, count]) => {
+                        const countNum = count as number;
+                        const total = data.totals?.totalVisits || 1;
+                        const pct = Math.round((countNum / total) * 100);
+                        return (
+                          <div key={browser} className="space-y-1">
+                            <div className="flex justify-between items-center text-xs">
+                              <span className="font-sans text-stone-700 dark:text-stone-300">{browser}</span>
+                              <span className="font-mono font-medium">{countNum} views ({pct}%)</span>
+                            </div>
+                            <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 overflow-hidden">
+                              <div className="bg-[#B38F4D]/50 dark:bg-[#B38F4D]/70 h-full" style={{ width: `${pct}%` }} />
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
-                    {Object.keys(data.totals?.browserCounts || {}).length === 0 && (
-                      <div className="text-center text-xs text-stone-400 py-6">No visitor data captured yet.</div>
-                    )}
+                        );
+                      })}
+                      {Object.keys(data.totals?.browserCounts || {}).length === 0 && (
+                        <div className="text-center text-xs text-stone-400 py-6">No visitor data captured yet.</div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -694,8 +729,14 @@ export default function AnalyticsPanel() {
                             </div>
                             
                             {/* Client IP */}
-                            <div className="col-span-3 font-mono font-bold text-stone-900 dark:text-stone-100 tracking-tight">
-                              {log.ip}
+                            <div className="col-span-3 font-mono text-stone-900 dark:text-stone-100 tracking-tight flex flex-col justify-center">
+                              <span className="font-bold">{log.ip}</span>
+                              {log.country && (
+                                <span className="text-[10px] text-stone-500 font-sans mt-0.5 flex items-center gap-1">
+                                  <span>📍</span>
+                                  <span className="truncate max-w-[150px]" title={`${log.city}, ${log.country}`}>{log.city}, {log.country}</span>
+                                </span>
+                              )}
                             </div>
 
                             {/* Total Visits Badge */}
@@ -730,62 +771,121 @@ export default function AnalyticsPanel() {
 
                           {/* Expanded detail box */}
                           {isExpanded && (
-                            <div className="bg-stone-50/50 dark:bg-stone-950/40 p-5 px-12 border-t border-b border-stone-200/50 dark:border-stone-850/50 gap-6 grid grid-cols-1 md:grid-cols-2 text-xs">
+                            <div className="bg-stone-50/50 dark:bg-stone-950/40 p-6 px-12 border-t border-b border-stone-200/50 dark:border-stone-850/50 gap-6 grid grid-cols-1 lg:grid-cols-3 text-xs">
                               
-                              {/* Left metadata profiles */}
+                              {/* Geographic profile and ISP Details */}
                               <div className="space-y-4">
-                                <h4 className="text-[10px] font-mono uppercase text-stone-400 font-bold tracking-wider border-b border-stone-200 dark:border-stone-800 pb-1 flex items-center gap-1">
-                                  <Info className="w-3.5 h-3.5" /> Client Profile Details
+                                <h4 className="text-[10px] font-mono uppercase text-[#B38F4D] font-bold tracking-wider border-b border-stone-200 dark:border-stone-800 pb-1 flex items-center gap-1">
+                                  <Globe className="w-3.5 h-3.5" /> 📍 Geolocation Profile
                                 </h4>
-                                <div className="space-y-1.5 font-mono text-[11px]">
-                                  <div className="flex py-0.5">
-                                    <span className="w-24 text-stone-500">First Visit:</span>
-                                    <span className="text-stone-900 dark:text-stone-200">{formatDate(log.firstVisit)}</span>
+                                <div className="space-y-2 font-mono text-[11px]">
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Country:</span>
+                                    <span className="text-stone-900 dark:text-stone-200 font-semibold">{log.country ? `${log.country} (${log.countryCode || 'N/A'})` : 'Localhost / Unknown'}</span>
                                   </div>
-                                  <div className="flex py-0.5">
-                                    <span className="w-24 text-stone-500">Most Recent:</span>
-                                    <span className="text-stone-900 dark:text-stone-200">{formatDate(log.lastVisit)}</span>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Region/State:</span>
+                                    <span className="text-stone-900 dark:text-stone-200">{log.regionName || 'N/A'}</span>
                                   </div>
-                                  <div className="flex py-0.5">
-                                    <span className="w-24 text-stone-500">Screen Sizes:</span>
-                                    <span className="text-stone-850 dark:text-stone-250 truncate" title={log.screens?.join(', ') || 'Unknown'}>
-                                      {log.screens?.join(' / ') || 'N/A'}
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">City &amp; Zip:</span>
+                                    <span className="text-stone-900 dark:text-stone-200">{log.city ? `${log.city} (${log.zip || 'N/A'})` : 'N/A'}</span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Timezone (IP):</span>
+                                    <span className="text-stone-950 dark:text-stone-200">{log.timezone || 'N/A'}</span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Coordinates:</span>
+                                    {log.lat ? (
+                                      <a 
+                                        href={`https://www.google.com/maps?q=${log.lat},${log.lon}`} 
+                                        target="_blank" 
+                                        rel="noreferrer" 
+                                        className="text-[#B38F4D] hover:underline flex items-center gap-1 font-semibold"
+                                      >
+                                        {log.lat.toFixed(4)}, {log.lon?.toFixed(4)} ↗
+                                      </a>
+                                    ) : (
+                                      <span className="text-stone-400">N/A</span>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col pt-1">
+                                    <span className="text-[10px] text-stone-400 font-semibold uppercase">ISP Provider:</span>
+                                    <span className="text-stone-900 dark:text-stone-300 text-xs mt-0.5 font-sans truncate" title={log.isp || 'Local Network'}>
+                                      {log.isp || 'Local loopback'}
                                     </span>
                                   </div>
-                                  <div className="flex py-0.5">
-                                    <span className="w-24 text-stone-500">Language:</span>
-                                    <span className="text-stone-900 dark:text-stone-200 uppercase">{log.languages?.join(', ') || 'N/A'}</span>
-                                  </div>
-                                  <div className="flex py-0.5">
-                                    <span className="w-24 text-stone-500">Referrer URL:</span>
-                                    <span className="text-[#B38F4D] truncate max-w-[280px]" title={log.referrers?.join(', ') || 'Direct / External'}>
-                                      {log.referrers?.join(' / ') || 'Direct connection'}
+                                  <div className="flex flex-col">
+                                    <span className="text-[10px] text-stone-400 font-semibold uppercase">AS Domain/Org:</span>
+                                    <span className="text-stone-900 dark:text-stone-300 text-xs mt-0.5 font-sans truncate" title={log.org || log.as || 'Local system'}>
+                                      {log.org || log.as || 'System loopback'}
                                     </span>
                                   </div>
                                 </div>
+                              </div>
 
-                                <div className="space-y-1 pt-1.5">
-                                  <span className="text-[9px] font-mono uppercase text-stone-400 font-semibold block">Full Browser User-Agent Header</span>
-                                  <p className="text-[10px] bg-stone-100 dark:bg-stone-900 border border-stone-200 dark:border-[#B38F4D]/10 rounded-lg p-3 text-stone-600 dark:text-stone-400 font-mono tracking-tighter leading-normal select-all">
-                                    {log.userAgent || 'Missing header'}
-                                  </p>
+                              {/* Technical Device Specs & Client Metrics */}
+                              <div className="space-y-4">
+                                <h4 className="text-[10px] font-mono uppercase text-[#B38F4D] font-bold tracking-wider border-b border-stone-200 dark:border-stone-800 pb-1 flex items-center gap-1">
+                                  <Monitor className="w-3.5 h-3.5" /> 💻 Client Specifications
+                                </h4>
+                                <div className="space-y-2 font-mono text-[11px]">
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Screen Res:</span>
+                                    <span className="text-stone-900 dark:text-stone-200 font-semibold">{log.screenResolution || 'Unknown'}</span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Browser Window:</span>
+                                    <span className="text-stone-900 dark:text-stone-200">{log.windowSize || log.screens?.[0] || 'Unknown'}</span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Browser TZ:</span>
+                                    <span className="text-stone-900 dark:text-stone-200 truncate max-w-[140px]" title={log.timezoneBrowser}>{log.timezoneBrowser || 'N/A'}</span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Platform OS:</span>
+                                    <span className="text-stone-900 dark:text-stone-200 truncate max-w-[140px]" title={log.platform}>{log.platform || 'Unknown'}</span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">CPU / Memory:</span>
+                                    <span className="text-stone-900 dark:text-stone-200">
+                                      {log.cores ? `${log.cores} Cores ` : ''}{log.memory ? `/ ${log.memory} GB RAM` : ''}{!log.cores && !log.memory ? 'Unknown' : ''}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Connection Speed:</span>
+                                    <span className="text-stone-900 dark:text-stone-200 uppercase font-semibold">{log.connection || 'N/A'}</span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Touch Screen:</span>
+                                    <span className="text-stone-900 dark:text-stone-200">{log.touchSupported || 'No'}</span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Cookies Status:</span>
+                                    <span className="text-stone-900 dark:text-stone-200">{log.cookieEnabled || 'Yes'}</span>
+                                  </div>
+                                  <div className="flex justify-between py-0.5 border-b border-stone-100 dark:border-stone-850">
+                                    <span className="text-stone-500">Color Depth:</span>
+                                    <span className="text-stone-900 dark:text-stone-200">{log.colorDepth || '24-bit'}</span>
+                                  </div>
                                 </div>
                               </div>
 
                               {/* Right dynamic tracking chronology timeline sequences */}
-                              <div className="space-y-3">
-                                <h4 className="text-[10px] font-mono uppercase text-stone-400 font-bold tracking-wider border-b border-stone-200 dark:border-stone-800 pb-1 flex items-center gap-1">
-                                  <Clock className="w-3.5 h-3.5" /> Recent visited paths chronology
+                              <div className="space-y-4">
+                                <h4 className="text-[10px] font-mono uppercase text-[#B38F4D] font-bold tracking-wider border-b border-stone-200 dark:border-stone-800 pb-1 flex items-center gap-1">
+                                  <Clock className="w-3.5 h-3.5" /> ⏱️ Navigation Chronology
                                 </h4>
-                                <div className="space-y-2.5 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="space-y-2 max-h-56 overflow-y-auto pr-1 custom-scrollbar">
                                   {log.history && log.history.map((hist, idx) => (
-                                    <div key={idx} className="flex gap-3 text-xs justify-between group rounded p-1 hover:bg-stone-100 dark:hover:bg-stone-900 p-1 rounded-md transition-all">
-                                      <div className="flex items-center gap-1.5">
+                                    <div key={idx} className="flex gap-3 text-xs justify-between group rounded hover:bg-stone-100/50 dark:hover:bg-stone-850/50 p-1 rounded-md transition-all">
+                                      <div className="flex items-center gap-1.5 min-w-0">
                                         <span className="text-[#B38F4D] text-[10px] font-mono leading-none">✦</span>
-                                        <span className="font-mono text-stone-900 dark:text-stone-100 font-semibold">{hist.pathname || '/'}</span>
+                                        <span className="font-mono text-stone-900 dark:text-stone-100 font-semibold truncate" title={hist.pathname}>{hist.pathname || '/'}</span>
                                       </div>
-                                      <div className="flex items-center gap-2 text-stone-400 font-mono text-[10px]">
-                                        <span className="truncate max-w-[100px] block opacity-70 group-hover:opacity-100" title={hist.referrer}>{hist.referrer === 'Direct Link' ? '' : hist.referrer}</span>
+                                      <div className="flex items-center gap-2 text-stone-400 font-mono text-[9px] shrink-0">
+                                        <span className="truncate max-w-[80px] block opacity-70 group-hover:opacity-100" title={hist.referrer}>{hist.referrer === 'Direct Link' ? '' : hist.referrer}</span>
                                         <span>{formatDate(hist.timestamp).split(',')[1]}</span>
                                       </div>
                                     </div>
@@ -793,6 +893,13 @@ export default function AnalyticsPanel() {
                                   {(!log.history || log.history.length === 0) && (
                                     <div className="text-center text-xs text-stone-400 italic py-6">No session action chronology recorded.</div>
                                   )}
+                                </div>
+
+                                <div className="space-y-1 pt-1.5">
+                                  <span className="text-[9px] font-mono uppercase text-stone-400 font-semibold block">Full Browser User-Agent Header</span>
+                                  <p className="text-[9px] bg-stone-100 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-2 text-stone-500 dark:text-stone-400 font-mono tracking-tighter leading-snug select-all max-h-16 overflow-y-auto custom-scrollbar">
+                                    {log.userAgent || 'Missing header'}
+                                  </p>
                                 </div>
                               </div>
 

@@ -55,6 +55,24 @@ export default function App() {
   // Track visitor views when mounting or navigating to 'home'
   useEffect(() => {
     if (currentView === 'home' && !loading) {
+      // Gather extremely detailed client specifications and browser dimensions
+      const screenResolution = `${window.screen.width}x${window.screen.height}`;
+      const windowSize = `${window.innerWidth}x${window.innerHeight}`;
+      const timezoneBrowser = (() => {
+        try {
+          return Intl.DateTimeFormat().resolvedOptions().timeZone;
+        } catch (e) {
+          return 'Unknown';
+        }
+      })();
+      const platform = navigator.platform || 'Unknown';
+      const cores = navigator.hardwareConcurrency || 0;
+      const memory = (navigator as any).deviceMemory || 0;
+      const connection = (navigator as any).connection?.effectiveType || 'N/A';
+      const touchSupported = ('ontouchstart' in window || navigator.maxTouchPoints > 0) ? 'Yes' : 'No';
+      const cookieEnabled = navigator.cookieEnabled ? 'Yes' : 'No';
+      const colorDepth = `${window.screen.colorDepth || 0}-bit`;
+
       fetch(`${API_BASE_URL}/api/analytics/track`, {
         method: 'POST',
         headers: {
@@ -63,8 +81,18 @@ export default function App() {
         body: JSON.stringify({
           pathname: window.location.pathname + window.location.hash,
           referrer: document.referrer || 'Direct / Bookmark',
-          screen: `${window.innerWidth}x${window.innerHeight}`,
-          language: navigator.language || 'en-US'
+          screen: windowSize,
+          language: navigator.language || 'en-US',
+          screenResolution,
+          windowSize,
+          timezoneBrowser,
+          platform,
+          cores,
+          memory,
+          connection,
+          touchSupported,
+          cookieEnabled,
+          colorDepth
         }),
       }).catch(err => {
         console.warn('Analytics tracking not processed offline:', err);

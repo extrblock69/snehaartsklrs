@@ -1062,6 +1062,30 @@ interface VisitorLog {
     pathname: string;
     referrer: string;
   }>;
+  // Geolocation details from server IP lookup
+  country?: string;
+  countryCode?: string;
+  region?: string;
+  regionName?: string;
+  city?: string;
+  zip?: string;
+  lat?: number;
+  lon?: number;
+  timezone?: string;
+  isp?: string;
+  org?: string;
+  as?: string;
+  // Technical client specs
+  screenResolution?: string;
+  windowSize?: string;
+  timezoneBrowser?: string;
+  platform?: string;
+  cores?: number;
+  memory?: number;
+  connection?: string;
+  touchSupported?: string;
+  cookieEnabled?: string;
+  colorDepth?: string;
 }
 
 function parseUserAgent(uaString: string) {
@@ -1091,19 +1115,127 @@ function parseUserAgent(uaString: string) {
   return { browser, os, device };
 }
 
-function loadAnalyticsLogs(): { logs: VisitorLog[] } {
+async function fetchIpGeo(ip: string) {
+  if (!ip || ip === "Localhost Client" || ip === "127.0.0.1" || ip === "::1" || ip.includes("localhost")) {
+    return {
+      country: "Localhost Network",
+      countryCode: "LN",
+      region: "LCL",
+      regionName: "Localhost",
+      city: "Localhost",
+      zip: "00000",
+      lat: 0,
+      lon: 0,
+      timezone: "UTC",
+      isp: "Local System Loopback",
+      org: "Localhost",
+      as: "N/A"
+    };
+  }
+
+  try {
+    const res = await fetch(`http://ip-api.com/json/${encodeURIComponent(ip)}`);
+    if (res.ok) {
+      const info = await res.json();
+      if (info && info.status === "success") {
+        return {
+          country: info.country || "Unknown",
+          countryCode: info.countryCode || "UN",
+          region: info.region || "N/A",
+          regionName: info.regionName || "N/A",
+          city: info.city || "Unknown",
+          zip: info.zip || "N/A",
+          lat: info.lat || 0,
+          lon: info.lon || 0,
+          timezone: info.timezone || "UTC",
+          isp: info.isp || "N/A",
+          org: info.org || "N/A",
+          as: info.as || "N/A"
+        };
+      }
+    }
+  } catch (err) {
+    console.error(`[ANALYTICS] Geolocation API lookup failed for ${ip}:`, err);
+  }
+
+  return {
+    country: "Unknown",
+    countryCode: "UN",
+    region: "N/A",
+    regionName: "N/A",
+    city: "Unknown",
+    zip: "N/A",
+    lat: 0,
+    lon: 0,
+    timezone: "UTC",
+    isp: "N/A",
+    org: "N/A",
+    as: "N/A"
+  };
+}
+
+let cachedAnalytics: { logs: VisitorLog[] } | null = null;
+
+async function loadAnalyticsLogs(): Promise<{ logs: VisitorLog[] }> {
+  // 1. Try loading from Supabase first if active
+  if (supabaseClient) {
+    try {
+      const { data, error } = await supabaseClient
+        .from("site_configs")
+        .select("value")
+        .eq("key", "analytics_logs")
+        .maybeSingle();
+
+      if (!error && data && data.value) {
+        cachedAnalytics = data.value;
+        return data.value;
+      }
+    } catch (err) {
+      console.error("[ANALYTICS] Failed to load analytics from Supabase:", err);
+    }
+  }
+
+  // 2. Return cached if we have it
+  if (cachedAnalytics) {
+    return cachedAnalytics;
+  }
+
+  // 3. Fallback to local file read
   try {
     if (fs.existsSync(ANALYTICS_FILE_PATH)) {
       const b = fs.readFileSync(ANALYTICS_FILE_PATH, "utf-8");
-      return JSON.parse(b);
+      const parsed = JSON.parse(b);
+      cachedAnalytics = parsed;
+      return parsed;
     }
   } catch (err) {
-    console.error("Error loading analytics logs:", err);
+    console.error("[ANALYTICS] Error loading local analytics logs:", err);
   }
+
   return { logs: [] };
 }
 
-function saveAnalyticsLogs(data: { logs: VisitorLog[] }) {
+async function saveAnalyticsLogs(data: { logs: VisitorLog[] }) {
+  cachedAnalytics = data;
+
+  // 1. Save to Supabase if active
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from("site_configs")
+        .upsert({ key: "analytics_logs", value: data }, { onConflict: "key" });
+      
+      if (!error) {
+        console.log("[ANALYTICS] ✅ Successfully synchronized analytics logs to Supabase Cloud Server!");
+      } else {
+        console.error("[ANALYTICS] ❌ Failed to write analytics to Supabase:", error);
+      }
+    } catch (err) {
+      console.error("[ANALYTICS] Supabase database sync exception:", err);
+    }
+  }
+
+  // 2. Always persist a local backup copy
   try {
     const dir = path.dirname(ANALYTICS_FILE_PATH);
     if (!fs.existsSync(dir)) {
@@ -1111,14 +1243,18 @@ function saveAnalyticsLogs(data: { logs: VisitorLog[] }) {
     }
     fs.writeFileSync(ANALYTICS_FILE_PATH, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
-    console.error("Error saving analytics logs:", err);
+    console.error("[ANALYTICS] Error saving local backup analytics logs:", err);
   }
 }
 
 // API: Track visitor action / page-load
 app.post("/api/analytics/track", async (req, res) => {
   try {
-    const { pathname, referrer, screen, language } = req.body;
+    const { 
+      pathname, referrer, screen, language,
+      screenResolution, windowSize, timezoneBrowser, platform,
+      cores, memory, connection, touchSupported, cookieEnabled, colorDepth
+    } = req.body;
     
     // Resolve clean visitor IP safely
     let ip = (req.headers["x-forwarded-for"] as string || req.ip || req.socket.remoteAddress || "127.0.0.1").split(",")[0].trim();
@@ -1132,11 +1268,13 @@ app.post("/api/analytics/track", async (req, res) => {
     const uaString = req.headers["user-agent"] || "";
     const parsedUA = parseUserAgent(uaString);
 
-    const data = loadAnalyticsLogs();
+    const data = await loadAnalyticsLogs();
     const now = new Date().toISOString();
 
     let record = data.logs.find(r => r.ip === ip);
     if (!record) {
+      // Fetch IP geolocation info asynchronously for new visitor
+      const geo = await fetchIpGeo(ip);
       record = {
         ip,
         visitCount: 0,
@@ -1149,10 +1287,29 @@ app.post("/api/analytics/track", async (req, res) => {
         screens: [],
         referrers: [],
         languages: [],
-        history: []
+        history: [],
+        ...geo
       };
       data.logs.push(record);
+    } else {
+      // Lazily backfill geolocation info if missing
+      if (!record.country) {
+        const geo = await fetchIpGeo(ip);
+        Object.assign(record, geo);
+      }
     }
+
+    // Always update client details to the latest if provided
+    if (screenResolution) record.screenResolution = screenResolution;
+    if (windowSize) record.windowSize = windowSize;
+    if (timezoneBrowser) record.timezoneBrowser = timezoneBrowser;
+    if (platform) record.platform = platform;
+    if (cores) record.cores = cores;
+    if (memory) record.memory = memory;
+    if (connection) record.connection = connection;
+    if (touchSupported) record.touchSupported = touchSupported;
+    if (cookieEnabled) record.cookieEnabled = cookieEnabled;
+    if (colorDepth) record.colorDepth = colorDepth;
 
     record.visitCount += 1;
     record.lastVisit = now;
@@ -1182,13 +1339,13 @@ app.post("/api/analytics/track", async (req, res) => {
       record.history = record.history.slice(0, 30);
     }
 
-    // Also limit the number of logs to keep it clean (up to 500 IPs to prevent bloating disk)
+    // Also limit the number of logs to keep it clean (up to 500 IPs to prevent bloating disk/DB)
     if (data.logs.length > 500) {
       data.logs.sort((a, b) => new Date(b.lastVisit).getTime() - new Date(a.lastVisit).getTime());
       data.logs = data.logs.slice(0, 500);
     }
 
-    saveAnalyticsLogs(data);
+    await saveAnalyticsLogs(data);
 
     res.json({ success: true, ip: record.ip, visits: record.visitCount });
   } catch (err: any) {
@@ -1234,7 +1391,7 @@ app.get("/api/analytics/data", async (req, res) => {
       return res.status(401).json({ error: "Unauthorized: Access code incorrect. Please verify the administrator passphrase." });
     }
 
-    const data = loadAnalyticsLogs();
+    const data = await loadAnalyticsLogs();
     
     // Aggregate calculations for custom interactive visualizations
     const osCounts: Record<string, number> = {};
