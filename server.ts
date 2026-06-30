@@ -6,6 +6,12 @@ import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
 import { allowLocalFallback } from "./fallback";
 import { Resend } from "resend";
+import {
+  getWhatsAppStatus,
+  initWhatsApp,
+  disconnectWhatsApp,
+  sendWhatsAppMessage
+} from "./whatsappService";
 
 dotenv.config();
 
@@ -486,12 +492,60 @@ app.post("/api/content", requireAdmin, async (req, res) => {
   }
 });
 
-// API: Contact Form Submission via Resend.com
+// API: Contact Form Submission via Resend.com / WhatsApp Baileys Bot
 app.post("/api/contact/submit", async (req, res) => {
   const { name, email, phone, inquiryType, mediumOfInterest, message } = req.body;
 
   if (!name || !email || !message) {
     return res.status(400).json({ error: "Name, email, and message are required fields." });
+  }
+
+  // 1. Determine active contact backend and target WhatsApp settings
+  let activeSystem = "email";
+  let whatsappNumber = process.env.WHATSAPP_ADMIN_NUMBER || "";
+
+  try {
+    const content = await getSiteContent();
+    if (content?.contactSettings) {
+      activeSystem = content.contactSettings.activeSystem || "email";
+      if (content.contactSettings.whatsappAdminNumber) {
+        whatsappNumber = content.contactSettings.whatsappAdminNumber;
+      }
+    }
+  } catch (err) {
+    console.error("[CONTACT SUBMIT] Failed to resolve active contact system settings:", err);
+  }
+
+  // 2. Process WhatsApp integration if active
+  if (activeSystem === "whatsapp") {
+    if (!whatsappNumber) {
+      return res.status(400).json({ 
+        error: "WhatsApp system is active but the administrator's receiver phone number is not configured in the admin panel or environmental variables." 
+      });
+    }
+
+    const textMessage = `*New Inquiry Request - Sneha Art Academy*\n\n` +
+      `👤 *Name:* ${name}\n` +
+      `✉️ *Email:* ${email}\n` +
+      `📞 *Phone:* ${phone || "Not provided"}\n` +
+      `📚 *Program:* ${inquiryType}\n` +
+      `🎨 *Medium:* ${mediumOfInterest}\n\n` +
+      `💬 *Message:* \n"${message}"\n\n` +
+      `👉 _Sent via Sneha's Portfolio Website_`;
+
+    try {
+      await sendWhatsAppMessage(whatsappNumber, textMessage);
+      return res.json({ 
+        success: true, 
+        message: "Your drawing inquiry has been sent directly to Sneha's automated WhatsApp bot! She will reply shortly." 
+      });
+    } catch (error: any) {
+      console.error("[WHATSAPP SUBMIT FAILURE] Send error:", error);
+      return res.status(500).json({ 
+        error: "The WhatsApp bot was unable to route your request. Please ensure the administrator's bot connection is active.", 
+        details: error.message || String(error)
+      });
+    }
   }
 
   const resendApiKey = process.env.RESEND_API_KEY;
@@ -958,6 +1012,35 @@ app.post("/api/logout", (req, res) => {
   res.json({ success: true, message: "Logged out successfully" });
 });
 
+// --- WHATSAPP BOT CMS API ENDPOINTS ---
+app.get("/api/whatsapp/status", requireAdmin, (req, res) => {
+  res.json(getWhatsAppStatus());
+});
+
+app.post("/api/whatsapp/connect", requireAdmin, async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+    if (!phoneNumber) {
+      return res.status(400).json({ error: "Phone number is required to request a companion pairing code." });
+    }
+    await initWhatsApp(phoneNumber, true); // force restart session & delete old auth to request fresh pairing code
+    res.json({ success: true, message: "WhatsApp Baileys companion pairing code requested successfully." });
+  } catch (err: any) {
+    console.error("[WHATSAPP API] Connect trigger failure:", err);
+    res.status(500).json({ error: err.message || "Failed to trigger WhatsApp pairing code request" });
+  }
+});
+
+app.post("/api/whatsapp/disconnect", requireAdmin, async (req, res) => {
+  try {
+    await disconnectWhatsApp();
+    res.json({ success: true, message: "WhatsApp Baileys client session cleared and logged out." });
+  } catch (err: any) {
+    console.error("[WHATSAPP API] Disconnect trigger failure:", err);
+    res.status(500).json({ error: err.message || "Failed to clear WhatsApp session" });
+  }
+});
+
 // --- ANALYTICS ENGINE & DATA LOGGING ---
 
 const ANALYTICS_FILE_PATH = getDataFilePath("analytics_logs.json", "src/data/analytics_logs.json");
@@ -1217,7 +1300,21 @@ async function setupVite() {
 }
 
 if (!process.env.VERCEL) {
-  setupVite().catch((err) => {
+  setupVite().then(() => {
+    // Check if WhatsApp is the active contact channel and if so auto-boot the baileys listener
+    getSiteContent()
+      .then((content) => {
+        if (content?.contactSettings?.activeSystem === "whatsapp") {
+          console.log("[BOOT] Active contact system is set to WhatsApp. Initializing Baileys client on server start...");
+          initWhatsApp().catch((e) => console.error("[BOOT] Failed to auto-initialize WhatsApp:", e));
+        } else {
+          console.log("[BOOT] Active contact system is set to Email. Skipping WhatsApp auto-initialize.");
+        }
+      })
+      .catch((err) => {
+        console.error("[BOOT] Failed to fetch active contact settings for WhatsApp check:", err);
+      });
+  }).catch((err) => {
     console.error("Vite server configuration initialization failed", err);
   });
 }

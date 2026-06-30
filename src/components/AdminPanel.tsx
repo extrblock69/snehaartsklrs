@@ -5,7 +5,7 @@ import ThemeToggle from './ThemeToggle';
 import { 
   Settings, LogOut, Check, Save, Plus, Trash2, Edit3, Image, 
   HelpCircle, Sparkles, BookOpen, User, Phone, Mail, MapPin, Star, Eye, Upload,
-  RefreshCw, AlertCircle, Copy, Search, Award, BarChart3
+  RefreshCw, AlertCircle, Copy, Search, Award, BarChart3, MessageSquare, QrCode
 } from 'lucide-react';
 import { Artwork, Lesson, Testimonial, StudentProject, ArtCategory, LessonLevel } from '../types';
 
@@ -252,6 +252,98 @@ export default function AdminPanel() {
     metricRightVal: content.contact?.metricRightVal || "",
     metricRightLabel: content.contact?.metricRightLabel || "",
   });
+
+  const [contactSettingsForm, setContactSettingsForm] = useState({
+    activeSystem: content.contactSettings?.activeSystem || "email",
+    whatsappAdminNumber: content.contactSettings?.whatsappAdminNumber || "",
+  });
+
+  const [whatsappStatus, setWhatsappStatus] = useState<'disconnected' | 'connecting' | 'pairing' | 'connected'>('disconnected');
+  const [whatsappPairingCode, setWhatsappPairingCode] = useState<string | null>(null);
+  const [isPollingWhatsapp, setIsPollingWhatsapp] = useState(false);
+
+  const fetchWhatsappStatus = async () => {
+    if (!adminToken) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/whatsapp/status`, {
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWhatsappStatus(data.status);
+        setWhatsappPairingCode(data.pairingCode);
+      }
+    } catch (err) {
+      console.error("Failed to fetch WhatsApp status:", err);
+    }
+  };
+
+  useEffect(() => {
+    let interval: any = null;
+    if (activeTab === 'contact' && adminToken && contactSettingsForm.activeSystem === 'whatsapp') {
+      fetchWhatsappStatus();
+      interval = setInterval(fetchWhatsappStatus, 4000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [activeTab, adminToken, contactSettingsForm.activeSystem]);
+
+  const handleConnectWhatsapp = async () => {
+    if (!adminToken) return;
+    if (!contactSettingsForm.whatsappAdminNumber) {
+      alert("Please enter a valid receiver WhatsApp number first (with country code, e.g., 919876543210) to generate your companion pairing code.");
+      return;
+    }
+    setIsPollingWhatsapp(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/whatsapp/connect`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify({
+          phoneNumber: contactSettingsForm.whatsappAdminNumber
+        })
+      });
+      if (res.ok) {
+        await fetchWhatsappStatus();
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to trigger companion pairing code request");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsPollingWhatsapp(false);
+    }
+  };
+
+  const handleDisconnectWhatsapp = async () => {
+    if (!adminToken) return;
+    if (!window.confirm("Are you sure you want to disconnect and clear the WhatsApp session?")) return;
+    setIsPollingWhatsapp(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/whatsapp/disconnect`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${adminToken}`,
+        },
+      });
+      if (res.ok) {
+        await fetchWhatsappStatus();
+      } else {
+        alert("Failed to disconnect WhatsApp");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsPollingWhatsapp(false);
+    }
+  };
 
   const [achievementsForm, setAchievementsForm] = useState({
     badgeText: content.achievements?.badgeText || defaultContent.achievements?.badgeText || '',
@@ -556,6 +648,7 @@ export default function AdminPanel() {
       hero: heroForm,
       about: aboutForm,
       contact: contactForm,
+      contactSettings: contactSettingsForm,
       socials: socialsForm,
       globalButtons: globalButtonsForm,
       gallery: galleryList,
@@ -1711,6 +1804,162 @@ export default function AdminPanel() {
             {/* CONTACT DETAILS MODULE */}
             {activeTab === 'contact' && (
               <div className="space-y-6">
+                
+                {/* Contact System Selection & WhatsApp Integration Panel */}
+                <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6 shadow-sm space-y-6">
+                  <div className="flex items-center gap-3 border-b border-stone-100 dark:border-stone-850 pb-4">
+                    <div className="w-9 h-9 rounded-lg bg-wood/10 text-wood flex items-center justify-center">
+                      <Settings className="w-5 h-5 stroke-[1.5]" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-serif text-sm font-medium">Contact Form Routing Settings</h3>
+                      <p className="text-[10px] text-stone-400 font-mono">Control how student inquiries are dispatched from the client portfolio.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3 text-left">
+                      <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase block font-semibold">Active Backend System</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setContactSettingsForm({ ...contactSettingsForm, activeSystem: 'email' })}
+                          className={`p-3 rounded-lg border text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                            contactSettingsForm.activeSystem === 'email'
+                              ? 'bg-stone-950 dark:bg-stone-50 text-white dark:text-stone-950 border-stone-950 dark:border-stone-50 shadow-sm'
+                              : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-850 text-stone-600 dark:text-stone-400'
+                          }`}
+                        >
+                          <Mail className="w-4 h-4" />
+                          <span>Resend Email</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setContactSettingsForm({ ...contactSettingsForm, activeSystem: 'whatsapp' })}
+                          className={`p-3 rounded-lg border text-xs font-semibold flex flex-col items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                            contactSettingsForm.activeSystem === 'whatsapp'
+                              ? 'bg-wood text-white border-wood shadow-sm'
+                              : 'bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-850 text-stone-600 dark:text-stone-400'
+                          }`}
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          <span>WhatsApp Bot</span>
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-stone-400 leading-normal">
+                        {contactSettingsForm.activeSystem === 'email' 
+                          ? 'Inquiries are delivered to Sneha\'s inbox using the Resend email server.' 
+                          : 'Inquiries are dispatched directly to Sneha\'s WhatsApp chat using an automated Baileys bot session.'}
+                      </p>
+                    </div>
+
+                    {contactSettingsForm.activeSystem === 'whatsapp' && (
+                      <div className="space-y-3 text-left">
+                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase block font-semibold">Admin Receiver WhatsApp Number</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 917562224809"
+                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                          value={contactSettingsForm.whatsappAdminNumber}
+                          onChange={(e) => setContactSettingsForm({ ...contactSettingsForm, whatsappAdminNumber: e.target.value })}
+                        />
+                        <p className="text-[10px] text-stone-400 leading-normal">
+                          Include country code without special characters (e.g. 91 for India followed by the 10-digit mobile number).
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {contactSettingsForm.activeSystem === 'whatsapp' && (
+                    <div className="border-t border-stone-100 dark:border-stone-850 pt-5 space-y-4">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="text-left">
+                          <h4 className="text-xs font-mono font-bold text-stone-500 uppercase flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full ${
+                              whatsappStatus === 'connected' ? 'bg-emerald-500 animate-ping' :
+                              whatsappStatus === 'connecting' ? 'bg-amber-500 animate-pulse' :
+                              whatsappStatus === 'pairing' ? 'bg-blue-500 animate-pulse' : 'bg-rose-500'
+                            }`} />
+                            Baileys Client Status: <span className="text-stone-700 dark:text-stone-300 normal-case">{whatsappStatus === 'pairing' ? 'PAIRING CODE GENERATED' : whatsappStatus.toUpperCase()}</span>
+                          </h4>
+                          <p className="text-[10px] text-stone-400 mt-1">Generate a companion pairing code to link Sneha's admin WhatsApp account without scanning any QR codes.</p>
+                        </div>
+                        <div className="flex gap-2.5">
+                          {whatsappStatus !== 'connected' ? (
+                            <button
+                              type="button"
+                              onClick={handleConnectWhatsapp}
+                              disabled={isPollingWhatsapp || whatsappStatus === 'connecting'}
+                              className="h-9 px-4 bg-wood hover:bg-wood/90 text-white font-mono text-[10px] font-semibold tracking-wider uppercase rounded-lg transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                            >
+                              <RefreshCw className={`w-3.5 h-3.5 ${whatsappStatus === 'connecting' ? 'animate-spin' : ''}`} />
+                              <span>{whatsappStatus === 'pairing' ? 'Regenerate Code' : 'Get Pairing Code'}</span>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={handleDisconnectWhatsapp}
+                              disabled={isPollingWhatsapp}
+                              className="h-9 px-4 bg-rose-600 hover:bg-rose-700 text-white font-mono text-[10px] font-semibold tracking-wider uppercase rounded-lg transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                            >
+                              <LogOut className="w-3.5 h-3.5" />
+                              <span>Unlink Bot Session</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {whatsappStatus === 'pairing' && whatsappPairingCode && (
+                        <div className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl p-5 flex flex-col md:flex-row items-center justify-center gap-6">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="bg-white dark:bg-stone-900 px-6 py-4 rounded-xl border border-stone-200 dark:border-stone-800 shadow-inner flex flex-col items-center gap-2">
+                              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-400">Pairing Code</span>
+                              <span className="font-mono text-3xl font-extrabold tracking-widest text-wood select-all">{whatsappPairingCode}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(whatsappPairingCode);
+                                alert("Pairing code copied to clipboard!");
+                              }}
+                              className="text-[10px] text-wood hover:underline font-mono flex items-center gap-1 cursor-pointer"
+                            >
+                              <Copy className="w-3 h-3" />
+                              <span>Copy Pairing Code</span>
+                            </button>
+                          </div>
+                          <div className="text-left max-w-md space-y-2">
+                            <h5 className="font-serif text-xs font-semibold flex items-center gap-1.5 text-stone-850 dark:text-stone-100">
+                              <QrCode className="w-4 h-4 text-wood" />
+                              How to link using phone number:
+                            </h5>
+                            <ol className="text-[10px] text-stone-500 dark:text-stone-400 space-y-1.5 list-decimal pl-4 leading-relaxed">
+                              <li>Open <b>WhatsApp</b> on your mobile phone.</li>
+                              <li>Tap <b>Menu</b> or <b>Settings</b> and select <b>Linked Devices</b>.</li>
+                              <li>Tap <b>Link a Device</b>. When your phone camera view opens, look at the bottom and tap <b>"Link with phone number instead"</b>.</li>
+                              <li>Enter the 8-character code: <b className="font-mono text-xs text-wood">{whatsappPairingCode}</b> on your phone.</li>
+                              <li>Once paired, this screen will automatically refresh and state <b>CONNECTED</b>!</li>
+                            </ol>
+                          </div>
+                        </div>
+                      )}
+
+                      {whatsappStatus === 'connected' && (
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 p-4 rounded-xl text-left flex items-start gap-3">
+                          <Check className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                          <div className="space-y-0.5">
+                            <h5 className="text-xs font-bold font-mono tracking-wider uppercase">Bot Connected Successfully!</h5>
+                            <p className="text-[10px] leading-relaxed opacity-90">
+                              Your portfolio is currently connected. When a user completes the contact inquiry form, a WhatsApp notification will be delivered immediately to <b>{contactSettingsForm.whatsappAdminNumber || 'your configured number'}</b>.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase">Contact Section Badge Text</label>

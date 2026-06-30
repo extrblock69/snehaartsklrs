@@ -162,6 +162,10 @@ export interface SiteContent {
     description: string;
     items: CourseOrWorkshop[];
   };
+  contactSettings?: {
+    activeSystem: "email" | "whatsapp";
+    whatsappAdminNumber: string;
+  };
 }
 
 
