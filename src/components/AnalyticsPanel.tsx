@@ -83,6 +83,10 @@ export default function AnalyticsPanel() {
   const [isClearing, setIsClearing] = useState(false);
   const [clearSuccess, setClearSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'logs' | 'paths'>('dashboard');
+  
+  // Auto-polling & refresh countdown state
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [countdown, setCountdown] = useState(60);
 
   // Try auto-loading password from localStorage
   useEffect(() => {
@@ -91,6 +95,25 @@ export default function AnalyticsPanel() {
       verifyPassword(savedPass, true);
     }
   }, []);
+
+  // Periodic background data auto-refresh polling mechanism (60s)
+  useEffect(() => {
+    if (!isAuthorized || !autoRefresh) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          silentRefresh();
+          return 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isAuthorized, autoRefresh]);
 
   const verifyPassword = async (passToVerify: string, isAuto = false) => {
     if (!passToVerify.trim()) {
@@ -133,6 +156,21 @@ export default function AnalyticsPanel() {
     setIsAuthorized(false);
     setData(null);
     setPassword('');
+    setCountdown(60);
+  };
+
+  const silentRefresh = async () => {
+    const savedPass = localStorage.getItem('analytics_master_pass') || password;
+    if (!savedPass) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/analytics/data?password=${encodeURIComponent(savedPass)}`);
+      if (response.ok) {
+        const result = await response.json();
+        setData(result);
+      }
+    } catch (err) {
+      console.error('Auto-refresh failed:', err);
+    }
   };
 
   const handleRefresh = async () => {
@@ -144,6 +182,7 @@ export default function AnalyticsPanel() {
       if (response.ok) {
         const result = await response.json();
         setData(result);
+        setCountdown(60); // Reset countdown on manual refresh
       }
     } catch (err) {
       console.error('Refresh failed:', err);
@@ -397,6 +436,30 @@ export default function AnalyticsPanel() {
                 >
                   <Zap className="w-3.5 h-3.5" /> Simulate Visit
                 </button>
+
+                {/* Auto Refresh Toggle & Timer Countdown Indicator */}
+                <div className="flex items-center gap-2 h-9 px-3 rounded-lg border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 text-xs font-mono text-stone-600 dark:text-stone-400">
+                  <button
+                    onClick={() => setAutoRefresh(!autoRefresh)}
+                    className="flex items-center gap-1.5 font-semibold text-[11px] cursor-pointer"
+                    title={autoRefresh ? "Click to pause automatic polling" : "Click to enable automatic polling"}
+                  >
+                    <span className={`relative flex h-2 w-2 ${autoRefresh ? 'block' : 'hidden'}`}>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B38F4D] opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#B38F4D]"></span>
+                    </span>
+                    {!autoRefresh && <span className="w-2 h-2 rounded-full bg-stone-400 block" />}
+                    <span>Auto-refresh:</span>
+                    <span className={autoRefresh ? "text-[#B38F4D]" : "text-stone-400"}>
+                      {autoRefresh ? "ON" : "OFF"}
+                    </span>
+                  </button>
+                  {autoRefresh && (
+                    <span className="border-l border-stone-200 dark:border-stone-800 pl-2 text-stone-400 text-[10px]">
+                      {countdown}s
+                    </span>
+                  )}
+                </div>
 
                 <button
                   onClick={handleRefresh}
