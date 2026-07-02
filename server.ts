@@ -1019,9 +1019,10 @@ app.get("/api/whatsapp/status", requireAdmin, (req, res) => {
 
 app.post("/api/whatsapp/connect", requireAdmin, async (req, res) => {
   try {
-    const { phoneNumber } = req.body;
-    if (!phoneNumber) {
-      return res.status(400).json({ error: "Phone number is required to request a companion pairing code." });
+    const { phoneNumber, method } = req.body;
+    if (method === "qr" || !phoneNumber) {
+      await initWhatsApp(undefined, true); // trigger QR generation
+      return res.json({ success: true, message: "WhatsApp Baileys QR Code connection session started." });
     }
     await initWhatsApp(phoneNumber, true); // force restart session & delete old auth to request fresh pairing code
     res.json({ success: true, message: "WhatsApp Baileys companion pairing code requested successfully." });

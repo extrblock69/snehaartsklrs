@@ -260,6 +260,8 @@ export default function AdminPanel() {
 
   const [whatsappStatus, setWhatsappStatus] = useState<'disconnected' | 'connecting' | 'pairing' | 'connected'>('disconnected');
   const [whatsappPairingCode, setWhatsappPairingCode] = useState<string | null>(null);
+  const [whatsappQrCode, setWhatsappQrCode] = useState<string | null>(null);
+  const [whatsappError, setWhatsappError] = useState<string | null>(null);
   const [isPollingWhatsapp, setIsPollingWhatsapp] = useState(false);
 
   const fetchWhatsappStatus = async () => {
@@ -274,9 +276,38 @@ export default function AdminPanel() {
         const data = await res.json();
         setWhatsappStatus(data.status);
         setWhatsappPairingCode(data.pairingCode);
+        setWhatsappQrCode(data.qrCode);
+        setWhatsappError(data.error || null);
       }
     } catch (err) {
       console.error("Failed to fetch WhatsApp status:", err);
+    }
+  };
+
+  const handleConnectWhatsappQr = async () => {
+    if (!adminToken) return;
+    setIsPollingWhatsapp(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/whatsapp/connect`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${adminToken}`,
+        },
+        body: JSON.stringify({
+          method: "qr"
+        })
+      });
+      if (res.ok) {
+        await fetchWhatsappStatus();
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to trigger QR Code request");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsPollingWhatsapp(false);
     }
   };
 
@@ -1881,21 +1912,39 @@ export default function AdminPanel() {
                               whatsappStatus === 'connecting' ? 'bg-amber-500 animate-pulse' :
                               whatsappStatus === 'pairing' ? 'bg-blue-500 animate-pulse' : 'bg-rose-500'
                             }`} />
-                            Baileys Client Status: <span className="text-stone-700 dark:text-stone-300 normal-case">{whatsappStatus === 'pairing' ? 'PAIRING CODE GENERATED' : whatsappStatus.toUpperCase()}</span>
+                            Baileys Client Status: <span className="text-stone-700 dark:text-stone-300 normal-case">{whatsappStatus === 'pairing' ? 'PAIRING IN PROGRESS' : whatsappStatus.toUpperCase()}</span>
                           </h4>
-                          <p className="text-[10px] text-stone-400 mt-1">Generate a companion pairing code to link Sneha's admin WhatsApp account without scanning any QR codes.</p>
+                          <p className="text-[10px] text-stone-400 mt-1">Configure your companion session via dynamic QR Code scan or instant pairing code.</p>
+                          {whatsappError && (
+                            <div className="mt-2 text-[10px] font-mono text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 px-2 py-1.5 rounded border border-rose-200 dark:border-rose-900/30 text-left">
+                              ⚠️ <b>Session Error:</b> {whatsappError}
+                            </div>
+                          )}
                         </div>
-                        <div className="flex gap-2.5">
+                        <div className="flex flex-wrap gap-2">
                           {whatsappStatus !== 'connected' ? (
-                            <button
-                              type="button"
-                              onClick={handleConnectWhatsapp}
-                              disabled={isPollingWhatsapp || whatsappStatus === 'connecting'}
-                              className="h-9 px-4 bg-wood hover:bg-wood/90 text-white font-mono text-[10px] font-semibold tracking-wider uppercase rounded-lg transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
-                            >
-                              <RefreshCw className={`w-3.5 h-3.5 ${whatsappStatus === 'connecting' ? 'animate-spin' : ''}`} />
-                              <span>{whatsappStatus === 'pairing' ? 'Regenerate Code' : 'Get Pairing Code'}</span>
-                            </button>
+                            <>
+                              <button
+                                type="button"
+                                onClick={handleConnectWhatsapp}
+                                disabled={isPollingWhatsapp || whatsappStatus === 'connecting'}
+                                className="h-9 px-3 bg-wood hover:bg-wood/90 text-white font-mono text-[10px] font-semibold tracking-wider uppercase rounded-lg transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                                title="Link your phone by entering an 8-digit pairing code on your device"
+                              >
+                                <RefreshCw className={`w-3.5 h-3.5 ${whatsappStatus === 'connecting' && whatsappPairingCode ? 'animate-spin' : ''}`} />
+                                <span>{whatsappStatus === 'pairing' && whatsappPairingCode ? 'Regen Pairing Code' : 'Link via Pairing Code'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleConnectWhatsappQr}
+                                disabled={isPollingWhatsapp || whatsappStatus === 'connecting'}
+                                className="h-9 px-3 bg-stone-800 hover:bg-stone-900 text-white font-mono text-[10px] font-semibold tracking-wider uppercase rounded-lg transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                                title="Link your phone by scanning a QR Code directly"
+                              >
+                                <QrCode className={`w-3.5 h-3.5 ${whatsappStatus === 'connecting' && whatsappQrCode ? 'animate-spin' : ''}`} />
+                                <span>{whatsappStatus === 'pairing' && whatsappQrCode ? 'Regen QR Code' : 'Link via QR Code'}</span>
+                              </button>
+                            </>
                           ) : (
                             <button
                               type="button"
@@ -1910,38 +1959,91 @@ export default function AdminPanel() {
                         </div>
                       </div>
 
-                      {whatsappStatus === 'pairing' && whatsappPairingCode && (
-                        <div className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl p-5 flex flex-col md:flex-row items-center justify-center gap-6">
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="bg-white dark:bg-stone-900 px-6 py-4 rounded-xl border border-stone-200 dark:border-stone-800 shadow-inner flex flex-col items-center gap-2">
-                              <span className="text-[10px] font-mono uppercase tracking-widest text-stone-400">Pairing Code</span>
-                              <span className="font-mono text-3xl font-extrabold tracking-widest text-wood select-all">{whatsappPairingCode}</span>
+                      {/* Troubleshooting Guides Callout (Always visible to preempt issues) */}
+                      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-900/30 p-4 rounded-xl text-left">
+                        <h5 className="text-[11px] font-mono font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                          <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-500 shrink-0" />
+                          🚨 Troubleshooting: "Unauthorized, Expired or Invalid Session"
+                        </h5>
+                        <ul className="text-[10px] text-stone-600 dark:text-stone-400 space-y-2 list-disc pl-4 leading-relaxed">
+                          <li>
+                            <strong className="text-stone-800 dark:text-stone-200">System Clock Mismatch (NTP Drift):</strong> Baileys cryptographic handshakes require extremely precise server time. If your device time or the hosting container time has slight drift, WhatsApp instantly cancels pairing. Ensure your mobile phone's clock setting is set to <b className="text-[#B38F4D]">Automatic / Network Time</b>.
+                          </li>
+                          <li>
+                            <strong className="text-stone-800 dark:text-stone-200">Missing Country Prefix (Number Format):</strong> International pairing numbers must contain your exact country code (e.g. <b>1</b> for US/Canada, <b>91</b> for India) with NO spaces or `+` characters. Entering a 10-digit number like <b className="font-mono">4155551234</b> automatically prepends <b>91</b> (making it <b className="font-mono">914155551234</b>). You must enter <b className="font-mono">14155551234</b> for US numbers!
+                          </li>
+                          <li>
+                            <strong className="text-stone-800 dark:text-stone-200">QR Code Fallback (Highly Recommended):</strong> If the entering-code flow repeatedly yields session expiry, click <b className="text-wood hover:underline cursor-pointer" onClick={handleConnectWhatsappQr}>"Link via QR Code"</b> above instead! Visual QR scanning relies on a more robust device authentication channel.
+                          </li>
+                          <li>
+                            <strong className="text-stone-800 dark:text-stone-200">Device Limit Exceeded:</strong> Go to <b className="font-mono">WhatsApp &gt; Linked Devices</b> on your phone. If you have 4 linked devices, log out of unused sessions before adding another.
+                          </li>
+                          <li>
+                            <strong className="text-stone-800 dark:text-stone-200">Clear Cache:</strong> Click <b className="text-rose-500 uppercase text-[9px] font-bold">"Unlink Bot Session"</b> to completely clear and reset corrupt credential files before requesting a new code/QR.
+                          </li>
+                        </ul>
+                      </div>
+
+                      {whatsappStatus === 'pairing' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* PAIRING CODE VIEW */}
+                          {whatsappPairingCode && (
+                            <div className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl p-5 flex flex-col items-center justify-center gap-4">
+                              <div className="bg-white dark:bg-stone-900 px-6 py-4 rounded-xl border border-stone-200 dark:border-stone-800 shadow-inner flex flex-col items-center gap-2 w-full max-w-xs">
+                                <span className="text-[10px] font-mono uppercase tracking-widest text-stone-400">Pairing Code</span>
+                                <span className="font-mono text-3xl font-extrabold tracking-widest text-wood select-all">{whatsappPairingCode}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(whatsappPairingCode);
+                                  alert("Pairing code copied to clipboard!");
+                                }}
+                                className="text-[10px] text-wood hover:underline font-mono flex items-center gap-1 cursor-pointer"
+                              >
+                                <Copy className="w-3 h-3" />
+                                <span>Copy Pairing Code</span>
+                              </button>
+                              
+                              <div className="text-left w-full max-w-sm mt-2">
+                                <h5 className="font-serif text-xs font-semibold flex items-center gap-1.5 text-stone-850 dark:text-stone-100">
+                                  How to link with code:
+                                </h5>
+                                <ol className="text-[10px] text-stone-500 dark:text-stone-400 space-y-1.5 list-decimal pl-4 leading-relaxed mt-1">
+                                  <li>Open <b>WhatsApp</b> on your mobile phone.</li>
+                                  <li>Tap <b>Menu</b> or <b>Settings</b> and select <b>Linked Devices</b>.</li>
+                                  <li>Tap <b>Link a Device</b>. Tap <b>"Link with phone number instead"</b> at the bottom of the camera screen.</li>
+                                  <li>Enter the 8-character code: <b className="font-mono text-xs text-wood">{whatsappPairingCode}</b> on your phone.</li>
+                                </ol>
+                              </div>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                navigator.clipboard.writeText(whatsappPairingCode);
-                                alert("Pairing code copied to clipboard!");
-                              }}
-                              className="text-[10px] text-wood hover:underline font-mono flex items-center gap-1 cursor-pointer"
-                            >
-                              <Copy className="w-3 h-3" />
-                              <span>Copy Pairing Code</span>
-                            </button>
-                          </div>
-                          <div className="text-left max-w-md space-y-2">
-                            <h5 className="font-serif text-xs font-semibold flex items-center gap-1.5 text-stone-850 dark:text-stone-100">
-                              <QrCode className="w-4 h-4 text-wood" />
-                              How to link using phone number:
-                            </h5>
-                            <ol className="text-[10px] text-stone-500 dark:text-stone-400 space-y-1.5 list-decimal pl-4 leading-relaxed">
-                              <li>Open <b>WhatsApp</b> on your mobile phone.</li>
-                              <li>Tap <b>Menu</b> or <b>Settings</b> and select <b>Linked Devices</b>.</li>
-                              <li>Tap <b>Link a Device</b>. When your phone camera view opens, look at the bottom and tap <b>"Link with phone number instead"</b>.</li>
-                              <li>Enter the 8-character code: <b className="font-mono text-xs text-wood">{whatsappPairingCode}</b> on your phone.</li>
-                              <li>Once paired, this screen will automatically refresh and state <b>CONNECTED</b>!</li>
-                            </ol>
-                          </div>
+                          )}
+
+                          {/* QR CODE SCANNER VIEW */}
+                          {whatsappQrCode && (
+                            <div className="bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-xl p-5 flex flex-col items-center justify-center gap-4">
+                              <div className="bg-white p-3 rounded-xl border border-stone-200 dark:border-stone-800 shadow-inner flex items-center justify-center">
+                                <img 
+                                  src={whatsappQrCode} 
+                                  alt="WhatsApp QR Code" 
+                                  className="w-48 h-48 block object-contain"
+                                  referrerPolicy="no-referrer"
+                                />
+                              </div>
+                              <span className="text-[10px] font-mono text-stone-400">QR Code rotates frequently. Scan immediately.</span>
+                              
+                              <div className="text-left w-full max-w-sm mt-1">
+                                <h5 className="font-serif text-xs font-semibold flex items-center gap-1.5 text-stone-850 dark:text-stone-100">
+                                  How to link with QR:
+                                </h5>
+                                <ol className="text-[10px] text-stone-500 dark:text-stone-400 space-y-1.5 list-decimal pl-4 leading-relaxed mt-1">
+                                  <li>Open <b>WhatsApp</b> on your phone.</li>
+                                  <li>Tap <b>Settings</b> &gt; <b>Linked Devices</b> &gt; <b>Link a Device</b>.</li>
+                                  <li>Aim your phone's camera at the QR Code displayed above to log in instantly.</li>
+                                </ol>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 

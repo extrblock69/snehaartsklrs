@@ -9,7 +9,9 @@ import path from "path";
 
 let sock: WASocket | null = null;
 let pairingCode: string | null = null;
+let qrCodeUrl: string | null = null;
 let connectionStatus: "disconnected" | "connecting" | "pairing" | "connected" = "disconnected";
+let lastError: string | null = null;
 
 const AUTH_DIR = path.join(process.cwd(), "baileys_auth_info");
 
@@ -32,7 +34,12 @@ export async function initWhatsApp(phoneNumber?: string, forceRestart = false) {
       } catch (e) {}
       sock = null;
     }
+    // Delay slightly to let socket close completely and release any file locks
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     cleanupAuth();
+    qrCodeUrl = null;
+    pairingCode = null;
+    lastError = null;
   }
 
   // If already connecting or connected and not forcing restart, skip
@@ -43,6 +50,8 @@ export async function initWhatsApp(phoneNumber?: string, forceRestart = false) {
   try {
     connectionStatus = "connecting";
     pairingCode = null;
+    qrCodeUrl = null;
+    lastError = null;
 
     console.log("[WHATSAPP] Initializing Baileys client... Auth directory:", AUTH_DIR);
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
@@ -54,7 +63,18 @@ export async function initWhatsApp(phoneNumber?: string, forceRestart = false) {
     });
 
     sock.ev.on("connection.update", async (update) => {
-      const { connection, lastDisconnect } = update;
+      const { connection, lastDisconnect, qr } = update;
+
+      if (qr) {
+        try {
+          const QRCode = await import("qrcode");
+          qrCodeUrl = await QRCode.toDataURL(qr);
+          connectionStatus = "pairing";
+          console.log("[WHATSAPP] New QR Code generated successfully.");
+        } catch (e) {
+          console.error("[WHATSAPP] Failed to generate QR code data URL:", e);
+        }
+      }
 
       if (connection === "connecting") {
         connectionStatus = "connecting";
@@ -63,16 +83,20 @@ export async function initWhatsApp(phoneNumber?: string, forceRestart = false) {
       if (connection === "open") {
         connectionStatus = "connected";
         pairingCode = null;
+        qrCodeUrl = null;
         console.log("[WHATSAPP] ✅ Connection opened successfully!");
       }
 
       if (connection === "close") {
         const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
         const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-        console.log(`[WHATSAPP] Connection closed. StatusCode: ${statusCode}. Reconnecting: ${shouldReconnect}`);
-
+        const errMsg = lastDisconnect?.error?.message || String(lastDisconnect?.error || "Unknown disconnect error");
+        console.log(`[WHATSAPP] Connection closed. StatusCode: ${statusCode}. Reconnecting: ${shouldReconnect}. Error: ${errMsg}`);
+        
+        lastError = `Disconnected (${errMsg})`;
         connectionStatus = "disconnected";
         pairingCode = null;
+        qrCodeUrl = null;
         sock = null;
 
         if (shouldReconnect) {
@@ -82,7 +106,9 @@ export async function initWhatsApp(phoneNumber?: string, forceRestart = false) {
           }, 5000);
         } else {
           console.warn("[WHATSAPP] Logged out or session invalidated. Cleaning up local storage...");
-          cleanupAuth();
+          setTimeout(() => {
+            cleanupAuth();
+          }, 1000);
         }
       }
     });
@@ -108,6 +134,8 @@ export async function initWhatsApp(phoneNumber?: string, forceRestart = false) {
               // Format standard 8 character code to AAAA-BBBB style for high visibility
               pairingCode = (code.substring(0, 4) + "-" + code.substring(4)).toUpperCase();
               connectionStatus = "pairing";
+              qrCodeUrl = null;
+              lastError = null;
               console.log(`[WHATSAPP] Companion pairing code generated: ${pairingCode}`);
             }
           }
@@ -115,22 +143,27 @@ export async function initWhatsApp(phoneNumber?: string, forceRestart = false) {
           console.error("[WHATSAPP] Companion pairing code request failed:", err);
           connectionStatus = "disconnected";
           pairingCode = null;
+          lastError = `Pairing code request failed: ${err?.message || String(err)}`;
         }
       }, 3000);
     }
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("[WHATSAPP] Failed to initialize WhatsApp sock:", error);
     connectionStatus = "disconnected";
     pairingCode = null;
+    qrCodeUrl = null;
     sock = null;
+    lastError = `Initialization failed: ${error?.message || String(error)}`;
   }
 }
 
 export function getWhatsAppStatus() {
   return {
     status: connectionStatus,
-    pairingCode: pairingCode
+    pairingCode: pairingCode,
+    qrCode: qrCodeUrl,
+    error: lastError
   };
 }
 
