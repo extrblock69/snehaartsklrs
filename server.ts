@@ -534,7 +534,27 @@ app.post("/api/contact/submit", async (req, res) => {
       `👉 _Sent via Sneha's Portfolio Website_`;
 
     try {
-      await sendWhatsAppMessage(whatsappNumber, textMessage);
+      // Split by commas, semicolons or spaces to support multiple numbers
+      const targetNumbers = whatsappNumber
+        .split(/[,,;]/)
+        .map(num => num.trim())
+        .filter(Boolean);
+
+      if (targetNumbers.length === 0) {
+        throw new Error("No valid phone numbers found in config");
+      }
+
+      console.log(`[WHATSAPP SUBMIT] Routing inquiry to ${targetNumbers.length} recipients: ${targetNumbers.join(", ")}`);
+      
+      // Send to all targets
+      for (const targetNum of targetNumbers) {
+        try {
+          await sendWhatsAppMessage(targetNum, textMessage);
+        } catch (individualError) {
+          console.error(`[WHATSAPP SUBMIT] Failed sending to individual recipient ${targetNum}:`, individualError);
+        }
+      }
+
       return res.json({ 
         success: true, 
         message: "Your drawing inquiry has been sent directly to Sneha's automated WhatsApp bot! She will reply shortly." 

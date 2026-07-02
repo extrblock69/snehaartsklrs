@@ -1885,21 +1885,19 @@ export default function AdminPanel() {
                       </p>
                     </div>
 
-                    {contactSettingsForm.activeSystem === 'whatsapp' && (
-                      <div className="space-y-3 text-left">
-                        <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase block font-semibold">Admin Receiver WhatsApp Number</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. 917562224809"
-                          className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
-                          value={contactSettingsForm.whatsappAdminNumber}
-                          onChange={(e) => setContactSettingsForm({ ...contactSettingsForm, whatsappAdminNumber: e.target.value })}
-                        />
-                        <p className="text-[10px] text-stone-400 leading-normal">
-                          Include country code without special characters (e.g. 91 for India followed by the 10-digit mobile number).
-                        </p>
-                      </div>
-                    )}
+                    <div className="space-y-3 text-left">
+                      <label className="text-[11px] font-mono tracking-wider text-stone-500 uppercase block font-semibold">Admin Receiver WhatsApp Number(s)</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 917562224809, 919876543210"
+                        className="w-full bg-stone-50 dark:bg-stone-950 border border-stone-200 dark:border-stone-800 rounded-lg p-3 text-xs font-mono"
+                        value={contactSettingsForm.whatsappAdminNumber}
+                        onChange={(e) => setContactSettingsForm({ ...contactSettingsForm, whatsappAdminNumber: e.target.value })}
+                      />
+                      <p className="text-[10px] text-stone-400 leading-normal">
+                        Include country code without special characters. You can add <b>multiple recipient numbers</b> separated by commas to dispatch notifications to all of them.
+                      </p>
+                    </div>
                   </div>
 
                   {contactSettingsForm.activeSystem === 'whatsapp' && (
